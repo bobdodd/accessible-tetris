@@ -7,9 +7,10 @@ This project continues research begun in my PhD, which used Tetris as a case stu
 ## The documents
 
 | Document | What it is |
-|---|---|
+| --- | --- |
 | [docs/case-study.md](docs/case-study.md) | The full case study: what Tetris demands of a player, why assistive technology fails at it, the sonic metaphors and adaptive architecture of the PhD implementation, and the design for this web build. Also available as Word: `docs/Accessible Tetris - Case Study.docx`. |
 | [design/DESIGN.md](design/DESIGN.md) | The engineering design for the web implementation — architecture, audio stage, psychoacoustic rules, layers, and build phases. |
+| [docs/research.md](docs/research.md) | Research notes: what others have said about Tetris and accessibility, the audio-game lineage, accessible game design guidelines and literature, open-source implementations, and the legal landscape for falling-block games. |
 
 ## The shape of the thing
 
