@@ -19,6 +19,16 @@ The claim here is deliberately precise. This is **not** "an accessible Tetris ga
 - **A sonic view**: per-piece timbres, HRTF-panned positions, a terrain scan that plays the silhouette as melody, a ghost heard as a converging echo, urgency as heartbeat — organized into three switchable first-person listening views (The Wall, The Well, Mission Control).
 - **A capability layer**: the player's mixing desk — independently controllable audio layers with presets from Minimal to Full. The user decides how to experience the game.
 
+## Rebuilding the Word document
+
+```sh
+cd docs
+pandoc case-study.md --resource-path=. --toc --toc-depth=2 -o "Accessible Tetris - Case Study.docx"
+python3 tools/make-accessible-docx.py "Accessible Tetris - Case Study.docx"
+```
+
+The post-processing step is part of the document's accessibility: it converts the literal section numbers into real Word multilevel heading numbering and verifies that every figure carries alt text (authored as `{alt="…"}` attributes in the markdown, distinct from the visible captions).
+
 ## Status
 
 Documents and design first; the demonstrator follows the build order the case study argues for — timbres, then terrain scan, then the spatial stage, then a simple, openly-scoped version of the game that exercises the techniques.

@@ -2,6 +2,7 @@
 title: "Accessible Tetris: A Case Study"
 author: "Bob Dodd"
 date: "July 2026"
+lang: "en-CA"
 ---
 
 # Accessible Tetris: A Case Study
@@ -20,7 +21,7 @@ Two outcomes interested me: the impact on user-interface design of designing *fo
 
 This revision of the case study also does something the original could not: it holds the work up against the wider record — the cognitive science of Tetris, the accessible-games literature, and what players and studios have built since. Section 11 gives that reckoning honestly: where the record supports these concepts, where it challenges them, and what I simply had not considered.
 
-![The anatomy of Tetris: playing area, falling tile, ghost position, silhouette, next and held pieces.](figures/fig-board.png)
+![The anatomy of Tetris: playing area, falling tile, ghost position, silhouette, next and held pieces.](figures/fig-board.png){alt="Annotated diagram of a Tetris playing area, ten columns wide by twenty visible rows. A purple T-shaped tile is falling mid-field, and a dashed T outline near the bottom marks its ghost landing position. The stack of locked tiles across the bottom forms the silhouette, with an arrow marking a one-column gap in it. Side panels show a Hold box containing a J piece, a Next box containing an S piece, and a score panel reading score 1400, lines 17, level 2. A dashed strip above the field marks the two hidden spawn rows."}
 
 ## 2. The game
 
@@ -28,7 +29,7 @@ There are many variations on the classic 1985 game. Modern licensed versions con
 
 The essentials: the game is about managing falling bricks so that they form complete horizontal lines within the playing area. Each completed line disappears and scores points; completing multiple lines simultaneously multiplies the score. The falling bricks are one of seven defined shapes — the tetrominoes — each constructed within a 4 × 4 frame and occupying exactly four squares of it.
 
-![The seven tetrominoes.](figures/fig-tetrominoes.png)
+![The seven tetrominoes.](figures/fig-tetrominoes.png){alt="The seven tetromino shapes, each drawn as four connected squares within a four-by-four frame, labelled I, O, T, S, Z, J and L. The I is a horizontal bar, the O a square, the T a bar with a centre stem, S and Z mirrored zigzags, J and L mirrored hooks."}
 
 The playing area is a visible grid of 10 columns by 20 rows, with two hidden rows at the top in which pieces begin their fall. As a piece falls the player may move it left and right and rotate it, subject to rotation rules that vary between versions; modern licensed games use the Super Rotation System (SRS). A piece falls until it reaches the bottom row or is impeded by an already-fallen piece; for a short period after landing it remains movable — it is possible to slide a piece sideways under an overhang, and potentially for it to begin falling again. Once the piece times out into its **locked** position, the next piece begins to fall. The game ends when the stack reaches the top of the visible area so that a new piece cannot begin its descent.
 
@@ -133,7 +134,7 @@ A word on the epistemic status of these field notes, because it matters: they ar
 
 **Braided audio.** The technique I adapted from the "Audio Hallway" work of navigating large music collections: splice the play-out of several streams into alternating segments. Playing the musical sonar and the dancing margins simultaneously, even from radically different locations, was discordant and distracting — so I serialized them into a braid, and used the braid *ratio* to express priority: two scans of the sonar for every scan of the margins, because tessellation matters more than margins when playing. Braided audio thereby does two jobs at once: it shares a single musical play-out channel, and it encodes relative importance.
 
-![Braided audio: interleaving serializes competing streams, and the interleave ratio expresses priority.](figures/fig-braided.png)
+![Braided audio: interleaving serializes competing streams, and the interleave ratio expresses priority.](figures/fig-braided.png){alt="Timeline of audio segments alternating along a single play-out channel: sonar sweep, left margin, sonar sweep, right margin, sonar sweep, left margin, and so on along an arrow marked time. The sonar segments appear twice as often as the margin segments, showing how the interleave ratio expresses the sonar's higher priority."}
 
 The wav assets of the original build tell the same story in miniature: spoken letters and numbers for the asides and scores, water sounds for gravity, and note sets for the sonar — a soundscape barely a dozen samples deep, doing the work of a screenful of pixels.
 
@@ -159,7 +160,7 @@ There is one place the reverse can happen: adaptation for deaf and hearing-impai
 
 The case study models Tetris as a Shlaer-Mellor domain chart. The abstract game is the application domain. Two service domains render it — the Visual View and the Sonic View — each rendering *all, some, or none* of the abstract game according to the capability of the current user. Input is delegated to its own service domain, and models of capability to a User Capability domain, which describes a user's physical and cognitive capabilities — how effectively they can press a location, how easily they can hold a press. One implementation domain appears: the keyboard event model of the implementation language. And one bridge deserves notice: Input connects to the Sonic View, because mechanical input has audible feedback that the sonic rendering must own.
 
-![The Tetris domain chart: an abstract game rendered by independent views, with modality selection driven by user capability.](figures/fig-domain-chart.png)
+![The Tetris domain chart: an abstract game rendered by independent views, with modality selection driven by user capability.](figures/fig-domain-chart.png){alt="Shlaer-Mellor domain chart of five boxes. Tetris Game, the application domain, sits at the top. Below it are three service domains: Visual View, Sonic View and Input. Below those sit User Capability, a service domain, and Keyboard Events, an implementation domain drawn with a dashed border. Arrows labelled render run from the game to both views, and delegate input from the game to Input; arrows run from the views and Input down to User Capability, labelled select modalities by capability, and from Input to Keyboard Events labelled key events. A dashed arrow from Input to the Sonic View is labelled mechanical feedback."}
 
 The visual components correspond to the existing Tetris Guidelines; the sonic components are the invented metaphors of Section 6. The renderings are *peers* — neither is the "real" game with the other bolted on. That symmetry is the architecture's whole point.
 
@@ -177,7 +178,7 @@ This forced a decision with philosophical weight: **can the rendering of the use
 
 The repeated asynchronous behaviour reduces to a simple pattern: a **request/answer pair with a rendezvous on the answer** — diagrammatically similar to UML sequence charts, but the concept goes back to the CCITT/ITU message sequence charts used to describe telecommunications protocols.
 
-![The request/answer/rendezvous pattern between the game and its views.](figures/fig-request-answer.png)
+![The request/answer/rendezvous pattern between the game and its views.](figures/fig-request-answer.png){alt="Sequence diagram with three lifelines: Game, Visual View and Sonic View. The Game sends the request R: UI.tilePositionUpdate to both views. Each view then processes for its own duration - the visual rendering taking as long as this user needs, the sonic announcement its own duration entirely - before returning the answer A: UI.tilePositionUpdate. A filled rendezvous bar on the Game lifeline marks that the game proceeds only when every answer has arrived."}
 
 I did not invent that pattern for Tetris. In the mid-1990s I was Software Group Leader on the Ascom PABX — a small digital telephone exchange developed almost entirely with the Shlaer-Mellor method. An exchange is asynchronous communication incarnate, and the project relied heavily on sequence-chart patterns to describe the bridges between domains. Three hard lessons from that work transferred directly to Tetris:
 
@@ -211,7 +212,7 @@ An early draft of the Game model made the cost visible: the main body — tiles 
 
 **Contemporaneous-announcement meta-states.** When a tile lands, the landscape updates and the tile disappears; when a tile falls a row, its height and both margins may all need announcing. Are these simultaneous or sequential? At the abstract level the honest answer is "whichever the user's modalities can deliver" — so the meta-state (e.g. "UPDATING ON LANDING") lists alternatives in preference order: Option 1, concurrent updates (`AND { RA: UI.landscapeUpdate, RA: UI.clearTile }`); Option 2, serialized (`THEN { … }`). The preferred option is concurrency; the fallback is sequence. Expanded to plain notation, each meta-state is a combinatorial fragment that grows with the number of announcements — the stylization is what keeps the model on a page.
 
-![The final Falling Tile state model, carrying the full stylized notation: transactions, decision states, interruptible updates, and meta-states with concurrent and serialized announcement options.](figures/fig-falling-tile-state-model.png)
+![The final Falling Tile state model, carrying the full stylized notation: transactions, decision states, interruptible updates, and meta-states with concurrent and serialized announcement options.](figures/fig-falling-tile-state-model.png){alt="The complete stylized Moore state model of the Falling Tile, drawn as about twenty boxes connected by labelled event arrows, flowing from a create event at the top to end states at the bottom. Solid boxes are ordinary states such as Tile Falling and Waiting For Tile Advance Timeout. Heavy dashed boxes are meta-states - Updating On Falling, Updating On Landing, Updating On Reaching Bottom - each listing a transaction start, Option 1 concurrent updates joined by AND, Option 2 serialized updates joined by THEN, and a transaction end. Dotted boxes - Lateral Movement, Rotating, and Hard Dropping During Tile Update - are interruptible updates listing serialize and interrupt alternatives. Transition labels use the notation prefixes I, R, A, D, TS, TE and X explained in the text; dashed transitions carrying paired events denote hidden await-states. All exception paths converge on Terminating On Cancel, and the normal paths end at Fall Complete or Game Over."}
 
 One question from this modelling work stayed with me. The single event "tile added to landscape" is a higher abstraction than the pair "update landscape, clear tile" — but at what level of abstraction may an abstract model speak? Position and movement are common concepts; is "landed"? The answer lies in the metadata and ontologies applied to abstract model events — without them, no rendering algorithm could choose its metaphors — and that question formed the starting point for the bridge between the Game and Capability domains.
 
@@ -241,7 +242,7 @@ A skilled player keeping a clean board produces calm consonance; a struggling pl
 
 The polar-coordinate realization of Section 7 becomes explicit architecture. The game's information space decomposes into three switchable first-person listening perspectives:
 
-![The Wall, The Well, and Mission Control.](figures/fig-audio-stage.png)
+![The Wall, The Well, and Mission Control.](figures/fig-audio-stage.png){alt="Three panels showing the first-person listening views. The Wall, the side view: ten dots arc in front of a listener marked you, every column the same distance away; captions read azimuth equals column, precise, and elevation plus pitch equals height. The Well, the top-down view: the listener sits above a plan-view grid containing a T-shaped piece footprint, with a sonar line measuring depth to the surface; the shape becomes a horizontal sound pattern to match to the gap. Mission Control, the dashboard: four stations placed around the listener - Held at minus forty degrees behind, Next at plus forty degrees behind, Level at minus thirty degrees front-below, Score at plus thirty degrees front-below - with the note that nothing sits at exactly zero or one hundred eighty degrees, so no two stations share a cone of confusion."}
 
 **The Wall** — the side view, and the default, because it is how a novice knows Tetris. The ten columns map onto an arc with the listener at its centre — every column equidistant (no volume bias), maximally separated in azimuth (the ear's best dimension), with height carried literally in elevation. It excels at tracking the fall; it struggles with pattern-matching, which from the side is like judging whether a key fits a lock viewed edge-on.
 
@@ -260,7 +261,7 @@ The design is constrained throughout by what ears actually resolve, and my old f
 * **Avoid pure front/back.** Sounds mirrored across the interaural axis produce nearly identical cues — the cone of confusion. Nothing critical sits at exactly 0° or 180°; every Mission Control station is offset (±40° behind, ±30° front-below) so no two stations share a cone.
 * **The wobble.** In life, the brain resolves front/back by micro head movements — which don't happen wearing headphones at a screen. So the game space imperceptibly wobbles: a slow, irregular figure-eight oscillation of the audio listener's orientation, the two axes at incommensurate frequencies (so the pattern never repeats and is never heard as rhythm), amplitude a subliminal 2–4°. This is the direct descendant of my dancing margins — in the PhD build I moved the *sources* to help the ears; now we move the *listener*, and nobody has to hear it happening.
 
-![Twenty rows, five zones: designing to auditory resolution, with height carried by redundant cues.](figures/fig-zones.png)
+![Twenty rows, five zones: designing to auditory resolution, with height carried by redundant cues.](figures/fig-zones.png){alt="A twenty-row Tetris column bracketed into five labelled zones of four rows each: zone five, Sky, rows seventeen to twenty, bright and airy with high overtones; zone four, Upper, rows thirteen to sixteen, clear and present; zone three, Middle, rows nine to twelve, neutral and warm; zone two, Lower, rows five to eight, darker and denser; zone one, Ground, rows one to four, deep, heavy and compressed. A side panel titled height is a cluster of redundant cues lists: spatial elevation gives the coarse zone, one of about five; pitch is continuous and precise; brightness from filtering is textural and intuitive; tempo and pulse rate carry urgency. No single perceptual channel carries the vertical dimension alone."}
 
 ### The player's mixing desk
 
