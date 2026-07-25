@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="430" viewBox="0 0 980 430" font-family="Helvetica, Arial, sans-serif">
+  <rect width="980" height="430" fill="#ffffff"/>
+  <!-- ===== Panel 1: The Wall ===== -->
+  <g>
+    <rect x="20" y="20" width="300" height="360" rx="10" fill="#fbfbfd" stroke="#223" stroke-width="2"/>
+    <text x="170" y="52" font-size="18" font-weight="bold" fill="#111" text-anchor="middle">The Wall</text>
+    <text x="170" y="74" font-size="13.5" fill="#444" text-anchor="middle">side view — tracking the fall</text>
+    <!-- arc of columns -->
+    <g fill="#7f6fb8">
+      <circle cx="60" cy="210" r="7"/><circle cx="80" cy="184" r="7"/><circle cx="104" cy="163" r="7"/><circle cx="131" cy="148" r="7"/><circle cx="160" cy="140" r="7"/><circle cx="190" cy="140" r="7"/><circle cx="219" cy="148" r="7"/><circle cx="246" cy="163" r="7"/><circle cx="270" cy="184" r="7"/><circle cx="290" cy="210" r="7"/>
+    </g>
+    <text x="175" y="120" font-size="13" fill="#555" text-anchor="middle">10 columns on an equidistant arc</text>
+    <!-- listener -->
+    <circle cx="175" cy="290" r="16" fill="#fff" stroke="#223" stroke-width="2.5"/>
+    <text x="175" y="296" font-size="13" fill="#223" text-anchor="middle">you</text>
+    <text x="175" y="330" font-size="13.5" fill="#555" text-anchor="middle">azimuth = column (precise)</text>
+    <text x="175" y="350" font-size="13.5" fill="#555" text-anchor="middle">elevation + pitch = height</text>
+  </g>
+  <!-- ===== Panel 2: The Well ===== -->
+  <g>
+    <rect x="340" y="20" width="300" height="360" rx="10" fill="#fbfbfd" stroke="#223" stroke-width="2"/>
+    <text x="490" y="52" font-size="18" font-weight="bold" fill="#111" text-anchor="middle">The Well</text>
+    <text x="490" y="74" font-size="13.5" fill="#444" text-anchor="middle">top-down — fitting the shape</text>
+    <!-- listener above -->
+    <circle cx="490" cy="120" r="16" fill="#fff" stroke="#223" stroke-width="2.5"/>
+    <text x="490" y="126" font-size="13" fill="#223" text-anchor="middle">you</text>
+    <text x="560" y="125" font-size="13" fill="#555">(above)</text>
+    <!-- plan grid below -->
+    <g transform="translate(400,180)">
+      <rect x="0" y="0" width="180" height="120" fill="#f4f4f8" stroke="#333" stroke-width="1.5"/>
+      <g stroke="#ccc" stroke-width="1"><path d="M36 0V120M72 0V120M108 0V120M144 0V120M0 40H180M0 80H180"/></g>
+      <!-- piece footprint -->
+      <g fill="#7f6fb8" stroke="#2c2450" stroke-width="1.5">
+        <rect x="36" y="40" width="36" height="40"/><rect x="72" y="40" width="36" height="40"/><rect x="72" y="0" width="36" height="40"/>
+      </g>
+    </g>
+    <!-- sonar arrow -->
+    <g stroke="#a33" stroke-width="2"><path d="M490 142 L490 176"/></g>
+    <text x="502" y="160" font-size="13" fill="#a33">sonar: depth</text>
+    <text x="502" y="176" font-size="13" fill="#a33">to the surface</text>
+    <text x="490" y="330" font-size="13.5" fill="#555" text-anchor="middle">the shape becomes a horizontal</text>
+    <text x="490" y="350" font-size="13.5" fill="#555" text-anchor="middle">sound-pattern to match to the gap</text>
+  </g>
+  <!-- ===== Panel 3: Mission Control ===== -->
+  <g>
+    <rect x="660" y="20" width="300" height="360" rx="10" fill="#fbfbfd" stroke="#223" stroke-width="2"/>
+    <text x="810" y="52" font-size="18" font-weight="bold" fill="#111" text-anchor="middle">Mission Control</text>
+    <text x="810" y="74" font-size="13.5" fill="#444" text-anchor="middle">the dashboard — a snapshot</text>
+    <!-- listener centre -->
+    <circle cx="810" cy="220" r="16" fill="#fff" stroke="#223" stroke-width="2.5"/>
+    <text x="810" y="226" font-size="13" fill="#223" text-anchor="middle">you</text>
+    <!-- stations, all offset from pure front/back -->
+    <g font-size="13.5" fill="#222" text-anchor="middle">
+      <g><rect x="682" y="110" width="92" height="38" rx="7" fill="#f2ecdc" stroke="#333" stroke-width="1.5"/><text x="728" y="134">HELD −40°</text></g>
+      <g><rect x="846" y="110" width="92" height="38" rx="7" fill="#f2ecdc" stroke="#333" stroke-width="1.5"/><text x="892" y="134">NEXT +40°</text></g>
+      <g><rect x="676" y="300" width="86" height="38" rx="7" fill="#e8eef4" stroke="#333" stroke-width="1.5"/><text x="719" y="324">LEVEL −30°</text></g>
+      <g><rect x="856" y="300" width="86" height="38" rx="7" fill="#e8eef4" stroke="#333" stroke-width="1.5"/><text x="899" y="324">SCORE +30°</text></g>
+    </g>
+    <g stroke="#888" stroke-width="1.5" stroke-dasharray="4 4">
+      <path d="M796 208 L748 148"/><path d="M824 208 L872 148"/><path d="M798 232 L740 300"/><path d="M822 232 L880 300"/>
+    </g>
+    <text x="810" y="356" font-size="13" fill="#555" text-anchor="middle">nothing at exact 0° or 180° —</text>
+    <text x="810" y="372" font-size="13" fill="#555" text-anchor="middle">no shared cone of confusion</text>
+  </g>
+  <text x="490" y="412" font-size="15" fill="#333" text-anchor="middle">Three first-person listening views: one game, three perspectives, switched by key</text>
+</svg>

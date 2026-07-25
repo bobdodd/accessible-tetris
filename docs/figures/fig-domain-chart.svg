@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="560" viewBox="0 0 980 560" font-family="Helvetica, Arial, sans-serif">
+  <rect width="980" height="560" fill="#ffffff"/>
+  <defs>
+    <marker id="da" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0 0L10 5L0 10z" fill="#333"/>
+    </marker>
+  </defs>
+  <!-- Application domain -->
+  <g>
+    <rect x="380" y="40" width="220" height="84" rx="10" fill="#eef2fa" stroke="#223" stroke-width="2.5"/>
+    <text x="490" y="74" font-size="19" font-weight="bold" fill="#111" text-anchor="middle">Tetris Game</text>
+    <text x="490" y="100" font-size="14" fill="#444" text-anchor="middle">application domain — the abstract game</text>
+  </g>
+  <!-- Service domains -->
+  <g>
+    <rect x="80" y="230" width="200" height="84" rx="10" fill="#f2faf2" stroke="#223" stroke-width="2"/>
+    <text x="180" y="264" font-size="18" font-weight="bold" fill="#111" text-anchor="middle">Visual View</text>
+    <text x="180" y="290" font-size="14" fill="#444" text-anchor="middle">service — visual design space</text>
+
+    <rect x="390" y="230" width="200" height="84" rx="10" fill="#f2faf2" stroke="#223" stroke-width="2"/>
+    <text x="490" y="264" font-size="18" font-weight="bold" fill="#111" text-anchor="middle">Sonic View</text>
+    <text x="490" y="290" font-size="14" fill="#444" text-anchor="middle">service — sonic design space</text>
+
+    <rect x="700" y="230" width="200" height="84" rx="10" fill="#f2faf2" stroke="#223" stroke-width="2"/>
+    <text x="800" y="264" font-size="18" font-weight="bold" fill="#111" text-anchor="middle">Input</text>
+    <text x="800" y="290" font-size="14" fill="#444" text-anchor="middle">service — user input modalities</text>
+  </g>
+  <!-- Capability + implementation -->
+  <g>
+    <rect x="235" y="430" width="220" height="84" rx="10" fill="#faf6ee" stroke="#223" stroke-width="2"/>
+    <text x="345" y="464" font-size="18" font-weight="bold" fill="#111" text-anchor="middle">User Capability</text>
+    <text x="345" y="490" font-size="14" fill="#444" text-anchor="middle">service — models of user need</text>
+
+    <rect x="620" y="430" width="240" height="84" rx="10" fill="#f6f6f6" stroke="#223" stroke-width="2" stroke-dasharray="7 5"/>
+    <text x="740" y="464" font-size="18" font-weight="bold" fill="#111" text-anchor="middle">Keyboard Events</text>
+    <text x="740" y="490" font-size="14" fill="#444" text-anchor="middle">implementation domain</text>
+  </g>
+  <!-- Bridges -->
+  <g stroke="#333" stroke-width="2" fill="none">
+    <path d="M420 124 L200 230" marker-end="url(#da)"/>
+    <path d="M490 124 L490 230" marker-end="url(#da)"/>
+    <path d="M560 124 L780 230" marker-end="url(#da)"/>
+    <path d="M180 314 L320 430" marker-end="url(#da)"/>
+    <path d="M470 314 L370 430" marker-end="url(#da)"/>
+    <path d="M790 314 L750 430" marker-end="url(#da)"/>
+    <!-- mechanical feedback bridge Input -> Sonic View -->
+    <path d="M700 290 C 650 300, 640 300, 592 292" stroke-dasharray="6 5" marker-end="url(#da)"/>
+  </g>
+  <g font-size="13.5" fill="#555">
+    <text x="253" y="165">render</text>
+    <text x="497" y="180">render</text>
+    <text x="688" y="165">delegate input</text>
+    <text x="205" y="380">select modalities by capability</text>
+    <text x="785" y="380">key events</text>
+    <text x="596" y="322">mechanical feedback</text>
+  </g>
+  <text x="490" y="548" font-size="15" fill="#333" text-anchor="middle">Shlaer-Mellor domain chart: one abstract game, independently rendered views, capability-driven selection</text>
+</svg>

@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="240" viewBox="0 0 980 240" font-family="Helvetica, Arial, sans-serif">
+  <rect width="980" height="240" fill="#ffffff"/>
+  <!-- Each piece in a 4x4 cell frame, cell = 26px -->
+  <g stroke-width="2">
+    <!-- I -->
+    <g transform="translate(30,50)">
+      <g fill="#79b8c9" stroke="#1e3f49">
+        <rect x="0" y="26" width="26" height="26"/><rect x="26" y="26" width="26" height="26"/><rect x="52" y="26" width="26" height="26"/><rect x="78" y="26" width="26" height="26"/>
+      </g>
+      <text x="52" y="150" font-size="20" font-weight="bold" fill="#222" text-anchor="middle">I</text>
+    </g>
+    <!-- O -->
+    <g transform="translate(170,50)">
+      <g fill="#d9c66a" stroke="#4d431a">
+        <rect x="26" y="13" width="26" height="26"/><rect x="52" y="13" width="26" height="26"/><rect x="26" y="39" width="26" height="26"/><rect x="52" y="39" width="26" height="26"/>
+      </g>
+      <text x="52" y="150" font-size="20" font-weight="bold" fill="#222" text-anchor="middle">O</text>
+    </g>
+    <!-- T -->
+    <g transform="translate(310,50)">
+      <g fill="#a98fc9" stroke="#33224d">
+        <rect x="13" y="13" width="26" height="26"/><rect x="39" y="13" width="26" height="26"/><rect x="65" y="13" width="26" height="26"/><rect x="39" y="39" width="26" height="26"/>
+      </g>
+      <text x="52" y="150" font-size="20" font-weight="bold" fill="#222" text-anchor="middle">T</text>
+    </g>
+    <!-- S -->
+    <g transform="translate(450,50)">
+      <g fill="#8fbf8f" stroke="#274427">
+        <rect x="39" y="13" width="26" height="26"/><rect x="65" y="13" width="26" height="26"/><rect x="13" y="39" width="26" height="26"/><rect x="39" y="39" width="26" height="26"/>
+      </g>
+      <text x="52" y="150" font-size="20" font-weight="bold" fill="#222" text-anchor="middle">S</text>
+    </g>
+    <!-- Z -->
+    <g transform="translate(590,50)">
+      <g fill="#c98f8f" stroke="#4d2222">
+        <rect x="13" y="13" width="26" height="26"/><rect x="39" y="13" width="26" height="26"/><rect x="39" y="39" width="26" height="26"/><rect x="65" y="39" width="26" height="26"/>
+      </g>
+      <text x="52" y="150" font-size="20" font-weight="bold" fill="#222" text-anchor="middle">Z</text>
+    </g>
+    <!-- J -->
+    <g transform="translate(730,50)">
+      <g fill="#8fa3c9" stroke="#22304d">
+        <rect x="13" y="13" width="26" height="26"/><rect x="13" y="39" width="26" height="26"/><rect x="39" y="39" width="26" height="26"/><rect x="65" y="39" width="26" height="26"/>
+      </g>
+      <text x="52" y="150" font-size="20" font-weight="bold" fill="#222" text-anchor="middle">J</text>
+    </g>
+    <!-- L -->
+    <g transform="translate(870,50)">
+      <g fill="#c9a26a" stroke="#4d3a1e">
+        <rect x="65" y="13" width="26" height="26"/><rect x="13" y="39" width="26" height="26"/><rect x="39" y="39" width="26" height="26"/><rect x="65" y="39" width="26" height="26"/>
+      </g>
+      <text x="52" y="150" font-size="20" font-weight="bold" fill="#222" text-anchor="middle">L</text>
+    </g>
+  </g>
+  <text x="490" y="225" font-size="15" fill="#333" text-anchor="middle">The seven tetrominoes — each occupies exactly four squares of a 4 × 4 frame</text>
+</svg>

@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="980" height="480" viewBox="0 0 980 480" font-family="Helvetica, Arial, sans-serif">
+  <rect width="980" height="480" fill="#ffffff"/>
+  <defs>
+    <marker id="ma" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0 0L10 5L0 10z" fill="#333"/>
+    </marker>
+  </defs>
+  <!-- lifeline heads -->
+  <g stroke="#223" stroke-width="2">
+    <rect x="120" y="30" width="180" height="46" rx="8" fill="#eef2fa"/>
+    <rect x="410" y="30" width="180" height="46" rx="8" fill="#f2faf2"/>
+    <rect x="700" y="30" width="180" height="46" rx="8" fill="#f2faf2"/>
+  </g>
+  <g font-size="17" font-weight="bold" fill="#111" text-anchor="middle">
+    <text x="210" y="59">Game</text>
+    <text x="500" y="59">Visual View</text>
+    <text x="790" y="59">Sonic View</text>
+  </g>
+  <!-- lifelines -->
+  <g stroke="#999" stroke-width="1.5" stroke-dasharray="6 5">
+    <path d="M210 76V440M500 76V440M790 76V440"/>
+  </g>
+  <!-- requests -->
+  <g stroke="#333" stroke-width="2">
+    <path d="M210 120 L496 120" marker-end="url(#ma)"/>
+    <path d="M210 150 L786 150" marker-end="url(#ma)"/>
+  </g>
+  <g font-size="15" fill="#222">
+    <text x="250" y="112">R: UI.tilePositionUpdate</text>
+    <text x="250" y="142">R: UI.tilePositionUpdate</text>
+  </g>
+  <!-- activity boxes -->
+  <rect x="493" y="120" width="14" height="140" fill="#cfe0cf" stroke="#333" stroke-width="1.5"/>
+  <rect x="783" y="150" width="14" height="210" fill="#cfe0cf" stroke="#333" stroke-width="1.5"/>
+  <g font-size="14" fill="#555">
+    <text x="516" y="200">rendering (takes as long</text>
+    <text x="516" y="218">as this user needs)</text>
+    <text x="806" y="250">announcing (its own</text>
+    <text x="806" y="268">duration entirely)</text>
+  </g>
+  <!-- answers -->
+  <g stroke="#333" stroke-width="2" stroke-dasharray="7 4">
+    <path d="M496 260 L214 260" marker-end="url(#ma)"/>
+    <path d="M786 360 L214 360" marker-end="url(#ma)"/>
+  </g>
+  <g font-size="15" fill="#222">
+    <text x="250" y="252">A: UI.tilePositionUpdate</text>
+    <text x="250" y="352">A: UI.tilePositionUpdate</text>
+  </g>
+  <!-- rendezvous -->
+  <rect x="196" y="372" width="28" height="22" fill="#223" rx="4"/>
+  <g font-size="15" fill="#222">
+    <text x="240" y="388">rendezvous: the game proceeds only when EVERY answer has arrived</text>
+  </g>
+  <text x="490" y="462" font-size="15" fill="#333" text-anchor="middle">The request / answer / rendezvous pattern — the game busy-waits on its views, never the reverse</text>
+</svg>
