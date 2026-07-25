@@ -46,7 +46,7 @@ Three layers, mirroring the case study's domain chart:
 3. Views may send indications (key events arrive via the input service as indications).
 4. A request may be cancelled (the `X:` pattern) — used by hard drop when the current announcement's modality permits interruption; otherwise updates serialize. Each modality declares `interruptible: true/false`.
 
-**The game clock bends to the user.** Rendering may delay the fall. All five timeouts are parameters of the capability profile: per-row dwell, lock delay, next-piece delay, auto-repeat rate, key dwell. (Reference points from the PhD build: 300 ms visual dwell vs 4000 ms sonic dwell.)
+**The game clock bends to the user.** Rendering may delay the fall. All five timeouts are parameters of the capability profile: per-row dwell, lock delay, next-piece delay, auto-repeat rate, key dwell. (Reference points from the PhD build: 300 ms visual dwell vs 4000 ms sonic dwell.) **Game speed is also surfaced as a single first-class percentage setting** (GAG "adjust the game speed" / APX "Slow It Down"; Celeste 50–100%, Forza Horizon 5 40–100% as precedents) that scales the timeout set coherently — the per-timeout parameters remain for fine tuning, but the player-facing control is the percentage.
 
 **State machines.** `Game` and `FallingTile` as explicit FSMs with the case study's event discipline (`I:` indication, `R:/A:` request/answer, `D:` immediate internal decision, transactions). The final stylized Falling Tile model (docs/figures/fig-falling-tile-state-model.png) is the specification; meta-states with concurrent/serialized options become per-announcement strategy selection at runtime.
 
@@ -102,6 +102,8 @@ L6 EVENTS    locks, clears, game over
 ```
 
 Presets: **Minimal** (0,6) · **Standard** (0,1,5,6) · **Full** (0–6) · **Custom** (the desk). Per-cue weighting for the height cluster (elevation/pitch/brightness/tempo). Profiles persist (localStorage); the People/Capabilities/Preferences model from the PhD build is the schema starting point.
+
+**Framing language is a requirement, not copywriting polish** (case study §11–12; Celeste's assist-mode wording revision is the precedent). All preset, layer, and speed copy is neutral and empowering: presets are named by what they *provide* ("Minimal / Standard / Full"), never by skill or deficit ("beginner", "easy", "impaired"); the speed control is "Game speed", not an assist or concession; no interface text may frame an adapted configuration as a lesser way to play.
 
 ## 7. Visual view
 
