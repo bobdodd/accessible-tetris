@@ -1,6 +1,15 @@
 # Accessible Tetris — Engineering Design
 
-The design reference for the web implementation. The reasoning behind every decision here is in [the case study](../docs/case-study.md); this document states the decisions, for building against.
+The design reference for the web build. The reasoning behind every decision here is in [the case study](../docs/case-study.md); this document states the decisions, for building against.
+
+## 0. Scope: a demonstrator, not a product
+
+What we are building is a **demonstrator of adaptation techniques**, referencing directly back to the CISNA Model — not a claim of a finished accessible Tetris (case study §1 and §12). Consequences for everything below:
+
+- **A simple version of the game, scoped openly.** All seven pieces, movement, rotation, lock, line clears, hold, ghost, scoring. Simplifications are stated, not smuggled: basic rotation (no SRS kick tables), no T-spin scoring, simple randomizer acceptable for v1. Fidelity upgrades are possible later; they are not the point.
+- **The techniques are the deliverable**: the abstract-game/async-bridge architecture, the sonic metaphors as selectable Inventory, the three listening views, the capability-driven Adaptation layer (the mixing desk). Each must remain individually inspectable and switchable — the demonstrator's job is to make the CISNA layers visible in operation.
+- **CISNA mapping is structural**: game events (and their ontology) = Semantics over External Content; metaphor implementations = Inventory; view/metaphor selection by capability = Adaptation. UI copy and docs in the demo reference the layers by name.
+- Claims stay exploratory: "works" means "demonstrates", pending co-design and evaluation (§8).
 
 ## 1. Platform and constraints
 
@@ -16,8 +25,8 @@ Three layers, mirroring the case study's domain chart:
 
 ```
    ┌───────────────────────────────┐
-   │        ABSTRACT GAME          │  grid 10×22 (2 hidden), 7 pieces, SRS,
-   │  Game FSM  +  FallingTile FSM │  hold, ghost, scoring, levels
+   │        ABSTRACT GAME          │  grid 10×22 (2 hidden), 7 pieces,
+   │  Game FSM  +  FallingTile FSM │  rotation (see Scope), hold, ghost, scoring
    └──────────────┬────────────────┘
                   │  async request/answer bridge (Promise-based)
         ┌─────────┴─────────┐
@@ -103,7 +112,7 @@ Classic SVG rendering: playfield, ghost, next, hold, score. High-contrast and co
 1. **Timbres** — the 7 voices in a Web Audio sandbox; A/B until identities are learnable.
 2. **Terrain scan** — static boards played as audio; test: can a listener sketch the silhouette?
 3. **Stage** — coordinate system, PannerNode layout, the wobble; front/back discrimination test.
-4. **Abstract game** — FSMs + bridge, headless, unit-tested against Guideline behaviours.
+4. **Abstract game** — FSMs + bridge, headless, unit-tested against the Scope §0 rule subset (fidelity upgrades tracked, not assumed).
 5. **Views** — visual first (it debugs the game), then sonic layer by layer.
 6. **Desk + presets**, training mode, then evaluation instrumentation (event log for quantitative measures).
 

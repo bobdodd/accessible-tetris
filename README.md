@@ -1,8 +1,8 @@
 # Accessible Tetris
 
-An accessible version of the classic game of Tetris, rendered in sound as richly as in pixels — spatial audio, musical sonification, and a first-person listening experience — running in an ordinary web page.
+An exploration of what it means for Tetris to be accessible — design method and interaction modalities, with working examples of techniques: spatial audio, musical sonification, and a first-person listening experience, running in an ordinary web page.
 
-This project continues research begun in my PhD, which used Tetris as a case study in adapting user-interface content to user capability. The game was chosen to be difficult: real-time, animated, and built on exactly the kind of proximal, spatial content that screen readers cannot transliterate. The original implementation (Java + OpenAL, circa 2009) proved the architecture; this project rebuilds it on the modern web platform, where the Web Audio API finally provides binaural spatial audio worthy of the design.
+The claim here is deliberately precise. This is **not** "an accessible Tetris game": it is research into what accessibility *means* for a game like this, with a demonstrator showing the techniques in action. The work continues my PhD's rendering case study, which chose Tetris because it is hard, not because it was doable — real-time, animated, built on exactly the kind of proximal, spatial content that screen readers cannot transliterate. The adaptation approach references directly back to the thesis's core: the [CISNA Model of Accessible Adaptive Hypermedia](https://a11ybob.com/research/cisna-model) (Adaptation / Navigation / Semantics / Inventory / External Content), with the game's events at Semantics, the audio metaphors as Inventory, and the player-facing mixing desk as the Adaptation layer in the player's own hands. The original exploratory build (Java + OpenAL, circa 2009) exercised the architecture; the web demonstrator rebuilds it where the Web Audio API finally provides binaural spatial audio worthy of the design.
 
 ## The documents
 
@@ -21,6 +21,6 @@ This project continues research begun in my PhD, which used Tetris as a case stu
 
 ## Status
 
-Documents and design first; implementation follows the build order the case study argues for — timbres, then terrain scan, then the spatial stage, then the game.
+Documents and design first; the demonstrator follows the build order the case study argues for — timbres, then terrain scan, then the spatial stage, then a simple, openly-scoped version of the game that exercises the techniques.
 
 Tetris® is a trademark of The Tetris Company. This is non-commercial accessibility research; no Tetris Company assets are used.
