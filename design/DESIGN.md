@@ -111,6 +111,15 @@ Classic SVG rendering: playfield, ghost, next, hold, score. High-contrast and co
 
 ## 8. Build order
 
+> **Amended 2026-07-26 by [DEMOS.md](DEMOS.md).** The de-risking sequence below
+> stands, but a thin CISNA cradle is now built *before* step 1, and each step
+> registers into it as Inventory rather than living in a standalone sandbox. A
+> scripted event tape drives the cradle until step 4 replaces it with the real
+> game, so nothing is thrown away and the architecture is demonstrable from the
+> first demo. See DEMOS.md for the demo programme, the falsifiable question each
+> phase must answer, and the honesty policy.
+
+
 1. **Timbres** — the 7 voices in a Web Audio sandbox; A/B until identities are learnable.
 2. **Terrain scan** — static boards played as audio; test: can a listener sketch the silhouette?
 3. **Stage** — coordinate system, PannerNode layout, the wobble; front/back discrimination test.
