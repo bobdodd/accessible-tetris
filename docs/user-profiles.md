@@ -402,7 +402,7 @@ NONE, or because no parent is PARTIAL and so the question does not arise.
 | `manualStability` | FULL | FULL | FULL | FULL | FULL | PARTIAL 35 % |
 | `minKeyRepeatDelay` |  |  |  |  |  | PARTIAL 900 ms |
 | `readFontText` |  | NONE | PARTIAL |  |  |  |
-| `minReadFontSizeForFont` |  |  | PARTIAL size 18, font system-sans |  |  | PARTIAL size 12, font system-sans<br>PARTIAL *(M)* |
+| `minReadFontSizeForFont` |  |  | PARTIAL size 18, font system-sans |  |  | PARTIAL size 12, font system-sans; PARTIAL *(M)* |
 | `pointerControl` | FULL | FULL | FULL | FULL | NONE | PARTIAL |
 | `minTargetSize` |  |  |  |  |  | PARTIAL 18 mm |
 | `sustainedPress` |  |  |  |  |  | PARTIAL |

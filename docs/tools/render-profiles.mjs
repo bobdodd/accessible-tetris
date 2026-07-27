@@ -301,7 +301,10 @@ for (const prop of everyProperty) {
         const v = valueOf(s.measurement);
         return v === "—" ? "PARTIAL" : `PARTIAL ${v}${typeof s.measurement === "number" ? unitOf(p) : ""}`;
       })
-      .join("<br>");
+      /* Plain separator rather than <br>: raw HTML does not survive the docx
+       * render, and a cell that reads "PARTIAL size 12<br>PARTIAL (M)" in Word
+       * would be worse than one that reads it on a single line. */
+      .join("; ");
   });
   w(`| \`${prop}\` | ` + cells.join(" | ") + " |");
 }

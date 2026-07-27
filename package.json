@@ -7,6 +7,7 @@
   "license": "GPL-3.0-or-later",
   "scripts": {
     "test": "node test/semantics.test.mjs && node test/user.test.mjs",
-    "docs:profiles": "node docs/tools/render-profiles.mjs > docs/user-profiles.md"
+    "docs:profiles": "node docs/tools/render-profiles.mjs > docs/user-profiles.md",
+    "docs:profiles-docx": "python3 docs/tools/make-profiles-docx.py"
   }
 }
