@@ -139,10 +139,12 @@ cradle/          the framework: no audio, no game, no rendering
   document/        the five-layer Document Model (semantics, inventory, adaptation)
   runtime/         the Runtime System (profiling, composition, render, interaction)
   bridge.js        request/answer, rendezvous, cancellation
+vocabulary/      declared Concept Ontologies (content, not mechanism)
 renderers/       Inventory modules, one per metaphor, each independently switchable
 game/            abstract game FSMs (phase 3; replaces the tape)
 tapes/           scripted event tapes, the deterministic test material
 demos/<slug>/    one directory per demo: page, wiring, and notes.md write-up
+test/            plain node tests, no framework
 ```
 
 Each demo directory is self-contained and publishable on its own. The site

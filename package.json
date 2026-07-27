@@ -1,0 +1,11 @@
+{
+  "name": "accessible-tetris",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Demonstrator of CISNA-style adaptation, built around an accessible Tetris. No dependencies: the cradle is the framework.",
+  "license": "GPL-3.0-or-later",
+  "scripts": {
+    "test": "node test/semantics.test.mjs"
+  }
+}
