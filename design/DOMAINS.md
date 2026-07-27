@@ -118,11 +118,17 @@ value "can be determined by a formula or algorithm", is marked `(M)` on the
 Information Model, and carries the formula or algorithm in its description.
 
 Decision: **use `(M)`.** A derived Setting states its formula declaratively and
-the runtime evaluates it. An ADFD is reserved for Actions that genuinely
+the runtime evaluates it. An Action is reserved for the cases that genuinely
 process — external influences, conditional branching, event generation. The
-simple cases, which are most of them, need no process graph at all. Where an
+simple cases, which are most of them, need no action graph at all. Where an
 `(M)` attribute's formula reads other Settings, the acyclicity rule of §9.1
 still governs the resulting dependency graph.
+
+**Actions are written in Action Language, and that is not a substitution for
+ADFDs — it is the ADFD.** See §1c. Earlier drafts of this document proposed
+"specifying Actions as ADFDs" as though a diagram notation were being adopted.
+Corrected: Action Language descends directly from the ADFD definition (a graph of
+actions) and is already implemented.
 
 **Cross-domain communication is by wormhole.** OOA96 §5.5 forbids the
 alternative outright: "Events generated in an action in a domain must be received
@@ -138,6 +144,57 @@ wormholes.** The request/answer bridge of DESIGN.md §2 is a wormhole with a
 declared return. The construct's sync/async agnosticism is precisely the property
 that let the rendezvous discipline travel out of telephony in the first place.
 Bears directly on issue #5.
+
+## 1c. Action Language is the ADFD, and it already exists
+
+Correction to §1a, §1b and to issue #7, on Bob's history of the construct.
+
+**ADFDs appear nowhere in the PhD work and nowhere in the Ascom work, and the
+reason was tooling.** In the mid-90s nothing could draw them — not even
+BridgePoint, Project Technology's own CASE tool — nor record them as the actions
+of states. Both responses to that constraint were textual and both preserved the
+semantics:
+
+- **Ascom, 1995.** ADFDs replaced by actionable pseudocode in **TCL**. All
+  modelled behaviour was Moore state models whose actions were TCL over assumed
+  function calls, e.g. `navigate(R1, R2, R3 {id:23})` — from instance 23, through
+  relations R1, R2, R3, returning the instance set found. This permitted
+  **simulation of domains without transcription through Recursive Design**,
+  guaranteeing runtime event-model conformance instead. Bob built the simulator.
+- **The PhD.** Needing the same for the adaptation layer, Bob returned to the
+  definition of an ADFD as *a graph of actions* and expressed that graph in his
+  own notation. **That is the origin of Action Language.**
+
+So Action Language carries over from ADFDs by construction. It is not an
+alternative to them, it is them, in a more generalisable syntax. The cradle's
+action notation is therefore not a decision to take: it is made, implemented, and
+running at `/playgrounds/action-language`, with Paradise's ActionLanguage IR as
+the working descendant.
+
+**This also explains the Ascom lineage in DESIGN.md §2 more completely.** The
+request/answer bridge and the simulator come from the same work: a domain
+simulator that guaranteed event-model conformance without translating. That is
+what the cradle is, thirty years on.
+
+### What the port has, and what the cradle must add
+
+Read from `a11ybob/src/lib/action-language/`. The TypeScript port implements the
+generalised core: `seq`, `declare-var`, `assign`, `read-var`, `read-const`,
+`print`, `if-then-else`, `while`, `seq-return`, `literal`, `add`, `subtract`,
+`lt`, `eq`, `declare-function`, `call`.
+
+Against OOA96 §9.3's four process types it already covers **transformations** and
+**tests**. Missing are the two that reach outside the action:
+
+| To add | Source | §6a status |
+|---|---|---|
+| `navigate(R…, {id})` — relationship traversal returning an instance set | Bob's Ascom practice | **His own prior work.** OOA96 has no such accessor: Table 9.1 is entirely per-object-data-store, and chained navigation appears only statically as composition (§3). |
+| The eleven accessor forms of Table 9.1 | OOA96 §9.3.1 | Parent method |
+| Event generation, one event type per generator, no data-store access | OOA96 §9.3.2 | Parent method |
+
+That the method's own accessor table lacks a way to walk relationships at
+runtime — when relationships are the backbone of the Information Model — is worth
+stating in the write-up rather than smoothing over.
 
 ## 2. Where I think Bob is right, and where I would refine it
 

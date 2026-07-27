@@ -599,6 +599,96 @@ three errors. It was that being made to justify a borrowing three times surfaced
 a policy for borrowing. An AI that had been right the first time would not have
 prompted it.*
 
+## C6 · correction · I mistook the notation for the semantics; Action Language *is* the ADFD
+
+**2026-07-27.** After three exchanges arguing that the Capacity Model's Actions
+should "be ADFDs", Bob supplied the history that makes the argument moot.
+
+**There are no ADFDs in his PhD work. There are none in the Ascom work either.**
+
+**Why: tooling.** In the mid-90s nothing could draw them. Not even BridgePoint —
+Project Technology's own CASE tool, from Shlaer and Mellor's own company — could
+draw ADFDs or record them as the actions of states. A method's flagship process
+construct that its own flagship tool could not represent.
+
+**What Ascom did instead.** Replaced ADFDs with actionable pseudocode: fragments
+of **TCL**, so that all modelled behaviour was Moore state models with actions
+written in TCL syntax over assumed function calls. Bob's example:
+
+    navigate(R1, R2, R3 {id:23})
+
+— navigate from object instance 23 through relations R1, R2 and R3, returning the
+set of object instances found. This let them **simulate domains without
+transcribing through Recursive Design**, guaranteeing runtime event-model
+conformance instead. Bob built the simulator.
+
+**What the PhD did instead.** Needing the same thing for the adaptation layer, he
+went back to the *definition* of an ADFD — that it is a **graph of actions** —
+and described that graph in his own notation. **This is the origin of Action
+Language.** In his words: "I didn't lose ADFDs, I changed the syntax to describe
+them, and in a more generalizable way."
+
+### The error, and it is a new species
+
+C4 was the wrong route to a right answer. C5 was trusting a critic over the
+method. S2 was inventing convergence where there was transmission. This one is
+different again: **I mistook the notation for the semantics.**
+
+I spent the thread arguing we should "adopt ADFDs", treating the diagram as the
+thing to be adopted. The diagram was never the thing. The graph of actions is the
+thing, and the boxes-and-arrows form was one way to write it down — a way that
+was, in practice, unwritable for want of a tool. Bob had already carried the
+semantics forward twice, under two different constraints, in two different
+syntaxes. I was proposing to import a construct that this project has been
+running an implementation of for years.
+
+*Generalisation for the experience report, and it is the sharpest one yet: an AI
+researching a method through its literature will find the method's diagrams,
+because diagrams are what published papers preserve. It will not find what
+practitioners did when the diagrams proved undrawable, because that lives in
+tooling constraints, internal practice and memory. The literature records what a
+method meant to be; only the people record what it was like to use. I had
+reconstructed an idealised Shlaer-Mellor that nobody could actually practise in
+1995, and recommended we adopt it.*
+
+### What this settles
+
+Action Language is not a candidate notation for ADFDs. It **is** the ADFD, in
+generalised syntax, with direct descent. So the cradle's action notation is not a
+decision to be taken; it is already made, already implemented, and already
+running on the site at `/playgrounds/action-language`, with the ActionLanguage IR
+in Paradise as its working descendant.
+
+**§6a status: neither MODEL SPECIFIES nor MY CHOICE — this is Bob's own prior
+work.** A category the three states did not anticipate, and now a fifth alongside
+the parent-method state added as §6b. Reporting Action Language as an adoption
+from Shlaer-Mellor would misattribute his contribution to the method; reporting
+it as new work for this demonstrator would misdate it by twenty years.
+
+### Verified gap in the port
+
+Read `a11ybob/src/lib/action-language/` directly. The TypeScript port implements
+the generalised core: `seq`, `declare-var`, `assign`, `read-var`, `read-const`,
+`print`, `if-then-else`, `while`, `seq-return`, `literal`, `add`, `subtract`,
+`lt`, `eq`, `declare-function`, `call`.
+
+Against OOA96 §9.3's four process types it already covers two — **transformations**
+(arithmetic and expressions) and **tests** (`lt`, `eq`, `if-then-else` yielding
+conditional control). Absent are the two that reach outside the action:
+**accessors** and **event generators**. That is the correct absence for a
+general-purpose port and exactly what the cradle must add:
+
+| To add | Source | Note |
+|---|---|---|
+| `navigate(R…, {id})` — relationship traversal returning an instance set | **Bob's Ascom practice** | OOA96 has no such accessor. Table 9.1 is entirely per-object-data-store; chained navigation appears only statically as composition (§3, `R3 = R1 + R2`). He added the dynamic form. |
+| Accessor forms: `read`, `read where`, `find where`, `write`, `write where`, `create`, `create unique`, `create in`, `create unique in`, `delete`, `delete where` | OOA96 Table 9.1 | The minimum set any architecture must support. |
+| Event generation | OOA96 §9.3.2 | One event type per generator; may not access a data store. |
+
+Note that the method's own accessor table lacks the primitive Bob's practice
+found indispensable. Worth stating plainly in the write-up rather than smoothing
+over: relationships are the backbone of the Information Model, and OOA96 gives no
+runtime way to walk them.
+
 ## X1 · disagreement · Bob corrected Claude's conclusion, not its facts
 
 **2026-07-27.** After C3, Claude concluded that the working practice should be

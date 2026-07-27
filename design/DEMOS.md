@@ -280,6 +280,11 @@ any of them:
 - *the model says something that does not work, and here is what was done instead*
 - **the parent method specifies this, it works, and we have declined it for a
   stated reason**
+- **this is Bob's own prior work, carried forward** — neither the model
+  specifying it nor a choice made here. Action Language is the case that forced
+  this state (DOMAINS.md §1c): reporting it as an adoption from Shlaer-Mellor
+  would misattribute his contribution to the method, and reporting it as new work
+  for this demonstrator would misdate it by twenty years.
 
 The fourth is the easiest to misreport, and it can be got wrong in both
 directions. Presenting a declined construct as a gap in the method flatters us;
