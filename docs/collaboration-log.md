@@ -266,16 +266,77 @@ write-up: the earlier paper identifies the hole, the later one fills it.
 
 ---
 
+## X1 · disagreement · Bob corrected Claude's conclusion, not its facts
+
+**2026-07-27.** After C3, Claude concluded that the working practice should be
+"asking what else exists before designing anything". Bob rejected the
+generalisation:
+
+> "Thinking aloud / creating content without full knowledge often elicits
+> discoveries. When you are not encumbered by the baggage of existing knowledge
+> and practices you can free-think. Eventually you need to come back to earth
+> and reflect, but there is value in the activity so long as you don't overdo
+> it."
+
+His evidence is **Sign16**: knowing little sign language, he devised a way of
+recording sign *as a performance*, from watching signers communicate. Knowing
+the words and grammar well, the idea would not have come. The reframe from
+language-with-grammar to performance-to-be-recorded is only reachable from
+outside the field.
+
+The correction is accepted, and the finding is narrowed rather than dropped.
+Claude had generalised from two instances of one kind of task to all tasks:
+
+- **Generative work benefits from naivety.** Inventing a representation, a
+  metaphor, a framing. Prior art narrows the search space; not knowing it lets
+  you look where the informed do not. Sign16 and the seven sonic metaphors are
+  both this.
+- **Reconstructive work is punished by it.** Rebuilding or extending something
+  that already has a specified shape. C1 and C3 were both reconstructive: the
+  free-thinking produced a plan to discard, not a discovery.
+
+**This project already contains a case that refutes the original conclusion.**
+The seven dimensions of audible meaning were derived while writing the LinkedIn
+article, in ignorance of the Interaction Model's existence. Arriving
+independently at the same structure is worth *more* than deriving it from the
+source, because it is corroboration rather than transcription. N1 recorded this
+as "convergence rather than a result", which undersold it. Had the source been
+read first, that evidence would not exist.
+
+So the practice is not "check first". It is:
+
+1. **Mark the epistemic status of your own reasoning.** The cost of C1 was not
+   the thinking, it was that the output read as a settled plan rather than as a
+   reading of partial material. The §6a three states apply to Claude's
+   reasoning, not only to the model.
+2. **Reflect before commitment cost compounds, not before thinking.** Discarding
+   a plan is cheap; discarding a populated model with tests is not. The check
+   belongs at the point of building on an assumption, which is later and rarer
+   than "before designing".
+
+*Recorded as a disagreement because it is one: the facts of C1 and C3 stand, and
+the inference drawn from them did not.*
+
+---
+
 ## Standing observations for the experience report
 
 Written as they become visible, and expected to change:
 
-- **Published summaries are not a substitute for unpublished sources.** C1 is
-  the strongest instance: correct public documentation was insufficient, and the
-  gap was invisible from inside.
-- **The AI is better at finding gaps than at knowing what is missing.** G1 and
-  G2 were both found by reading the source closely, but only once the source was
-  supplied. Nothing prompted Claude to ask whether a runtime model existed.
-- **Reframing beats answering.** D3 is a case where the human rejected the
-  question rather than the options, and got a better result than either option
-  offered.
+- **Naivety is an asset in generative work and a liability in reconstructive
+  work.** See X1. The failure mode is not ignorance but *unmarked* ignorance:
+  output that reads as settled when it is exploratory.
+- **Published summaries are not a substitute for unpublished sources — for
+  reconstruction.** C1 and C3 are the instances, both cases of rebuilding
+  something with an existing specified shape. This does not generalise to
+  invention.
+- **The AI is better at finding gaps than at knowing what is missing.** G1, G2
+  and G3 were all found by reading sources closely, but only once the sources
+  were supplied. Nothing prompted Claude to ask whether a runtime model or a
+  user-capability model existed.
+- **Independent derivation is evidence; derivation from the source is
+  transcription.** The palette and the Interaction Model converged because they
+  were arrived at separately. Reading first would have destroyed the
+  corroboration.
+- **Reframing beats answering.** D3, where the human rejected the question
+  rather than the options, and got a better result than either option offered.
