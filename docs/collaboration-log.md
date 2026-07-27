@@ -428,6 +428,47 @@ dependent Settings are ADFDs under rules 56, 57, 61; cross-domain access is
 permitted and recorded on an Object Access Model per rule 70. §6a state is
 **MODEL SPECIFIES**, citable to a normative source.
 
+## S2 · source · Bob, from practice: polymorphic events at Ascom, 1995
+
+**2026-07-27.** First-hand history, not documentation. Bob's team at Ascom needed
+polymorphic events in 1995 and improvised: **supertype keys and labels were
+allowed to appear in subtype state models**, so state was modelled *only* in the
+subtypes. This avoided parallel state models in super and subtype and the work of
+knitting them together.
+
+His framing, unprompted: *"for our own benefit and ease of transcoding, not the
+method."*
+
+**Why that sentence matters more than the technique.** It is precisely the
+distinction Claude failed to make in C5, where Wieringa & Saake's adaptation
+("for these reasons, we will add the restriction") was relayed as though it
+described the method. Bob applies the label reflexively to his own work. The §6a
+three-state discipline is in large part an attempt to write down a habit he
+already has, which is worth saying plainly in the experience report: the
+discipline was not imported to manage the AI, it was extracted from how the human
+already works.
+
+**Convergence with OOA96.** The ooatool technical note on polymorphic events
+describes OOA96's mechanism as letting a supertype object define a polymorphic
+event "which is mapped to events associated with subtype object lifecycle
+models" — supertype label, subtype lifecycle. That is the Ascom improvisation,
+reached independently and roughly a year earlier. *Not verified against the OOA96
+report itself: ooatool.com fails its TLS handshake, so this rests on the
+secondary note. Flagged rather than asserted, given C5.*
+
+**Applicability to this project, and it is immediate.** The Capability Model has
+`Property` with five subtypes (Boolean, Discrete, Numeric, Numeric Range, Text)
+plus Composite; the Capacity Model mirrors them with matching `Setting` subtypes.
+That is exactly the configuration where the super/subtype state question arises.
+"Model state only in the subtypes, let supertype labels appear there" is a
+production-tested answer, and preferable to Claude reasoning one out.
+
+**Lineage note.** Ascom already appears in this project: DESIGN.md §2 credits the
+request/answer bridge rules to "the Ascom lessons". So the telephony discipline
+behind the bridge and the Shlaer-Mellor practice behind the models come from the
+same workplace and period. Worth drawing out in the write-up, since the case
+study currently presents them as separate inheritances.
+
 ## X1 · disagreement · Bob corrected Claude's conclusion, not its facts
 
 **2026-07-27.** After C3, Claude concluded that the working practice should be
