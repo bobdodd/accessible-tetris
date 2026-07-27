@@ -207,6 +207,65 @@ notice with attribution and the Tetris trademark note.
 
 ---
 
+## 2026-07-27 — the user model
+
+### S1 · source · Bob supplied
+**"User Capability in an Adaptive World"** (Dodd, Green, Pearson; MSIADU'09,
+Beijing). Bob supplied it on noticing that the plan would need the user model.
+It turns out to specify most of step 2 outright.
+
+*This is the second time a supplied source has changed the plan materially, and
+the pattern from C1 repeats: the published CISNA page and the case study
+between them do not mention that the user model is three models with full
+information models behind them. The AI was again working with an accurate but
+incomplete picture and had no way to know it was incomplete.*
+
+### C3 · correction · the source corrected Claude
+**"The Capability Model" is three models.** `DOMAINS.md` and `DEMOS.md` both
+treated user profiling as a single domain to be designed. It is Capability
+(definitions), Capacity (a user's settings across contexts) and Preference (an
+organization of content, not a container of values), each with a published
+Shlaer-Mellor information model.
+
+Consequence under §6a: most of step 2 moves from **MY CHOICE** to **MODEL
+SPECIFIES**, which raises the bar. Departures now have to be justified rather
+than simply made, and "I designed this" would have been a false claim.
+
+### N2 · note · Claude observed
+**Two things in the paper matter more for Tetris than they did for its own
+worked example.**
+
+*Composite Property with Composition Order*, introduced for usable audio
+frequency range as ordered ranges with gaps between them. A listener with
+notched hearing loss is expressible; a single min/max is not. That is directly
+load-bearing for a sonic demonstrator.
+
+*Functional dependency through Actions.* Settings that change in response to
+External Influences, which the paper says is what makes a model adaptive rather
+than static. Two Tetris cases fall straight out: listening fatigue, following
+the paper's own `focusDuration` / `trackingDuration` pattern for vision; and
+environment, since usable azimuth resolution in a quiet room is not usable
+azimuth resolution on a bus.
+
+### G3 · gap · Claude identified
+**The two Adaptation Model figures do not match** (issue #6). The Render Model
+note has Attribute Value Type, Instance Application, Application Order; the
+MSIADU'09 paper has Data Type, Instance Sequence, Sequence No. Probably the
+same model renamed across time, but *Instance Application* and *Instance
+Sequence* are not obviously synonyms, and the Render Model note carries ordering
+separately in Application Order, which would be redundant if the container were
+already a sequence. Provisionally following the Render Model note because it is
+the only source with a worked XML population. Bob wrote both and should confirm.
+
+### N3 · note · Claude observed
+**The two papers join up across a gap one of them names.** MSIADU'09 §7 says
+that bridging preference and settings across domains "implies that there is a
+missing abstract model of the underlying application". The Render Model note
+later supplies exactly that, as the Application Model. Worth recording for the
+write-up: the earlier paper identifies the hole, the later one fills it.
+
+---
+
 ## Standing observations for the experience report
 
 Written as they become visible, and expected to change:

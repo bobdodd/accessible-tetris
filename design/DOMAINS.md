@@ -37,7 +37,7 @@ whole basis of the recommendation below.
 | Domain | What a population looks like | Why it stands alone |
 |---|---|---|
 | **Interaction Model** | The Sonic and Visual Interaction Spaces, each with its Interaction Properties | Properties of a medium. Psychoacoustics does not depend on Tetris, on a user, or on any other model. |
-| **Capability Model** (within User Profiling) | Default, blind, low-vision, hard-of-hearing profiles | Capacity to perceive and act. A property of people, not of content. |
+| **Capability / Capacity / Preference** (within User Profiling) | Property definitions, one user's settings per context, and their preferences | Three published models, not one. See section 2a. A property of people, not of content. |
 | **Semantics** | Nouns, Verbs, Rules for Tetris | Already built and populated. Knows nothing of rendering. |
 | **Inventory** | Timbres, water sounds, note sets, visual cells | A media element is a media element before anything selects it. |
 | **Application Model** | A concrete board, presented, for one user | Can be hand-populated as a *target*. See §3. |
@@ -85,6 +85,96 @@ bridges: it is simply asserted.
 
 **So: do the Render Model work, but enter it the way the thesis did.**
 
+## 2a. The user model is three models, and it is already specified
+
+Correction to this document's first draft, and to `DEMOS.md`. What both called
+"the Capability Model" is three separate models, published in *User Capability
+in an Adaptive World* (Dodd, Green and Pearson, MSIADU'09) with full
+Shlaer-Mellor information models:
+
+| Model | Holds | Note |
+|---|---|---|
+| **Capability** (Fig. 2) | The *definitions*: what properties exist and how they are organised | Not user data. A schema of what can be known about a person. |
+| **Capacity** (Fig. 3) | A *specific user's settings*, across multiple contexts | Where the values live. |
+| **Preference** (Fig. 4) | Configuration items and the user's arbitrary choices | "An organization of content, not a container of values": a ConfigurationSetting *refers to* a value, it does not hold one. |
+
+This changes the §6a state of most of step 2 from **MY CHOICE** to **MODEL
+SPECIFIES**. The elements are named and related in the published figures, so
+implementing them is transcription rather than design, and any departure has to
+be justified rather than merely made.
+
+### What the paper decides that the plan had left open
+
+**Capability is scoped by design space, and the scopes are disjoint.** Subject
+Ontologies are visual, sonic and haptic, and "individual properties exist in
+exactly one ontology". This ties Capability to the Interaction Model far more
+tightly than the earlier draft assumed, and it resolves an ambiguity in §4:
+capability is *about the person*, but it is *organised by* the design space in
+which that person acts. Both, without contradiction.
+
+**Capability is not impairment, and not the functional list either.** The
+paper's worked example is colour-blindness given three ways: etiologically
+(protanopia, deuteranopia), functionally in the Access for All manner
+(avoidRed, colorAvoidance), and as capability (colorLow, colorMedium, colorHigh
+as percentages). Its verdict on the functional list is that "a model of specific
+solutions for specific conditions is unwieldy and unquantifiable", and its
+formulation of the distinction is the one to carry into this project:
+
+> "It is what the user can do, not why she cannot."
+
+**Five data types, plus composites.** Boolean, Discrete, Numeric, Numeric Range,
+Text. A Composite Property with a Composition Order handles the case that
+matters most for sonic capability: usable audio frequency range as an ordered
+collection of ranges *with gaps between them*. A listener with notched hearing
+loss is expressible; a single minimum and maximum would not be.
+
+**Precedence gives acquisition order.** There is no point asking for a minimum
+readable font size if the user has no sight, and no point acquiring elevation
+discrimination for a listener with no usable hearing in the relevant band.
+Properties may sit in several precedence trees at once.
+
+**Functional dependency is the part that makes it adaptive.** Settings may be
+functionally dependent, expressed through *Actions*, described as "mini programs
+that can read and write Settings", triggered by External Influences. This is
+what separates the model from a static profile, and the paper is explicit that
+"only the on-line model is suitable for adaptive systems".
+
+For Tetris that is not decoration. Two candidates are already visible:
+
+- **Listening fatigue.** The paper models `focusDuration` and
+  `trackingDuration` for vision, in minutes, reasoning that tracking a moving
+  image costs more than watching a static one. The sonic equivalent is real:
+  sustained attention to a dense serial soundscape tires in a way glancing at a
+  board does not. A duration property whose value degrades with soundscape
+  density is expressible here and nowhere in Access for All.
+- **Environment.** Usable azimuth resolution in a quiet room is not usable
+  azimuth resolution on a bus. An Action driven by an External Influence is
+  exactly the mechanism, and it is the one the mixing desk will eventually sit
+  on top of.
+
+**"Fred is like Jim except…"** The Adaptation Model applies Instances as
+database-style transactions of add, modify and delete, so a profile can be
+expressed as a difference from a template. This gives the demonstrator its
+capability populations almost free: a default listener, then a blind listener as
+a difference, then a high-frequency-loss variant as a difference from that. It
+also supports what the paper calls spiky profiles, which is the honest case and
+the one stereotypes handle worst.
+
+### Consequence for the order
+
+Step 2 grows and splits. Capability (definitions) must precede Capacity
+(values), because a Setting is typed by its Property. Preference can follow
+either, being an organization of content rather than of values. The Adaptation
+Model arrives with them rather than at step 7, because it is the mechanism by
+which populations are versioned, and the difference-from-template trick is how
+the populations get built at all.
+
+One conflict found and logged as issue #6: the Adaptation Model figures in the
+two sources do not match. `Attribute Value Type` against `Data Type`, `Instance
+Application` against `Instance Sequence`, `Application Order` against `Sequence
+No`. Provisionally following the Render Model note, since it is the only source
+with a worked XML population, but Bob wrote both and should confirm.
+
 ## 3. Recommended order
 
 ![Population order](figures/fig-population-order.png)
@@ -105,11 +195,13 @@ Model section is the one that trails off into "shown in XXX" against a figure
 that was never drawn. Building it is new work, and must be reported as such
 rather than as the model having specified it (§6a).
 
-**Step 2 — Capability Model.** Also independent. Populate as the note's own
-example did: a Default User and a Low Vision User to begin, then a blind user,
-then a user with reduced high-frequency hearing. Small populations, chosen to
-make selection *discriminate*: two profiles that would select identically test
-nothing.
+**Step 2 — Capability, then Capacity, then Preference.** Also independent, and
+now largely transcription from the published figures rather than design (2a).
+Capability first, because a Setting is typed by its Property. Populate a default
+listener, then a blind listener and a high-frequency-loss variant expressed as
+differences from it, using the Adaptation Model's instance mechanism. Small
+populations, chosen to make selection *discriminate*: two profiles that would
+select identically test nothing.
 
 **Step 3 — Inventory.** Media Elements and Formatted Media Elements per
 interaction space. The seven timbres, the water sound, the note sets, the
