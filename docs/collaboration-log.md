@@ -448,13 +448,33 @@ already has, which is worth saying plainly in the experience report: the
 discipline was not imported to manage the AI, it was extracted from how the human
 already works.
 
-**Convergence with OOA96.** The ooatool technical note on polymorphic events
-describes OOA96's mechanism as letting a supertype object define a polymorphic
-event "which is mapped to events associated with subtype object lifecycle
-models" — supertype label, subtype lifecycle. That is the Ascom improvisation,
-reached independently and roughly a year earlier. *Not verified against the OOA96
-report itself: ooatool.com fails its TLS handshake, so this rests on the
-secondary note. Flagged rather than asserted, given C5.*
+**~~Convergence~~ TRANSMISSION with OOA96. Corrected 2026-07-27.** This entry
+first recorded the Ascom improvisation as convergent evolution — the same shape
+"reached independently and roughly a year earlier" than OOA96. **That was wrong,
+and Bob corrected it:** Sally Shlaer was a consultant to his team at Ascom, as
+was Kennedy-Carter in the UK, who became the method's primary evangelists after
+Shlaer effectively retired with cancer.
+
+So the 1995 work was not parallel invention. It was done *with the author of the
+method*, during the window in which OOA96 was being settled — the report is
+dated 960109, months after the Ascom need arose. Whether the idea travelled from
+Shlaer to the team, from the team's problem into the report, or both, it is one
+lineage and not two.
+
+Verified against the report itself, §5.7: supertype S has no lifecycle model
+while subtypes T, U, V do; the sender labels the event with the supertype's key
+letter and true recipients use their own; a polymorphic event table maps between
+them; and "the state model (if any) of the supertype object plays no role in the
+routing of a polymorphic event." §5.7.3 then argues against an instance having
+multiple state models — the parallel-state-model problem Bob said they were
+avoiding.
+
+*Second-order lesson for the experience report, and it compounds C5. There I
+over-trusted a secondary source. Here I reached for "independent convergence" —
+a satisfying, publishable-sounding explanation — when the mundane one was
+transmission through a named consultant. Both errors share a root: reconstructing
+history from documents alone, with no access to who was in the room. The
+correction was not available in any text.*
 
 **Applicability to this project, and it is immediate.** The Capability Model has
 `Property` with five subtypes (Boolean, Discrete, Numeric, Numeric Range, Text)
@@ -468,6 +488,72 @@ request/answer bridge rules to "the Ascom lessons". So the telephony discipline
 behind the bridge and the Shlaer-Mellor practice behind the models come from the
 same workplace and period. Worth drawing out in the write-up, since the case
 study currently presents them as separate inheritances.
+
+## S3 · source · The OOA96 report itself (Shlaer & Lang, 1996)
+
+**2026-07-27.** Bob supplied the primary source Claude could not fetch:
+*Shlaer-Mellor Method: The OOA96 Report*, Version 1.0, Sally Shlaer and Neil
+Lang, Project Technology, 960109. It supersedes portions of *Object Lifecycles*
+and is described by its authors as "a mathematical system, built up of axioms,
+definitions, and theorems." Three questions in this project are now settled from
+it rather than inferred.
+
+**1. Cycles. §9.1, verbatim:** "**ADFDs are directed acyclic graphs.** An ADFD
+forms one or more directed acyclic graphs; loops on the ADFD are not permitted.
+This was implied but not made explicit in OOA91. We do so now because this rule
+was sometimes overlooked by new users of the method."
+
+Rejecting cyclic Action graphs (issue #7) is therefore not a design decision
+taken here. It is a rule of the formalism, and one the method's authors had to
+state explicitly because practitioners kept missing it.
+
+**2. Process types, tightened since Lang 1993. §9.3:** "OOA96 allows for exactly
+four types of processes on an ADFD: accessors, event generators, transformations,
+and tests." But §9.3.1 adds "an accessor is now the **only** process type that
+can access an object data store", and §9.3.3 "a test or transformation may no
+longer access an object data store."
+
+Lang's 1993 rules 66 and 69 permitted transformations and tests to access their
+own object's store. OOA96 withdraws that. Note carefully what this is *not*: it
+is not the locality restriction wrongly endorsed in C5. Cross-object access
+remains entirely legitimate; it is simply routed through accessors. The
+constraint is on *process type*, not on *which object's data*.
+
+**3. Dependence has three kinds, and MSIADU'09 may name the wrong one.**
+Chapter 2 distinguishes functional dependence (§2.1), stochastic dependence
+(§2.2), and mathematical dependence (§2.3): "An attribute Y is said to be
+mathematically dependent on a set of attributes X if and only if, given values of
+the attributes in X, the value of Y can be determined by a formula or algorithm."
+Mathematically dependent attributes are marked **(M)** on the Information Model,
+and the attribute description must "cite the formula or algorithm used to
+determine the value."
+
+*User Capability in an Adaptive World* describes Settings as **functionally**
+dependent, realised through Actions. But a Setting computed from other Settings
+by a stated formula is, in OOA96's vocabulary, **mathematically** dependent —
+"a stronger form of dependency… We do not need access to instances in the world
+being modeled." Open question for Bob, raised not assumed: does the Capacity
+Model want (M)-marked derived Settings with cited formulae for the simple cases,
+reserving ADFDs for Actions that genuinely process? The paper predates neither
+concept, so this may be loose usage or may be deliberate.
+
+**4. Wormholes — bearing directly on the bridge (issue #5). §9.5.2:** "we use the
+wormhole symbol — a double-walled bubble — to indicate a transfer of control
+between two domains", whose process description must state "what the calling
+domain (server or client) expects the other domain to do (stated in the semantic
+world of the caller)" and "any return communication required by the caller."
+Critically: "the appearance of a wormhole on an ADFD does not prescribe whether
+the communication between the domains is implemented via a synchronous or an
+asynchronous mechanism."
+
+And §5.5 forecloses the alternative: "Events generated in an action in a domain
+must be received by an instance in the same domain. It is no longer permitted to
+generate an event that is intended for an object in another domain."
+
+This matters for the cradle. The CISNA layers are domains, so inter-layer
+communication is wormholes, not events — and the request/answer bridge with its
+rendezvous is a wormhole whose return communication is declared. The
+sync/async-agnosticism of the construct is exactly the property the bridge needs.
 
 ## X1 · disagreement · Bob corrected Claude's conclusion, not its facts
 
