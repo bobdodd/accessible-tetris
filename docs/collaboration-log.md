@@ -766,6 +766,83 @@ available" — is the honest position and is what makes the fixtures usable now
 without their becoming a claim. Recorded here because it is exactly the kind of
 qualification that erodes silently between a repo and a conference paper.
 
+## C7 · correction · Capability is FULL/PARTIAL/NONE, not a data type per property
+
+**2026-07-27.** Bob, on reading the first build: "what are you doing with
+capability? … Capability is a hierarchy of properties whose value can be full,
+partial, none. For partial we need an extra field with the measurement value. If
+you cannot perceive contrast the value is just none."
+
+**He is right and D13 was built on a misreading.** I had taken the "Values"
+column of Tables 2, 3 and 4 to mean that each Property has one of five data
+types, so `contrastSensitivity` became a percentage in which 0% meant no
+perception at all. That is not the model.
+
+The column is showing two different things depending on the row:
+
+| Table | Row | "Values" | What it is |
+|---|---|---|---|
+| 3 | `focus` | FULL PARTIAL NONE | the capability scale itself |
+| 3 | `focusDuration` | Time in minutes | the measurement qualifying PARTIAL |
+| 2 | `colorLow` | Percentage | the measurement qualifying PARTIAL |
+| 4 | `writeFontSet` | CURSIVE BLOCK SELECT | the measurement qualifying PARTIAL |
+
+So `focusDuration` is not "a number of minutes". It is FULL (can focus
+indefinitely), PARTIAL (for N minutes), or NONE (cannot focus at all), and the
+minutes exist only in the middle case. And a user who cannot perceive contrast
+has contrast **NONE** — not 0%, which asserts that a measurement was taken of
+something that is not there.
+
+### The second error, caught while fixing the first
+
+Having understood the scale, I made a child's capability a hard ceiling under
+its parents: NONE < PARTIAL < FULL, child ≤ min(parents). That breaks
+immediately. Someone with tunnel vision has PARTIAL sight and may have perfectly
+FULL colour perception; a Braille reader has FULL language and a very specific
+hapticLanguageSet.
+
+The paper's sentence is "Remaining template properties only of interest for
+PARTIAL sight" — a statement about **which questions are worth asking**, not a
+logical implication. So: NONE propagates strictly (a capability cannot exist
+beneath one that does not), FULL does not propagate at all (it merely makes the
+children uninteresting by default), and PARTIAL is where the detail lives. Both
+readings are now tested, the tunnel-vision case explicitly.
+
+### Why this one is worth the space
+
+The first four corrections were about provenance — right answer, wrong route
+(C4); critic mistaken for method (C5); convergence that was transmission (S2);
+notation mistaken for semantics (C6). **This is the first that is simply wrong
+about what the model says**, and it survived a full build, 44 passing tests, and
+a confident write-up. Tests do not catch a misread specification: they encode
+the misreading and then confirm it.
+
+What made it findable was Bob reading the *output* rather than the code — the
+schema said `contrastSensitivity: percentage`, and that was visibly not a
+capability. The lesson for the experience report is narrow and useful: when an
+AI transcribes a specification, the artefact to review is the transcription
+against the source, not the tests against the transcription. Every test I wrote
+passed against the wrong model.
+
+*Second generalisation, less comfortable: I had the paper open and quoted it
+accurately throughout. Quoting a source correctly is no evidence of having
+understood its structure, and fluent citation is exactly what makes a
+misreading hard to spot.*
+
+### What changed
+
+Rewritten: `capability.js` (properties have no type; `measurement` types the
+PARTIAL case; `impliedCapability` and `isOfInterest` replace the ceiling),
+`capacity.js` (a Setting is `{capability, measurement}`, with the pairing rules
+enforced), `user-capability.js` (36 properties re-expressed),
+`profiles.js` (all six exemplars). Action Language gained `measure`,
+`capabilityOf`, `tuple` and `field`.
+
+The reference profile is now **seven settings**, all FULL, and blind-since-birth
+is **one changed line**. That compression is the clearest evidence the shape is
+now right: under the previous misreading the reference profile needed
+thirty-odd values, because every property demanded one.
+
 ## X1 · disagreement · Bob corrected Claude's conclusion, not its facts
 
 **2026-07-27.** After C3, Claude concluded that the working practice should be

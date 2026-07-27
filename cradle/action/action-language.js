@@ -159,6 +159,15 @@ export const A = {
   max: (a, b) => node("op", { op: "max", a, b }),
   clamp: (value, lo, hi) => node("clamp", { value, lo, hi }),
 
+  /** Build a composite measurement from named parts. A transformation: it
+   *  computes a dataset and touches no store. */
+  tuple: (parts) => node("tuple", { parts: Object.freeze({ ...parts }) }),
+
+  /** Pick one part out of a composite. §9.3.3 allows exactly this: a
+   *  transformation "also allows for picking a data value out of a set (pick
+   *  the largest volume given a set of volumes, for example)". */
+  field: (of, name) => node("field", { of, name }),
+
   /* --- TESTS ------------------------------------------------------------ */
 
   lt: (a, b) => node("op", { op: "<", a, b }),
@@ -175,6 +184,15 @@ export const A = {
    * The ONLY nodes permitted to touch a data store. */
 
   read: (key) => node("read", { key }),
+
+  /* A Capability Setting is a pair: a FULL/PARTIAL/NONE capability, and a
+   * measurement that exists only when the capability is PARTIAL. Formulae want
+   * one or the other, rarely the pair, so these two accessors save every
+   * formula from reaching into the shape by hand. Both are accessors — they
+   * touch the store — and are classified as such. */
+  measure: (key) => node("measure", { key }),
+  capabilityOf: (key) => node("capabilityOf", { key }),
+
   readWhere: (predicate) => node("readWhere", { predicate }),
   findWhere: (predicate) => node("findWhere", { predicate }),
   write: (key, expr) => node("write", { key, expr }),
@@ -212,7 +230,8 @@ export const A = {
  * ------------------------------------------------------------------------- */
 
 const ACCESSOR_KINDS = new Set([
-  "read", "readWhere", "findWhere", "write", "create", "delete", "exists", "navigate",
+  "read", "measure", "capabilityOf", "readWhere", "findWhere",
+  "write", "create", "delete", "exists", "navigate",
 ]);
 
 /** Walk a tree and report which process types it contains. Used both to
@@ -227,7 +246,7 @@ export function classify(action) {
       if (["+", "-", "*", "/", "min", "max"].includes(n.op)) found.transformations++;
       else found.tests++;
     }
-    if (n.kind === "clamp") found.transformations++;
+    if (n.kind === "clamp" || n.kind === "tuple" || n.kind === "field") found.transformations++;
     for (const key of Object.keys(n)) {
       const v = n[key];
       if (Array.isArray(v)) v.forEach(walk);
@@ -381,6 +400,23 @@ function evaluate(n, scope, ctx, depth) {
       return Math.min(hi, Math.max(lo, v));
     }
 
+    case "tuple": {
+      const out = {};
+      for (const [k, v] of Object.entries(n.parts)) out[k] = ev(v);
+      return Object.freeze(out);
+    }
+
+    case "field": {
+      const of = ev(n.of);
+      if (of === null || typeof of !== "object") {
+        throw new ActionError(`field "${n.name}" of a ${of === null ? "null" : typeof of}`);
+      }
+      if (!(n.name in of)) {
+        throw new ActionError(`no field "${n.name}" in ${JSON.stringify(of)}`);
+      }
+      return of[n.name];
+    }
+
     /* --- accessors ------------------------------------------------------ */
 
     case "read": {
@@ -388,6 +424,22 @@ function evaluate(n, scope, ctx, depth) {
       const v = ctx.store.read(key);
       log("read", { key, value: v ?? null });
       return v === undefined ? null : v;
+    }
+
+    case "measure": {
+      const key = keyOf(n.key, scope, ctx, depth);
+      const setting = ctx.store.read(key);
+      const v = setting && typeof setting === "object" ? setting.measurement ?? null : null;
+      log("measure", { key, value: v });
+      return v;
+    }
+
+    case "capabilityOf": {
+      const key = keyOf(n.key, scope, ctx, depth);
+      const setting = ctx.store.read(key);
+      const v = setting && typeof setting === "object" ? setting.capability ?? null : null;
+      log("capabilityOf", { key, value: v });
+      return v;
     }
 
     case "exists":

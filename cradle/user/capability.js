@@ -2,47 +2,60 @@
  * ---------------------------------------------------------------------------
  * Part of the cradle: the User Profiling half of the Runtime System.
  *
+ * THE SHAPE OF THE MODEL — read this before anything else
+ *
+ * A Capability is a hierarchy of Properties whose value is FULL, PARTIAL or
+ * NONE. Where the value is PARTIAL, and only there, a measurement qualifies it.
+ *
+ * That is the whole structure, and the "Values" column of the paper's tables
+ * is showing two different things depending on the row:
+ *
+ *   Table 3, focus          "FULL PARTIAL NONE"   the capability scale itself
+ *   Table 3, focusDuration  "Time in minutes"     the PARTIAL measurement
+ *   Table 2, colorLow       "Percentage"          the PARTIAL measurement
+ *   Table 4, writeFontSet   "CURSIVE BLOCK SELECT" the PARTIAL measurement
+ *
+ * So focusDuration is not "a number". It is FULL (can focus indefinitely),
+ * PARTIAL (can focus for N minutes), or NONE (cannot focus at all), and the
+ * minutes exist only in the middle case. A user who cannot perceive contrast
+ * has contrast NONE — not zero percent. Zero percent would be a measurement of
+ * something that is not there.
+ *
+ * The consequence for the hierarchy is the sentence attached to `sight` in
+ * Tables 1, 2 and 3:
+ *
+ *     "Remaining template properties only of interest for PARTIAL sight."
+ *
+ * Note that it says PARTIAL, not "not NONE". FULL sight makes the children
+ * uninteresting too, because there is no impairment left to describe. A child
+ * property is of interest exactly when its parent is PARTIAL — which gives the
+ * model a clean ordering, NONE < PARTIAL < FULL, in which a child may never be
+ * more capable than its least capable parent.
+ *
  * MODEL PROVENANCE (design/DEMOS.md §6a)
  *
- *   MODEL SPECIFIES. Every element and relationship here is Figure 2 of
- *   "User Capability in an Adaptive World" (Dodd, Green & Pearson, MSIADU'09,
- *   doi:10.1145/1631097.1631110): a Subject Ontology scopes many Properties;
- *   Property has five intrinsic sub-types (Boolean, Discrete, Numeric, Text,
- *   Numeric Range); a Composite Property collects Properties under a
- *   Composition Order; Precedence describes a hierarchy of importance over
- *   Properties; Properties are grouped into Capability Templates through
- *   Property In Template, and Templates into Template Sets through Template
- *   In Set.
+ *   MODEL SPECIFIES. Figure 2 of "User Capability in an Adaptive World"
+ *   (Dodd, Green & Pearson, MSIADU'09, doi:10.1145/1631097.1631110): a Subject
+ *   Ontology scopes many Properties; Property has five intrinsic sub-types
+ *   (Boolean, Discrete, Numeric, Text, Numeric Range); a Composite Property
+ *   collects Properties under a Composition Order; Precedence describes a
+ *   hierarchy of importance; Properties group into Capability Templates, and
+ *   Templates into Template Sets.
  *
- *   The two hard rules are the paper's own:
- *
- *     "Subject ontologies are disjoint, so individual properties exist in
- *      exactly one ontology."
- *
- *     "Properties are assumed to have a natural hierarchy of importance
- *      described by the Precedence element… it makes no sense to acquire a
- *      setting for 'minReadFontSizeForFont' if the user has no sight. As is
- *      clear from the 'parent columns', Properties may sometimes appear in
- *      multiple precedence trees."
- *
- *   Note what precedence is NOT. It is not the ontology hierarchy and it does
- *   not respect ontology boundaries — Table 4's readSignText has parents in
- *   both sight and signLanguageSet. A Property sits in exactly one ontology and
- *   in any number of precedence trees. Conflating the two would collapse the
- *   distinction the model is built on.
+ *   "Subject ontologies are disjoint, so individual properties exist in exactly
+ *   one ontology." Precedence, by contrast, crosses ontologies freely — Table
+ *   4's readSignText has parents "sight + signLanguageSet" — and a Property may
+ *   sit in several precedence trees at once.
  *
  *   WHAT THIS MODEL IS NOT. It holds no user data. It is the schema: what can
  *   be known about a person, not what is known about anyone. Values live in the
- *   Capacity Model (capacity.js). The paper is unambiguous that these are
- *   separate models and this module keeps them separate.
+ *   Capacity Model (capacity.js).
  *
  *   THE DEFINITION THAT GOVERNS. "It is what the user can do, not why she
- *   cannot." A property that names a diagnosis rather than an ability is
- *   modelled wrongly, however convenient. The paper's own worked comparison
- *   (Tables 1 and 2, colour-blindness etiologically then as capability) is the
- *   reference for the distinction, and its verdict on the functional
- *   alternative is that "a model of specific solutions for specific conditions
- *   is unwieldy and unquantifiable".
+ *   cannot." Compare Table 1 (etiological: monochromacy TRUE/FALSE, protanopia
+ *   TRUE/FALSE) with Table 2 (capability: colour perception per frequency band).
+ *   The paper's verdict on the alternative is that "a model of specific
+ *   solutions for specific conditions is unwieldy and unquantifiable".
  */
 
 export class CapabilityError extends Error {
@@ -60,12 +73,20 @@ function deepFreeze(value) {
   return value;
 }
 
-/** The five intrinsic data types of Figure 2, plus composite.
- *
- *  The paper: "Five intrinsic data types are suggested in Figure 2, covering
- *  Boolean values, numbers, numeric ranges, text, and discrete lists of
- *  alternative values (e.g. FULL, PARTIAL, NONE)." */
-export const PROPERTY_TYPES = Object.freeze([
+/** The capability scale. Ordered: a child may not exceed its parent. */
+export const CAPABILITY = Object.freeze(["NONE", "PARTIAL", "FULL"]);
+
+const RANK = Object.freeze({ NONE: 0, PARTIAL: 1, FULL: 2 });
+
+/** Lower is less capable. Used to derive a child's ceiling from its parents. */
+export function rankOf(value) {
+  if (!(value in RANK)) throw new CapabilityError(`not a capability value: ${value}`);
+  return RANK[value];
+}
+
+/** The five intrinsic data types of Figure 2, plus composite. These type the
+ *  PARTIAL *measurement*, never the capability itself. */
+export const MEASUREMENT_TYPES = Object.freeze([
   "boolean",
   "discrete",
   "numeric",
@@ -75,19 +96,113 @@ export const PROPERTY_TYPES = Object.freeze([
 ]);
 
 /* ---------------------------------------------------------------------------
+ * Measurement specifications
+ * ------------------------------------------------------------------------- */
+
+function normaliseMeasurement(spec, where) {
+  if (spec === null || spec === undefined) return null;
+  if (typeof spec !== "object") throw new CapabilityError(`${where}: measurement must be an object`);
+  if (!MEASUREMENT_TYPES.includes(spec.type)) {
+    throw new CapabilityError(
+      `${where}: measurement type "${spec.type}"; expected one of ${MEASUREMENT_TYPES.join(", ")}`,
+    );
+  }
+
+  const m = { type: spec.type, unit: spec.unit ?? null };
+
+  switch (spec.type) {
+    case "boolean":
+      break;
+
+    case "discrete":
+      if (!Array.isArray(spec.values) || spec.values.length < 2) {
+        throw new CapabilityError(`${where}: discrete measurement needs at least two values`);
+      }
+      m.values = Object.freeze([...spec.values]);
+      /* Discrete measurements may be answered with a set rather than a single
+       * value — Table 4's writeFontSet is literally named a *Set*, and a user
+       * may write in more than one mode. */
+      m.multiple = spec.multiple ?? false;
+      break;
+
+    case "numeric":
+      if (typeof spec.min !== "number" || typeof spec.max !== "number") {
+        throw new CapabilityError(`${where}: numeric measurement needs min and max`);
+      }
+      if (spec.min > spec.max) throw new CapabilityError(`${where}: min > max`);
+      if (!spec.unit) {
+        /* Every numeric in the paper's tables is dimensioned — percentage,
+         * minutes, points, milliseconds, pixels, Hertz. A bare number in a
+         * profile survives one context and breaks in the next. */
+        throw new CapabilityError(`${where}: numeric measurement needs a unit`);
+      }
+      m.min = spec.min;
+      m.max = spec.max;
+      break;
+
+    case "numericRange":
+      if (!spec.unit) throw new CapabilityError(`${where}: numericRange measurement needs a unit`);
+      m.min = spec.min ?? null;
+      m.max = spec.max ?? null;
+      break;
+
+    case "text":
+      m.maxLength = spec.maxLength ?? null;
+      break;
+
+    case "composite":
+      /* Two shapes, both present in the paper.
+       *
+       * `of` — a homogeneous collection, any length, with a Composition Order.
+       * The paper's own example: "the usable audio frequency range for a user,
+       * which may be described as a collection of numeric ranges measured in
+       * Hertz, with gaps between the ranges. Formalization by the
+       * CompositionOrder element allows for a natural order to be applied…
+       * ordering the usable frequency ranges from lowest to highest."
+       *
+       * `parts` — MY CHOICE. A named tuple, for Table 4's
+       * "Font size in points + font name", which is one measurement with two
+       * components rather than a collection of like things. */
+      if (spec.of && spec.parts) {
+        throw new CapabilityError(`${where}: composite takes either of or parts, not both`);
+      }
+      if (spec.of) {
+        m.of = normaliseMeasurement(spec.of, `${where} (composed part)`);
+        m.order = spec.order ?? null;
+        if (!m.order) {
+          throw new CapabilityError(
+            `${where}: a composed collection needs an order (the model's CompositionOrder; ` +
+              `"lowest to highest" is the paper's example)`,
+          );
+        }
+      } else if (Array.isArray(spec.parts) && spec.parts.length > 1) {
+        m.parts = Object.freeze(
+          spec.parts.map((p) => {
+            if (!p.name) throw new CapabilityError(`${where}: every composite part needs a name`);
+            return Object.freeze({ name: p.name, ...normaliseMeasurement(p, `${where}.${p.name}`) });
+          }),
+        );
+        m.order = spec.order ?? "asDeclared";
+      } else {
+        throw new CapabilityError(`${where}: composite needs of, or parts with at least two entries`);
+      }
+      break;
+  }
+
+  return Object.freeze(m);
+}
+
+/* ---------------------------------------------------------------------------
  * Declaration
  * ------------------------------------------------------------------------- */
 
 /**
  * Declare a Capability Model.
  *
- * @param {object} spec
- * @param {string} spec.id
- * @param {string} spec.version
- * @param {object} spec.ontologies   Subject Ontologies, keyed by name.
- * @param {object} spec.properties   Properties, keyed by name.
- * @param {object} [spec.templates]  Capability Templates, keyed by name.
- * @param {object} [spec.templateSets] Template Sets, keyed by name.
+ * Each property is `{ontology, precedence, description, measurement?}`. There
+ * is no `type`: every property is FULL/PARTIAL/NONE. `measurement` describes
+ * what qualifies the PARTIAL case, and is omitted where PARTIAL needs no
+ * further detail.
  */
 export function defineCapability(spec) {
   if (!spec || typeof spec !== "object") {
@@ -106,131 +221,52 @@ export function defineCapability(spec) {
   const ontologyNames = new Set(Object.keys(ontologies));
   const propertyNames = new Set(Object.keys(properties));
 
-  /* --- ontologies ------------------------------------------------------- */
   const builtOntologies = {};
   for (const [name, o] of Object.entries(ontologies)) {
-    if (!o || typeof o !== "object") {
-      throw new CapabilityError(`ontology ${name} must be an object`);
-    }
-    if (!o.description) {
-      throw new CapabilityError(`ontology ${name} needs a description`);
-    }
+    if (!o?.description) throw new CapabilityError(`ontology ${name} needs a description`);
     builtOntologies[name] = {
       name,
       description: o.description,
-      /* The paper scopes ontologies to Nesbitt's physical design spaces, but
-       * says explicitly that other groupings are possible: "it is possible to
-       * imagine other groupings, not related to specific design spaces, with
-       * use of language one obvious candidate". `designSpace` records which
-       * kind this is, so the distinction survives into the write-up. */
+      /* The paper scopes ontologies to Nesbitt's physical design spaces but
+       * says other groupings are possible: "it is possible to imagine other
+       * groupings, not related to specific design spaces, with use of language
+       * one obvious candidate". This records which kind each one is. */
       designSpace: o.designSpace ?? false,
       properties: [],
     };
   }
 
-  /* --- properties ------------------------------------------------------- */
   const built = {};
   for (const [name, p] of Object.entries(properties)) {
     if (!p || typeof p !== "object") {
       throw new CapabilityError(`property ${name} must be an object`);
     }
-    if (!PROPERTY_TYPES.includes(p.type)) {
+    if ("type" in p) {
       throw new CapabilityError(
-        `property ${name} has type "${p.type}"; expected one of ${PROPERTY_TYPES.join(", ")}`,
+        `property ${name} declares a type. Properties have no type: every property is ` +
+          `FULL/PARTIAL/NONE. Use \`measurement\` to type the PARTIAL case`,
       );
     }
-    if (!p.ontology) {
-      throw new CapabilityError(`property ${name} declares no subject ontology`);
-    }
+    if (!p.ontology) throw new CapabilityError(`property ${name} declares no subject ontology`);
     if (!ontologyNames.has(p.ontology)) {
       throw new CapabilityError(
         `property ${name} is in ontology "${p.ontology}", which is not declared`,
       );
     }
-    if (!p.description) {
-      throw new CapabilityError(`property ${name} needs a description`);
-    }
+    if (!p.description) throw new CapabilityError(`property ${name} needs a description`);
 
-    const prop = {
+    built[name] = {
       name,
       ontology: p.ontology,
-      type: p.type,
       description: p.description,
-      /* Precedence parents. The paper's "parent" column. Zero, one, or many —
+      /* Precedence parents — the paper's "parent" column. Zero, one, or many:
        * "Properties may sometimes appear in multiple precedence trees". */
       precedence: Object.freeze([...(p.precedence ?? [])]),
+      measurement: normaliseMeasurement(p.measurement ?? null, `property ${name}`),
     };
-
-    switch (p.type) {
-      case "discrete":
-        if (!Array.isArray(p.values) || p.values.length < 2) {
-          throw new CapabilityError(
-            `discrete property ${name} needs a values list of at least two alternatives`,
-          );
-        }
-        prop.values = Object.freeze([...p.values]);
-        break;
-
-      case "numeric":
-        if (typeof p.min !== "number" || typeof p.max !== "number") {
-          throw new CapabilityError(`numeric property ${name} needs numeric min and max`);
-        }
-        if (p.min > p.max) {
-          throw new CapabilityError(`numeric property ${name} has min > max`);
-        }
-        if (!p.unit) {
-          /* The paper's numeric properties are always dimensioned — percentage,
-           * minutes, points, milliseconds, Hertz. A bare number in a user
-           * profile is the kind of thing that survives one context and breaks
-           * in the next. */
-          throw new CapabilityError(`numeric property ${name} needs a unit`);
-        }
-        prop.min = p.min;
-        prop.max = p.max;
-        prop.unit = p.unit;
-        break;
-
-      case "numericRange":
-        if (!p.unit) throw new CapabilityError(`numericRange property ${name} needs a unit`);
-        prop.unit = p.unit;
-        prop.min = p.min ?? null;
-        prop.max = p.max ?? null;
-        break;
-
-      case "text":
-        prop.maxLength = p.maxLength ?? null;
-        break;
-
-      case "boolean":
-        break;
-
-      case "composite":
-        /* "A Property may also be a CompositeProperty. This deals with
-         * properties such as the usable audio frequency range for a user,
-         * which may be described as a collection of numeric ranges measured in
-         * Hertz, with gaps between the ranges. Formalization by the
-         * CompositionOrder element allows for a natural order to be applied to
-         * the composition, for example ordering the usable frequency ranges
-         * from lowest to highest." */
-        if (!Array.isArray(p.composedOf) || !p.composedOf.length) {
-          throw new CapabilityError(`composite property ${name} needs composedOf`);
-        }
-        if (!p.compositionOrder) {
-          throw new CapabilityError(
-            `composite property ${name} needs a compositionOrder (the model's ` +
-              `CompositionOrder element; "lowest to highest" is the paper's example)`,
-          );
-        }
-        prop.composedOf = Object.freeze([...p.composedOf]);
-        prop.compositionOrder = p.compositionOrder;
-        break;
-    }
-
-    built[name] = prop;
     builtOntologies[p.ontology].properties.push(name);
   }
 
-  /* --- referential integrity -------------------------------------------- */
   for (const prop of Object.values(built)) {
     for (const parent of prop.precedence) {
       if (!propertyNames.has(parent)) {
@@ -239,31 +275,10 @@ export function defineCapability(spec) {
         );
       }
     }
-    if (prop.type === "composite") {
-      for (const part of prop.composedOf) {
-        if (!propertyNames.has(part)) {
-          throw new CapabilityError(
-            `composite property ${prop.name} composes "${part}", which is not declared`,
-          );
-        }
-      }
-    }
   }
 
-  /* Precedence must be acyclic, or acquisition order is undefined and the
-   * "no point asking X before Y" reasoning has no fixed point. This is the
-   * same constraint OOA96 §9.1 places on an ADFD, arrived at independently:
-   * a dependency graph you can walk in a cycle is not a dependency graph. */
-  detectCycle(built, (p) => p.precedence, "precedence");
+  detectCycle(built);
 
-  /* Composition must also be acyclic, and a composite may not compose itself. */
-  detectCycle(
-    built,
-    (p) => (p.type === "composite" ? p.composedOf : []),
-    "composition",
-  );
-
-  /* --- templates -------------------------------------------------------- */
   const builtTemplates = {};
   for (const [name, t] of Object.entries(templates)) {
     if (!Array.isArray(t?.properties) || !t.properties.length) {
@@ -278,8 +293,7 @@ export function defineCapability(spec) {
       name,
       description: t.description ?? "",
       /* "The same Property may exist in many templates, again reflecting the
-       * overlaps of Tables 1 to 4." So no uniqueness constraint across
-       * templates — only within one. */
+       * overlaps of Tables 1 to 4." No cross-template uniqueness. */
       properties: Object.freeze([...new Set(t.properties)]),
     };
   }
@@ -291,7 +305,7 @@ export function defineCapability(spec) {
     }
     for (const t of s.templates) {
       if (!builtTemplates[t]) {
-        throw new CapabilityError(`template set ${name} lists template "${t}", which is not declared`);
+        throw new CapabilityError(`template set ${name} lists template "${t}", not declared`);
       }
     }
     builtSets[name] = {
@@ -309,11 +323,7 @@ export function defineCapability(spec) {
     templates: builtTemplates,
     templateSets: builtSets,
   };
-
-  /* Attach the derived views before freezing, so callers cannot mutate them
-   * and cannot recompute them inconsistently. */
   model.acquisitionOrder = Object.freeze(acquisitionOrder(built));
-
   return deepFreeze(model);
 }
 
@@ -321,19 +331,18 @@ export function defineCapability(spec) {
  * Derived views
  * ------------------------------------------------------------------------- */
 
-function detectCycle(properties, edgesOf, label) {
+function detectCycle(properties) {
   const WHITE = 0, GREY = 1, BLACK = 2;
   const colour = new Map(Object.keys(properties).map((k) => [k, WHITE]));
   const stack = [];
-
   const visit = (name) => {
     colour.set(name, GREY);
     stack.push(name);
-    for (const next of edgesOf(properties[name])) {
+    for (const next of properties[name].precedence) {
       if (colour.get(next) === GREY) {
         const from = stack.indexOf(next);
         throw new CapabilityError(
-          `${label} cycle: ${[...stack.slice(from), next].join(" -> ")}`,
+          `precedence cycle: ${[...stack.slice(from), next].join(" -> ")}`,
         );
       }
       if (colour.get(next) === WHITE) visit(next);
@@ -341,21 +350,15 @@ function detectCycle(properties, edgesOf, label) {
     stack.pop();
     colour.set(name, BLACK);
   };
-
-  for (const name of Object.keys(properties)) {
-    if (colour.get(name) === WHITE) visit(name);
-  }
+  for (const name of Object.keys(properties)) if (colour.get(name) === WHITE) visit(name);
 }
 
 /**
- * The order in which a Property's setting may sensibly be acquired: every
- * precedence parent before its children.
+ * The order in which settings may sensibly be acquired: every precedence parent
+ * before its children.
  *
- * This is the practical payoff of the Precedence element, and it is the
- * paper's own argument for having it — "it makes no sense to acquire a setting
- * for 'minReadFontSizeForFont' if the user has no sight". An acquisition
- * wizard walks this list; so does a validator asking whether a profile is
- * coherent.
+ * The paper's argument for the Precedence element: "it makes no sense to
+ * acquire a setting for 'minReadFontSizeForFont' if the user has no sight".
  */
 export function acquisitionOrder(properties) {
   const out = [];
@@ -366,36 +369,70 @@ export function acquisitionOrder(properties) {
     for (const parent of properties[name].precedence) visit(parent);
     out.push(name);
   };
-  /* Sorted for determinism: two runs of the same model must produce the same
-   * order, or a diff of two profiles becomes unreadable. */
+  /* Sorted for determinism: two runs must give the same order, or a diff of
+   * two profiles becomes unreadable. */
   for (const name of Object.keys(properties).sort()) visit(name);
   return out;
 }
 
 /**
- * Properties whose acquisition is pointless given what is already known.
+ * What a Property is *forced* to be by its precedence parents.
  *
- * A parent property answered with a "nothing here" value makes its children
- * moot. Which values mean that is not universal — NONE for sight, 0 for a
- * percentage — so the caller supplies the test.
+ * Only NONE propagates. If a parent capability is absent, so is everything
+ * beneath it: a user with no sight has no colour perception, and recording one
+ * would be incoherent rather than merely uninformative.
  *
- * MY CHOICE, and flagged as such: the paper states the principle and gives the
- * example, but does not formalise what makes a parent value blocking. Deciding
- * that in the model rather than per-call would be inventing a rule the model
- * does not have.
+ * FULL does NOT propagate, and getting this wrong was a real error worth
+ * recording. The paper's sentence is "Remaining template properties only of
+ * interest for PARTIAL sight" — a statement about which questions are worth
+ * asking, not a logical implication. Treating it as implication breaks
+ * immediately: someone with tunnel vision has PARTIAL sight and may have
+ * perfectly FULL colour perception, and a Braille reader has FULL language and
+ * a very specific hapticLanguageSet. A child of a FULL parent is simply not
+ * *interesting* by default; declaring one anyway is extra detail, not a
+ * contradiction.
+ *
+ * @returns {"NONE"|null} the forced value, or null if the child is free
  */
-export function blockedProperties(model, isExhausted) {
-  const blocked = new Set();
-  for (const name of model.acquisitionOrder) {
-    const prop = model.properties[name];
-    if (prop.precedence.some((p) => blocked.has(p) || isExhausted(p))) {
-      blocked.add(name);
-    }
+export function impliedCapability(model, name, valueOf) {
+  for (const parent of model.properties[name].precedence) {
+    if (valueOf(parent) === "NONE") return "NONE";
   }
-  return blocked;
+  return null;
 }
 
-/** Every property in an ontology, in acquisition order. */
+/**
+ * Is this Property worth asking about?
+ *
+ * Yes when it has no parents, or when no parent is NONE and at least one is
+ * PARTIAL. That is the paper's rule read as what it says: FULL parents leave
+ * nothing to describe, NONE parents leave nothing to describe, and PARTIAL is
+ * where the detail lives.
+ */
+export function isOfInterest(model, name, valueOf) {
+  const parents = model.properties[name].precedence;
+  if (!parents.length) return true;
+  let sawPartial = false;
+  for (const parent of parents) {
+    const v = valueOf(parent);
+    if (v === "NONE") return false;
+    if (v === "PARTIAL") sawPartial = true;
+  }
+  return sawPartial;
+}
+
+/**
+ * Walk the model in acquisition order and report which properties are worth
+ * asking about, given the answers so far. An acquisition wizard is this
+ * function in a loop, and the paper's argument for Precedence existing at all:
+ * "it makes no sense to acquire a setting for 'minReadFontSizeForFont' if the
+ * user has no sight".
+ */
+export function ofInterest(model, values) {
+  return model.acquisitionOrder.filter((n) => isOfInterest(model, n, (p) => values[p]));
+}
+
+/** Every property in one ontology, in acquisition order. */
 export function propertiesOf(model, ontology) {
   if (!model.ontologies[ontology]) {
     throw new CapabilityError(`no such subject ontology: ${ontology}`);

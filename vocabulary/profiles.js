@@ -2,82 +2,77 @@
  * ---------------------------------------------------------------------------
  * WHAT THESE ARE, AND WHAT THEY ARE NOT
  *
- * These are stand-ins. They exist so the cradle has something to adapt to
- * before there is anyone real to adapt to, and they are to be replaced or
- * augmented with lived experience as and when it is available. Every profile
- * records `basis: "exemplar"` in its Entity so that the distinction lives in
- * the data and not only in this comment — a fixture that has quietly become a
- * finding is the failure mode this guards against.
+ * Stand-ins. They exist so the cradle has something to adapt to before there is
+ * anyone real to adapt to, and they are to be replaced or augmented with lived
+ * experience as and when it is available. Every profile records
+ * `basis: "exemplar"` in its Entity so the distinction lives in the data and
+ * not only in this comment — a fixture that has quietly become a finding is the
+ * failure mode this guards against.
  *
- * They are deliberately NOT personas. There is no name, no age, no occupation
- * and no narrative, because those invite the reader to generalise from a
- * character to a population. What is here is capability values and nothing
- * else, which is the whole argument of the source paper: "It is what the user
- * can do, not why she cannot."
+ * Deliberately NOT personas. No name, age, occupation or narrative, because
+ * those invite generalising from a character to a population. Capability values
+ * and nothing else, which is the paper's own argument: "It is what the user can
+ * do, not why she cannot."
+ *
+ * READING A PROFILE
+ *
+ * Every Setting is FULL, PARTIAL or NONE, and a measurement appears only
+ * against PARTIAL. Two consequences are worth stating because both look like
+ * omissions and neither is:
+ *
+ *   - Most properties are absent from most profiles. A property whose parent is
+ *     FULL is not of interest — there is no impairment left to describe — and a
+ *     property whose parent is NONE is not of interest either. Only PARTIAL
+ *     opens the question. So the reference profile is seven lines.
+ *
+ *   - Absence beneath a NONE is not the same as zero. The blind exemplar has no
+ *     contrastSensitivity setting; it does not have contrastSensitivity: 0%.
+ *     Zero would assert that a measurement was taken of something that is not
+ *     there.
  *
  * MODEL PROVENANCE (design/DEMOS.md §6a)
  *
- *   MODEL SPECIFIES. Profiles are expressed as differences from a reference,
- *   which is the paper's §8 mechanism: "it is possible to say 'Fred is like Jim
- *   except...', and starting with Jim's profile (which is an Instance of each
- *   of the Capability, Capacity, and Preference models) to create Fred's
- *   profile describing only the differences between the users." Each Instance
- *   "adds, modifies, or deletes rows in the Tables".
+ *   MODEL SPECIFIES. Profiles are differences from a reference, which is §8:
+ *   "it is possible to say 'Fred is like Jim except...', and starting with
+ *   Jim's profile… to create Fred's profile describing only the differences
+ *   between the users." Each Instance "adds, modifies, or deletes rows in the
+ *   Tables".
  *
- *   PARTIAL IMPLEMENTATION, and marked. `variation()` below implements the
+ *   PARTIAL IMPLEMENTATION, marked. `variation()` implements the
  *   add/modify/delete transaction over setting tables. It does NOT implement
  *   the rest of the Adaptation Model (Figure 5): Event Triggers, Instance
- *   Sequences and Sequence No are not here, so profiles cannot yet be composed
- *   in a declared order under a trigger. That is the versioning machinery, and
- *   it is not needed to populate exemplars. Issue #6 tracks the model itself.
- *
- *   The paper's own note on why this matters beyond convenience: "This
- *   mechanism supports standard templates for blind, deaf, or indeed any other
- *   recognizable stereotype, that can then be modified accordingly… it also
- *   leads to effective support for users with spiky profiles, such as users
- *   with Multiple Sclerosis who experience varied and multiple impairments."
- *   The stereotype is the starting point, not the answer.
+ *   Sequences and Sequence No are absent, so profiles cannot yet be composed in
+ *   a declared order under a trigger. That is versioning machinery and is not
+ *   needed to populate exemplars. Issue #6 tracks the model itself.
  */
 
 import { defineCapacity, A } from "../cradle/user/capacity.js";
 import { userCapability } from "./user-capability.js";
 
-/**
- * "Fred is like Jim except…" — one Instance applied to a base specification.
+/** "Fred is like Jim except…" — one Instance applied to a base specification.
  *
- * Operates on the *spec*, before the model is built, because the paper's
- * Instances act on tables of data and only the merged result is the profile.
- * Building the base and then mutating it would be a different thing.
- */
+ *  Operates on the *spec*, before the model is built, because the paper's
+ *  Instances act on tables of data and only the merged result is the profile. */
 export function variation(base, { entity, add = {}, modify = {}, remove = [], groups, actions, influences } = {}) {
   const settings = { ...base.settings };
 
   for (const [id, s] of Object.entries(add)) {
-    if (settings[id]) {
-      throw new Error(`variation adds "${id}", which the base already has — use modify`);
-    }
+    if (settings[id]) throw new Error(`variation adds "${id}", which the base already has — use modify`);
     settings[id] = s;
   }
   for (const [id, s] of Object.entries(modify)) {
-    if (!settings[id]) {
-      throw new Error(`variation modifies "${id}", which the base does not have — use add`);
-    }
-    /* A modify replaces the row. Merging would make "value" and "derived"
-     * silently coexist, which defineCapacity rejects for good reason. */
+    if (!settings[id]) throw new Error(`variation modifies "${id}", which the base does not have — use add`);
+    /* A modify replaces the row rather than merging it, so a capability can
+     * drop to NONE without a stale measurement surviving underneath. */
     settings[id] = s;
   }
   for (const id of remove) {
-    if (!settings[id]) {
-      throw new Error(`variation removes "${id}", which the base does not have`);
-    }
+    if (!settings[id]) throw new Error(`variation removes "${id}", which the base does not have`);
     delete settings[id];
   }
 
-  const nextGroups = groups ?? base.groups;
-  /* A group may not survive its settings. Removing `sight` from a profile
-   * should not leave a vision group pointing at nothing. */
   const prunedGroups = {};
-  for (const [gid, g] of Object.entries(nextGroups ?? {})) {
+  for (const [gid, g] of Object.entries(groups ?? base.groups ?? {})) {
     const kept = g.settings.filter((sid) => settings[sid]);
     if (kept.length) prunedGroups[gid] = { ...g, settings: kept };
   }
@@ -91,9 +86,7 @@ export function variation(base, { entity, add = {}, modify = {}, remove = [], gr
   };
 }
 
-/* ---------------------------------------------------------------------------
- * External influences shared by the exemplars
- * ------------------------------------------------------------------------- */
+const EXEMPLAR = "exemplar — stands in for lived experience, not derived from any person";
 
 const influences = {
   deviceStability: {
@@ -118,9 +111,12 @@ const influences = {
  * The reference profile
  *
  * Not "normal" and not "default" — a baseline with no reported limitation,
- * present so the others can be expressed as differences from something. Naming
- * it `reference` rather than `default` is deliberate: a default is what you get
- * if you do not choose, which is exactly the wrong idea here.
+ * present so the others can be differences from something. Naming it
+ * `reference` rather than `default` is deliberate: a default is what you get if
+ * you do not choose, which is the wrong idea here.
+ *
+ * Seven settings, and that is the model working. Every root property is FULL,
+ * so nothing beneath any of them is of interest.
  * ------------------------------------------------------------------------- */
 
 export const referenceSpec = {
@@ -132,72 +128,31 @@ export const referenceSpec = {
   },
   influences,
   settings: {
-    /* visual */
-    sight: { value: "FULL" },
-    stereo: { value: "FULL" },
-    focus: { value: "FULL" },
-    focusDuration: { value: 60 },
-    tracking: { value: "FULL" },
-    trackingDuration: { value: 45 },
-    viewRectangle: { value: [{ from: 0, to: 1024 }, { from: 0, to: 768 }] },
-    colorLow: { value: 100 },
-    colorMedium: { value: 100 },
-    colorHigh: { value: 100 },
-    intensityLow: { value: 100 },
-    intensityMedium: { value: 100 },
-    intensityHigh: { value: 100 },
-    contrastSensitivity: { value: 100 },
-
-    /* sonic */
-    hearing: { value: "FULL" },
-    usableFrequencyRange: { value: [{ from: 20, to: 20000 }] },
-    azimuthResolution: { value: 5 },
-    elevationResolution: { value: 15 },
-    concurrentStreams: { value: 3 },
-    listeningDuration: { value: 40 },
-
-    /* haptic */
-    touch: { value: "FULL" },
-    vibrationDetection: { value: 100 },
-
-    /* motor */
-    pointerControl: { value: "FULL" },
-    keyControl: { value: "FULL" },
-    manualStability: { value: 100 },
-    minTargetSize: { value: 5 },
-    sustainedPress: { value: "FULL" },
-    minKeyRepeatDelay: { value: 300 },
-
-    /* language. hapticLanguageSet is deliberately absent: the model says
-     * "there is no requirement for there to be a Setting for every Property in
-     * the CapabilityTemplate", and Braille is not relevant to this profile. */
-    language: { value: "FULL" },
-    readFontText: { value: "FULL" },
-    readAudioText: { value: "FULL" },
-    minReadFontSizeForFont: { value: 11 },
-    minInterWordGap: { value: 80 },
-    writeFontSet: { value: "BLOCK" },
+    sight: { capability: "FULL" },
+    hearing: { capability: "FULL" },
+    touch: { capability: "FULL" },
+    language: { capability: "FULL" },
+    pointerControl: { capability: "FULL" },
+    keyControl: { capability: "FULL" },
+    manualStability: { capability: "FULL" },
   },
   groups: {
-    seated: {
-      description: "At a desk, quiet, mounted display.",
+    seeing: {
+      description: "At a desk, mounted display.",
       template: "vision",
-      settings: ["sight", "focus", "tracking", "minReadFontSizeForFont", "contrastSensitivity"],
+      settings: ["sight"],
       influencedBy: ["deviceStability"],
     },
     listening: {
       description: "Audio-first play, the demonstrator's primary context.",
       template: "listening",
-      settings: [
-        "hearing", "usableFrequencyRange", "azimuthResolution",
-        "concurrentStreams", "listeningDuration",
-      ],
+      settings: ["hearing"],
       influencedBy: ["ambientNoise"],
     },
     input: {
       description: "How the user drives the game.",
       template: "input",
-      settings: ["pointerControl", "keyControl", "manualStability", "sustainedPress", "minKeyRepeatDelay"],
+      settings: ["pointerControl", "keyControl", "manualStability"],
     },
   },
 };
@@ -211,19 +166,21 @@ export const reference = defineCapacity(userCapability, referenceSpec);
 /**
  * Blind since birth, no other reported limitation.
  *
- * The interesting part is what is ABSENT. `sight: NONE` makes every property
- * beneath it in the precedence tree moot — "it makes no sense to acquire a
- * setting for 'minReadFontSizeForFont' if the user has no sight" — so those
- * Settings are deleted rather than set to some notional zero. A profile that
- * carried contrastSensitivity: 0 would be asserting something false: not that
- * contrast is irrelevant, but that it was measured and found absent.
+ * One changed line. `sight: NONE` settles every visual property beneath it, and
+ * the model enforces that: a setting under a NONE parent may only be NONE.
+ * Nothing is zeroed, because zero would be a measurement.
  *
- * "Since birth" is recorded in the description only. It changes nothing in the
- * capability model, and that is the correct outcome — capability is what the
- * user can do, and the model has no place to store an aetiology. Where it
- * *would* matter is in the Semantics and Composition layers, since a listener
- * with no visual memory is a different audience for a spatial metaphor than
- * one who lost sight later. That belongs in the metaphor work, not here.
+ * "Since birth" changes nothing here, and that is the correct outcome —
+ * capability is what the user can do, and the model has no place for aetiology
+ * by design. Where it *would* matter is Semantics and Composition, since a
+ * listener with no visual memory is a different audience for a spatial metaphor
+ * than one who lost sight later. That belongs in the metaphor work.
+ *
+ * Braille is added even though `language` is FULL and `touch` is FULL, so
+ * hapticLanguageSet is not "of interest" by default. That is allowed: FULL
+ * parents make a child uninteresting, not forbidden. Knowing which tactile
+ * language a reader has is real information, and a model that refused to record
+ * it would be enforcing an acquisition heuristic as if it were a law.
  */
 export const blindSinceBirth = defineCapacity(
   userCapability,
@@ -231,67 +188,64 @@ export const blindSinceBirth = defineCapacity(
     entity: {
       id: "blind-since-birth",
       description: "No usable sight from birth. No other reported limitation.",
-      basis: "exemplar — stands in for lived experience, not derived from any person",
+      basis: EXEMPLAR,
     },
-    modify: {
-      sight: { value: "NONE" },
-      /* Listening carries the whole game, so these are not left at reference
-       * values by omission — an experienced screen-reader listener typically
-       * separates more concurrent streams and tolerates faster speech than the
-       * reference. MY CHOICE, and a testable claim rather than a courtesy. */
-      concurrentStreams: { value: 4 },
-      minInterWordGap: { value: 40 },
-      readFontText: { value: "NONE" },
-    },
+    modify: { sight: { capability: "NONE" } },
     add: {
-      /* Absent from the reference, so this is an add rather than a modify.
-       * The reference has no Setting for hapticLanguageSet at all, which is
-       * the model working as intended: "there is no requirement for there to
-       * be a Setting for every Property in the CapabilityTemplate". */
-      hapticLanguageSet: { value: "Braille" },
+      readFontText: { capability: "NONE" },
+      hapticLanguageSet: { capability: "PARTIAL", measurement: ["Braille"] },
     },
-    remove: [
-      "stereo", "focus", "focusDuration", "tracking", "trackingDuration",
-      "viewRectangle",
-      "colorLow", "colorMedium", "colorHigh",
-      "intensityLow", "intensityMedium", "intensityHigh",
-      "contrastSensitivity",
-      "minReadFontSizeForFont",
-    ],
   }),
 );
 
-/** Low vision, contrast. Sight is partial; the limiting factor is how much two
- *  tones must differ before they can be told apart. Colour discrimination is
- *  intact, which is what distinguishes this exemplar from the next. */
+/**
+ * Low vision, contrast.
+ *
+ * Sight is PARTIAL, which is what opens the visual properties to being asked
+ * about at all. The limiting factor is how far two tones must differ before
+ * they can be told apart; colour discrimination is intact and is left FULL,
+ * which is what distinguishes this exemplar from the next.
+ */
 export const lowVisionContrast = defineCapacity(
   userCapability,
   variation(referenceSpec, {
     entity: {
       id: "low-vision-contrast",
-      description:
-        "Partial sight limited by contrast discrimination. Colour perception intact.",
-      basis: "exemplar — stands in for lived experience, not derived from any person",
+      description: "Partial sight limited by contrast discrimination. Colour perception intact.",
+      basis: EXEMPLAR,
     },
-    modify: {
-      sight: { value: "PARTIAL" },
-      focus: { value: "PARTIAL" },
-      focusDuration: { value: 25 },
-      tracking: { value: "PARTIAL" },
-      trackingDuration: { value: 12 },
-      contrastSensitivity: { value: 30 },
-      intensityLow: { value: 45 },
-      intensityMedium: { value: 45 },
-      intensityHigh: { value: 45 },
-      minReadFontSizeForFont: { value: 18 },
+    modify: { sight: { capability: "PARTIAL" } },
+    add: {
+      focus: { capability: "PARTIAL" },
+      focusDuration: { capability: "PARTIAL", measurement: 25 },
+      tracking: { capability: "PARTIAL" },
+      trackingDuration: { capability: "PARTIAL", measurement: 12 },
+      contrastSensitivity: { capability: "PARTIAL", measurement: 30 },
+      intensityLow: { capability: "PARTIAL", measurement: 45 },
+      intensityMedium: { capability: "PARTIAL", measurement: 45 },
+      intensityHigh: { capability: "PARTIAL", measurement: 45 },
+      colorLow: { capability: "FULL" },
+      colorMedium: { capability: "FULL" },
+      colorHigh: { capability: "FULL" },
+      readFontText: { capability: "PARTIAL" },
+      minReadFontSizeForFont: {
+        capability: "PARTIAL",
+        measurement: { size: 18, font: "system-sans" },
+      },
     },
   }),
 );
 
-/** Low vision, colour. Table 2's own subject. Deuteranomaly-shaped: medium
- *  frequency discrimination is the impaired one, and the paper's author reports
- *  exactly this form. Contrast is intact, which is the mirror of the profile
- *  above and the reason both exist. */
+/**
+ * Low vision, colour. Table 2's own subject.
+ *
+ * Deuteranomaly-shaped: medium frequency discrimination is the impaired one,
+ * which is the form the paper's own author reports — "in my case, this results
+ * in mild colour blindness that shifts the neutral point within the high,
+ * medium, or low frequency ranges… without the dimming that can occur with, for
+ * example protanopia". Contrast is intact, the mirror of the profile above,
+ * which is why both exist.
+ */
 export const lowVisionColour = defineCapacity(
   userCapability,
   variation(referenceSpec, {
@@ -300,14 +254,15 @@ export const lowVisionColour = defineCapacity(
       description:
         "Colour discrimination reduced in the green-yellow-red region; contrast intact. " +
         "Modelled as capability per Table 2, not as a diagnosis per Table 1.",
-      basis: "exemplar — stands in for lived experience, not derived from any person",
+      basis: EXEMPLAR,
     },
-    modify: {
-      sight: { value: "PARTIAL" },
-      colorLow: { value: 40 },
-      colorMedium: { value: 25 },
-      colorHigh: { value: 80 },
-      intensityMedium: { value: 70 },
+    modify: { sight: { capability: "PARTIAL" } },
+    add: {
+      colorLow: { capability: "PARTIAL", measurement: 40 },
+      colorMedium: { capability: "PARTIAL", measurement: 25 },
+      colorHigh: { capability: "PARTIAL", measurement: 80 },
+      intensityMedium: { capability: "PARTIAL", measurement: 70 },
+      contrastSensitivity: { capability: "FULL" },
     },
   }),
 );
@@ -315,11 +270,14 @@ export const lowVisionColour = defineCapacity(
 /**
  * Keyboard only.
  *
- * Expressed as `pointerControl: NONE` — a capability — rather than as a
- * preference for the keyboard. That is the paper's central argument in §4:
- * "Does the user need a screen reader, or does she simply wish to use one?"
- * A profile recording "prefers keyboard" tells an adaptive system nothing
- * about what happens when only a pointer is offered.
+ * `pointerControl: NONE` — a capability — rather than a preference for the
+ * keyboard. That is the paper's central argument in §4: "Does the user need a
+ * screen reader, or does she simply wish to use one?" A profile recording
+ * "prefers keyboard" tells an adaptive system nothing about what happens when
+ * only a pointer is offered.
+ *
+ * Note that minTargetSize is not merely omitted but forbidden: its parent is
+ * NONE, and the model rejects a capability beneath one that does not exist.
  */
 export const keyboardOnly = defineCapacity(
   userCapability,
@@ -327,36 +285,38 @@ export const keyboardOnly = defineCapacity(
     entity: {
       id: "keyboard-only",
       description: "No usable continuous pointing device. Discrete key control intact.",
-      basis: "exemplar — stands in for lived experience, not derived from any person",
+      basis: EXEMPLAR,
     },
-    modify: {
-      pointerControl: { value: "NONE" },
-      writeFontSet: { value: "SELECT" },
+    modify: { pointerControl: { capability: "NONE" } },
+    add: {
+      writeFontSet: { capability: "PARTIAL", measurement: ["SELECT"] },
     },
-    remove: ["minTargetSize"],
   }),
 );
 
 /**
- * Hand tremor — and the one exemplar that exercises the adaptive machinery.
+ * Hand tremor — the one exemplar that exercises the adaptive machinery.
  *
  * The paper's own example of functional dependency: "the physical stability of
  * the screen also plays a part, so that a person with hand tremors may find
  * that the readable size of text depends on whether the screen is placed on a
  * Table, or is held in their hand".
  *
- * So minReadFontSizeForFont is not a value here. It is a derived, (M)-marked
- * Setting computed from a base size, the user's manual stability, and the
- * External Influence `deviceStability`. This is the whole difference between a
- * static profile and an adaptive one — "only the on-line model is suitable for
- * adaptive systems" — and it is worth noting that Access for All would need
- * two whole contexts to say the same thing, which is the duplication §3
- * criticises.
+ * So minReadFontSizeForFont is not a value. It is a derived, (M)-marked
+ * measurement computed from a seated baseline, the user's manual stability, and
+ * the External Influence `deviceStability`. The capability itself stays
+ * declared as PARTIAL: whether this reader can read at all is not a function of
+ * how large the type is, and only the measurement is derived.
  *
- * The dependency is mathematical, not merely functional: given the base size
- * and the stability, the effective size follows from a formula, with no need
- * to observe the user. OOA96 §2.3, and the reason it is a formula and not an
- * Action.
+ * This is the whole difference between a static profile and an adaptive one —
+ * "only the on-line model is suitable for adaptive systems" — and Access for
+ * All would need two entire contexts to say the same thing, which is the
+ * duplication §3 attacks.
+ *
+ * Sight and language are FULL. minReadFontSizeForFont is still of interest
+ * because manualStability is PARTIAL, and that property has both readFontText
+ * and manualStability as precedence parents — which is why the second parent
+ * was added to the schema.
  */
 export const handTremor = defineCapacity(
   userCapability,
@@ -366,51 +326,59 @@ export const handTremor = defineCapacity(
       description:
         "Tremor under load. Sight and hearing unimpaired; the limitation is stability, " +
         "and it reaches into reading whenever the display is not mounted.",
-      basis: "exemplar — stands in for lived experience, not derived from any person",
+      basis: EXEMPLAR,
     },
     modify: {
-      manualStability: { value: 35 },
-      pointerControl: { value: "PARTIAL" },
-      keyControl: { value: "PARTIAL" },
-      sustainedPress: { value: "PARTIAL" },
-      minKeyRepeatDelay: { value: 900 },
-      minTargetSize: { value: 18 },
+      manualStability: { capability: "PARTIAL", measurement: 35 },
+      pointerControl: { capability: "PARTIAL" },
+      keyControl: { capability: "PARTIAL" },
+    },
+    add: {
+      sustainedPress: { capability: "PARTIAL" },
+      minKeyRepeatDelay: { capability: "PARTIAL", measurement: 900 },
+      minTargetSize: { capability: "PARTIAL", measurement: 18 },
 
-      /* The (M) attribute. `cite` is not decoration: OOA96 §2.3 requires that
-       * "in the description of an attribute that represents a dependent
-       * variable, cite the formula or algorithm used to determine the value". */
+      /* A second Setting for the same Property, holding the mounted baseline.
+       * This is how the model carries per-context values without duplicating
+       * contexts: "the same settings may appear in more than one group… the
+       * individual Setting is referenced in every case". */
+      fontSizeSeated: {
+        property: "minReadFontSizeForFont",
+        capability: "PARTIAL",
+        measurement: { size: 12, font: "system-sans" },
+      },
+
       minReadFontSizeForFont: {
+        capability: "PARTIAL",
         derived: {
           reads: ["fontSizeSeated", "manualStability"],
           influences: ["deviceStability"],
+          /* OOA96 §2.3 requires the dependent variable's description to "cite
+           * the formula or algorithm used to determine the value". */
           cite:
-            "MOUNTED: fontSizeSeated. HANDHELD: fontSizeSeated scaled by " +
-            "(1 + (100 - manualStability)/100), clamped to the property range. " +
-            "At 35% stability a hand-held display needs roughly 1.65x the mounted size.",
-          formula: A.ifThen(
-            A.eq(A.influence("deviceStability"), A.lit("HANDHELD")),
-            A.clamp(
-              A.mul(
-                A.read("fontSizeSeated"),
-                A.add(
-                  A.lit(1),
-                  A.div(A.sub(A.lit(100), A.read("manualStability")), A.lit(100)),
+            "MOUNTED: fontSizeSeated.size. HANDHELD: fontSizeSeated.size scaled by " +
+            "(1 + (100 - manualStability)/100), clamped to 4..96pt. At 35% stability a " +
+            "hand-held display needs 1.65x the mounted size.",
+          formula: A.tuple({
+            size: A.ifThen(
+              A.eq(A.influence("deviceStability"), A.lit("HANDHELD")),
+              A.clamp(
+                A.mul(
+                  A.field(A.measure("fontSizeSeated"), "size"),
+                  A.add(
+                    A.lit(1),
+                    A.div(A.sub(A.lit(100), A.measure("manualStability")), A.lit(100)),
+                  ),
                 ),
+                A.lit(4),
+                A.lit(96),
               ),
-              A.lit(4),
-              A.lit(96),
+              A.field(A.measure("fontSizeSeated"), "size"),
             ),
-            A.read("fontSizeSeated"),
-          ),
+            font: A.field(A.measure("fontSizeSeated"), "font"),
+          }),
         },
       },
-    },
-    add: {
-      /* A second Setting for the same Property. This is how the model carries
-       * per-context values without duplicating contexts: "the same settings may
-       * appear in more than one group… the individual Setting is referenced in
-       * every case". */
-      fontSizeSeated: { property: "minReadFontSizeForFont", value: 12 },
     },
   }),
 );

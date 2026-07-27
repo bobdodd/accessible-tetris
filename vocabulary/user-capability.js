@@ -1,17 +1,27 @@
 /* The Capability Model population: what can be known about a person.
  * ---------------------------------------------------------------------------
- * This is a schema, not a profile. No user appears here. Values live in
- * profiles.js against the Capacity Model.
+ * A schema, not a profile. No user appears here. Values live in profiles.js.
  *
- * MODEL PROVENANCE (design/DEMOS.md §6a) — mixed, and marked per group below.
+ * EVERY property below is FULL / PARTIAL / NONE. Where a property carries a
+ * `measurement`, that measurement qualifies the PARTIAL case and only that
+ * case. So `focusDuration` is not "a number of minutes": it is FULL (can focus
+ * indefinitely), PARTIAL (can focus for N minutes), or NONE (cannot focus at
+ * all), and the minutes exist only in the middle.
+ *
+ * This is what the paper's "Values" column is showing. In Table 3, `focus`
+ * reads "FULL PARTIAL NONE" — the scale itself — while `focusDuration` reads
+ * "Time in minutes" — the measurement that qualifies PARTIAL. Same column, two
+ * different things, and reading it as "each property has a data type" produces
+ * a model in which "no contrast perception" is written as 0%, which asserts a
+ * measurement of something that is not there.
+ *
+ * MODEL PROVENANCE (design/DEMOS.md §6a)
  *
  *   MODEL SPECIFIES for Tables 2, 3 and 4 of "User Capability in an Adaptive
- *   World" (MSIADU'09), transcribed with their values, parents and
- *   descriptions.
+ *   World" (MSIADU'09), transcribed with their parents and descriptions.
  *
- *   MY CHOICE for the sonic, haptic and motor groups, and for a handful of
- *   properties Table 4 names as parents without defining. The paper licenses
- *   both extensions explicitly:
+ *   MY CHOICE for the sonic, haptic and motor groups, and for a few properties
+ *   Table 4 names as parents without defining. Both extensions are licensed:
  *
  *     "Property groupings are also identifiable for the sonic and haptic
  *      design spaces, and it is possible to imagine other groupings, not
@@ -21,55 +31,39 @@
  *     Of Table 4: "A small edited fragment of such a language-based grouping
  *      is shown in Table 4."
  *
- *   So the shape of an extension is sanctioned; the specific properties are
- *   mine and are marked as such. An unmarked property is transcription.
+ *   An unmarked property is transcription. Every MY CHOICE says so in its own
+ *   description, so the distinction survives being read out of context.
  *
- *   ON ONTOLOGIES BEING OPEN. The paper says the model "scopes properties
- *   first by subject ontologies SUCH AS visual, sonic, and haptic" — an
- *   exemplary list, and the sentence about language groupings confirms it.
- *   `motor` and `language` are therefore not deviations. They are, however,
- *   not Nesbitt design spaces either, and `designSpace: false` records that so
- *   the difference survives into the write-up.
- *
- *   ON PRECEDENCE CROSSING ONTOLOGIES. Table 4's readSignText has parent
- *   "sight + signLanguageSet" — one parent in the visual ontology, one in
- *   language. That is correct and is not a contradiction of ontology
- *   disjointness: a Property sits in exactly one ontology and in any number of
- *   precedence trees. readFontText below does the same thing deliberately.
+ *   ON ONTOLOGIES BEING OPEN. The model "scopes properties first by subject
+ *   ontologies SUCH AS visual, sonic, and haptic" — exemplary, not exhaustive,
+ *   and the sentence about language groupings confirms it. `motor` and
+ *   `language` are not deviations, but they are not Nesbitt design spaces
+ *   either, and `designSpace: false` records the difference.
  */
 
 import { defineCapability } from "../cradle/user/capability.js";
 
-const PARTIAL_SCALE = ["FULL", "PARTIAL", "NONE"];
-
 /** The paper's percentage idiom, used throughout Table 2: "100% would be no
- *  impairment. 0% would suggest some form of colour blindness. A mid-value of
- *  50% would suggest a mild form of colour blindness." Higher is more able. */
-const percentage = (description, precedence, ontology = "visual") => ({
-  ontology,
-  type: "numeric",
-  min: 0,
-  max: 100,
-  unit: "%",
-  precedence,
-  description,
-});
+ *  impairment… A mid-value of 50% would suggest a mild form of colour
+ *  blindness." Higher is more able. Note that total absence is NOT 0% — it is
+ *  a capability of NONE, and the percentage does not arise. */
+const percent = { type: "numeric", min: 1, max: 99, unit: "%" };
+const minutes = (max = 480) => ({ type: "numeric", min: 1, max, unit: "min" });
 
 export const userCapability = defineCapability({
   id: "cisna.user-capability",
-  version: "0.1.0",
+  version: "0.2.0",
 
   ontologies: {
     visual: {
       designSpace: true,
-      description:
-        "Nesbitt's visual physical design space. What the user can perceive visually.",
+      description: "Nesbitt's visual physical design space. What the user can perceive visually.",
     },
     sonic: {
       designSpace: true,
       description:
-        "Nesbitt's auditory physical design space. What the user can perceive aurally. " +
-        "The design space this demonstrator carries the most weight in.",
+        "Nesbitt's auditory physical design space. What the user can perceive aurally, and " +
+        "the design space this demonstrator carries the most weight in.",
     },
     haptic: {
       designSpace: true,
@@ -79,43 +73,35 @@ export const userCapability = defineCapability({
       designSpace: false,
       description:
         "MY CHOICE. Not a Nesbitt display space: what the user can DO to a device rather " +
-        "than perceive from one. The paper licenses groupings 'not related to specific " +
-        "design spaces' and models input capability throughout (writeFontSet's SELECT " +
-        "value covers 'keyboard, scanning, eye tracking'; hand tremors appear twice as a " +
-        "worked example), but tabulates no such ontology. This supplies one.",
+        "than perceive from one. The paper models input capability throughout — " +
+        "writeFontSet's SELECT covers 'keyboard, scanning, eye tracking', and hand tremor " +
+        "appears twice as a worked example — but tabulates no such ontology.",
     },
     language: {
       designSpace: false,
       description:
         "The paper's own example of a grouping not tied to a design space, tabulated as " +
-        "Table 4: 'it is possible to imagine other groupings, not related to specific " +
-        "design spaces, with use of language one obvious candidate'.",
+        "Table 4.",
     },
   },
 
   properties: {
-    /* --- visual: Table 3, "Example capability model of vision" ----------- */
+    /* --- visual: Table 3 -------------------------------------------------- */
 
     sight: {
       ontology: "visual",
-      type: "discrete",
-      values: PARTIAL_SCALE,
       precedence: [],
       description:
-        "Top-level property for vision. Remaining properties only of interest for " +
-        "PARTIAL sight.",
+        "Top-level property for vision. Remaining template properties only of interest " +
+        "for PARTIAL sight.",
     },
     stereo: {
       ontology: "visual",
-      type: "discrete",
-      values: PARTIAL_SCALE,
       precedence: ["sight"],
       description: "Stereo vision.",
     },
     focus: {
       ontology: "visual",
-      type: "discrete",
-      values: PARTIAL_SCALE,
       precedence: ["sight"],
       description:
         "Can the user focus on a point? PARTIAL would suggest blurred/double vision. " +
@@ -124,19 +110,15 @@ export const userCapability = defineCapability({
     },
     focusDuration: {
       ontology: "visual",
-      type: "numeric",
-      min: 0,
-      max: 480,
-      unit: "min",
       precedence: ["focus"],
+      measurement: minutes(),
       description:
         "Length of time the user can continue to focus on a point (not necessarily the " +
-        "same point) before experiencing fatigue.",
+        "same point) before experiencing fatigue. FULL is indefinitely; PARTIAL carries " +
+        "the minutes.",
     },
     tracking: {
       ontology: "visual",
-      type: "discrete",
-      values: PARTIAL_SCALE,
       precedence: ["focus"],
       description:
         "Can the user visually track a moving item? This is not a measure of focus (the " +
@@ -145,367 +127,261 @@ export const userCapability = defineCapability({
     },
     trackingDuration: {
       ontology: "visual",
-      type: "numeric",
-      min: 0,
-      max: 480,
-      unit: "min",
       precedence: ["tracking"],
+      measurement: minutes(),
       description:
         "Length of time the user can continue to track a moving image before experiencing " +
-        "fatigue. Assuming that tracking a moving image is a greater cognitive load than " +
-        "simply watching static images, this value should be less than focusDuration.",
-    },
-
-    /* Table 3 gives viewRectangle and nonViewRectangle as "x, y, w, h in
-     * pixels". MY CHOICE: modelled as a Composite Property over two Numeric
-     * Range parts rather than four numbers, because a rectangle IS a
-     * horizontal extent and a vertical extent, and Numeric Range is one of the
-     * model's five intrinsic types. Encoding four scalars into a Text property
-     * would put structure inside a string, which is what first normal form
-     * exists to prevent (OOA96 §2.1.1: "the domain underlying each attribute
-     * consists of atomic values only"). */
-    viewExtentH: {
-      ontology: "visual",
-      type: "numericRange",
-      unit: "px",
-      min: 0,
-      max: 8192,
-      precedence: ["sight"],
-      description: "MY CHOICE. Horizontal extent of a viewing rectangle. A part, not used alone.",
-    },
-    viewExtentV: {
-      ontology: "visual",
-      type: "numericRange",
-      unit: "px",
-      min: 0,
-      max: 8192,
-      precedence: ["sight"],
-      description: "MY CHOICE. Vertical extent of a viewing rectangle. A part, not used alone.",
+        "fatigue. Assuming tracking a moving image is a greater cognitive load than simply " +
+        "watching static images, this value should be less than focusDuration.",
     },
     viewRectangle: {
       ontology: "visual",
-      type: "composite",
-      composedOf: ["viewExtentH", "viewExtentV"],
-      compositionOrder: "asDeclared",
       precedence: ["sight"],
+      measurement: {
+        type: "composite",
+        parts: [
+          { name: "x", type: "numeric", min: 0, max: 8192, unit: "px" },
+          { name: "y", type: "numeric", min: 0, max: 8192, unit: "px" },
+          { name: "w", type: "numeric", min: 1, max: 8192, unit: "px" },
+          { name: "h", type: "numeric", min: 1, max: 8192, unit: "px" },
+        ],
+      },
       description:
         "A viewing rectangle within the user's field of vision. Nominally a rectangle " +
         "within a 1024x768 pixel screen on a 15\" laptop mounted at a normal viewing " +
-        "distance from the user. Anything less than 1024x768 would typically suggest " +
-        "tunnel vision.",
+        "distance. Anything less than 1024x768 would typically suggest tunnel vision. " +
+        "FULL is the whole field, so the rectangle arises only for PARTIAL.",
     },
     nonViewRectangle: {
       ontology: "visual",
-      type: "composite",
-      composedOf: ["viewExtentH", "viewExtentV"],
-      compositionOrder: "asDeclared",
       precedence: ["sight"],
+      measurement: {
+        type: "composite",
+        parts: [
+          { name: "x", type: "numeric", min: 0, max: 8192, unit: "px" },
+          { name: "y", type: "numeric", min: 0, max: 8192, unit: "px" },
+          { name: "w", type: "numeric", min: 1, max: 8192, unit: "px" },
+          { name: "h", type: "numeric", min: 1, max: 8192, unit: "px" },
+        ],
+      },
       description:
-        "A rectangle within the user's field of vision not readable by the user. Any such " +
+        "A rectangle within the user's field of vision NOT readable by the user. Any such " +
         "centrally placed rectangle would suggest either poor or no central vision, " +
         "perhaps only peripheral vision.",
     },
 
-    /* --- visual: Table 2, "Capability model of colour-blindness" --------- */
+    /* --- visual: Table 2 -------------------------------------------------- */
 
-    colorLow: percentage(
-      "The effective low frequency colour perception of the user. 100% would be no " +
-        "impairment. 0% would suggest some form of colour blindness. A mid-value of 50% " +
-        "would suggest a mild form of colour blindness.",
-      ["sight"],
-    ),
-    colorMedium: percentage(
-      "The effective medium frequency colour perception of the user.",
-      ["sight"],
-    ),
-    colorHigh: percentage(
-      "The effective high frequency colour perception of the user.",
-      ["sight"],
-    ),
-    intensityLow: percentage(
-      "The effective low frequency intensity perception of the user. 100% would be no " +
-        "impairment. Non-zero would suggest some form of colour blindness.",
-      ["sight"],
-    ),
-    intensityMedium: percentage(
-      "The effective medium frequency intensity perception of the user.",
-      ["sight"],
-    ),
-    intensityHigh: percentage(
-      "The effective high frequency intensity perception of the user.",
-      ["sight"],
-    ),
+    colorLow: {
+      ontology: "visual", precedence: ["sight"], measurement: percent,
+      description:
+        "The effective low frequency colour perception of the user. FULL is no impairment; " +
+        "NONE is no low-frequency colour perception at all; PARTIAL carries the percentage.",
+    },
+    colorMedium: {
+      ontology: "visual", precedence: ["sight"], measurement: percent,
+      description: "The effective medium frequency colour perception of the user.",
+    },
+    colorHigh: {
+      ontology: "visual", precedence: ["sight"], measurement: percent,
+      description: "The effective high frequency colour perception of the user.",
+    },
+    intensityLow: {
+      ontology: "visual", precedence: ["sight"], measurement: percent,
+      description: "The effective low frequency intensity perception of the user.",
+    },
+    intensityMedium: {
+      ontology: "visual", precedence: ["sight"], measurement: percent,
+      description: "The effective medium frequency intensity perception of the user.",
+    },
+    intensityHigh: {
+      ontology: "visual", precedence: ["sight"], measurement: percent,
+      description: "The effective high frequency intensity perception of the user.",
+    },
+    contrastSensitivity: {
+      ontology: "visual", precedence: ["sight"], measurement: percent,
+      description:
+        "MY CHOICE. Effective contrast discrimination. Table 2 models colour and intensity " +
+        "per frequency band but has no contrast property, and contrast is the limiting " +
+        "capability for many low-vision users. NONE means contrast cannot be perceived at " +
+        "all — not 0%, which would claim a measurement of something absent.",
+    },
 
-    /* MY CHOICE. Table 2 models colour and intensity per frequency band but
-     * has no property for contrast sensitivity, which is the capability the
-     * "low vision (contrast)" exemplar turns on. Modelled in the paper's own
-     * percentage idiom rather than as a diagnosis, per "It is what the user
-     * can do, not why she cannot." */
-    contrastSensitivity: percentage(
-      "MY CHOICE. The effective contrast discrimination of the user. 100% would be no " +
-        "impairment; a low value means adjacent tones must differ more before the user " +
-        "can tell them apart. Distinct from intensity perception, which Table 2 models " +
-        "per frequency band.",
-      ["sight"],
-    ),
-
-    /* --- sonic: MY CHOICE throughout ------------------------------------- */
+    /* --- sonic: MY CHOICE throughout -------------------------------------- */
 
     hearing: {
       ontology: "sonic",
-      type: "discrete",
-      values: PARTIAL_SCALE,
       precedence: [],
       description:
-        "MY CHOICE. Top-level property for hearing, following the shape of `sight` in " +
-        "Table 3. Remaining sonic properties only of interest for PARTIAL hearing.",
+        "MY CHOICE. Top-level property for hearing, following the shape of `sight`. " +
+        "Remaining sonic properties only of interest for PARTIAL hearing.",
     },
-    usableFrequencyBand: {
-      ontology: "sonic",
-      type: "numericRange",
-      unit: "Hz",
-      min: 0,
-      max: 22050,
-      precedence: ["hearing"],
-      description:
-        "MY CHOICE. One contiguous band of usable hearing. A part of usableFrequencyRange, " +
-        "not used alone.",
-    },
-    /* MODEL SPECIFIES for the structure: this composite is the paper's own
-     * worked example of why Composite Property exists — "the usable audio
-     * frequency range for a user, which may be described as a collection of
-     * numeric ranges measured in Hertz, WITH GAPS BETWEEN THE RANGES.
-     * Formalization by the CompositionOrder element allows for a natural order
-     * to be applied to the composition, for example ordering the usable
-     * frequency ranges from lowest to highest." The gaps are the point: a
-     * listener with notched loss is expressible, and would not be by a single
-     * min and max. */
     usableFrequencyRange: {
       ontology: "sonic",
-      type: "composite",
-      composedOf: ["usableFrequencyBand"],
-      compositionOrder: "lowestToHighest",
       precedence: ["hearing"],
+      measurement: {
+        type: "composite",
+        of: { type: "numericRange", unit: "Hz", min: 0, max: 22050 },
+        order: "lowestToHighest",
+      },
       description:
-        "The usable audio frequency range for a user, as a collection of bands with gaps " +
-        "between them, ordered lowest to highest. The paper's own example of a Composite " +
-        "Property.",
+        "The usable audio frequency range, as a collection of bands with gaps between " +
+        "them. The paper's own worked justification for Composite Property: 'a collection " +
+        "of numeric ranges measured in Hertz, with gaps between the ranges… ordering the " +
+        "usable frequency ranges from lowest to highest'. Notched loss is expressible; a " +
+        "single min and max could not express it.",
     },
     azimuthResolution: {
-      ontology: "sonic",
-      type: "numeric",
-      min: 1,
-      max: 180,
-      unit: "deg",
-      precedence: ["hearing"],
+      ontology: "sonic", precedence: ["hearing"],
+      measurement: { type: "numeric", min: 1, max: 180, unit: "deg" },
       description:
-        "MY CHOICE. The smallest left-right angular difference the user can reliably " +
+        "MY CHOICE. Smallest left-right angular difference the user can reliably " +
         "distinguish. Directly bounds how many positions a spatialised soundscape can use.",
     },
     elevationResolution: {
-      ontology: "sonic",
-      type: "numeric",
-      min: 1,
-      max: 180,
-      unit: "deg",
-      precedence: ["hearing"],
+      ontology: "sonic", precedence: ["hearing"],
+      measurement: { type: "numeric", min: 1, max: 180, unit: "deg" },
       description:
-        "MY CHOICE. The smallest up-down angular difference the user can reliably " +
-        "distinguish. Typically much coarser than azimuth for most listeners.",
+        "MY CHOICE. Smallest up-down angular difference the user can reliably distinguish. " +
+        "Typically much coarser than azimuth for most listeners.",
     },
     concurrentStreams: {
-      ontology: "sonic",
-      type: "numeric",
-      min: 1,
-      max: 8,
-      unit: "streams",
-      precedence: ["hearing"],
+      ontology: "sonic", precedence: ["hearing"],
+      measurement: { type: "numeric", min: 1, max: 8, unit: "streams" },
       description:
         "MY CHOICE. How many simultaneous audio streams the user can attend to and still " +
         "separate. The sonic analogue of Table 3's tracking.",
     },
     listeningDuration: {
-      ontology: "sonic",
-      type: "numeric",
-      min: 0,
-      max: 480,
-      unit: "min",
-      precedence: ["concurrentStreams"],
+      ontology: "sonic", precedence: ["hearing"],
+      measurement: minutes(),
       description:
         "MY CHOICE. Length of time the user can attend to a dense soundscape before " +
-        "experiencing fatigue. The sonic analogue of trackingDuration, and by the same " +
-        "reasoning it should fall as concurrentStreams rises.",
+        "experiencing fatigue. The sonic analogue of trackingDuration.",
     },
 
     /* --- haptic: MY CHOICE ------------------------------------------------ */
 
     touch: {
-      ontology: "haptic",
-      type: "discrete",
-      values: PARTIAL_SCALE,
-      precedence: [],
+      ontology: "haptic", precedence: [],
       description: "MY CHOICE. Top-level property for touch perception.",
     },
     vibrationDetection: {
-      ontology: "haptic",
-      type: "numeric",
-      min: 0,
-      max: 100,
-      unit: "%",
-      precedence: ["touch"],
-      description: "MY CHOICE. Effective detection of device vibration. 100% is no impairment.",
+      ontology: "haptic", precedence: ["touch"], measurement: percent,
+      description: "MY CHOICE. Effective detection of device vibration.",
     },
 
     /* --- motor: MY CHOICE, on a licensed extension point ------------------ */
 
     pointerControl: {
-      ontology: "motor",
-      type: "discrete",
-      values: PARTIAL_SCALE,
-      precedence: [],
+      ontology: "motor", precedence: [],
       description:
         "MY CHOICE. Can the user operate a continuous pointing device? NONE is the " +
-        "capability behind what is usually described as 'keyboard only' — and note that " +
-        "describing it as capability rather than preference is the whole argument of §5: " +
-        "'Does the user need a screen reader, or does she simply wish to use one?'",
+        "capability usually described as 'keyboard only' — and describing it as capability " +
+        "rather than preference is the paper's whole argument: 'Does the user need a " +
+        "screen reader, or does she simply wish to use one?'",
     },
     keyControl: {
-      ontology: "motor",
-      type: "discrete",
-      values: PARTIAL_SCALE,
-      precedence: [],
+      ontology: "motor", precedence: [],
       description: "MY CHOICE. Can the user operate discrete keys or switches?",
     },
     manualStability: {
-      ontology: "motor",
-      type: "numeric",
-      min: 0,
-      max: 100,
-      unit: "%",
-      precedence: [],
+      ontology: "motor", precedence: [], measurement: percent,
       description:
-        "MY CHOICE. Steadiness of the user's hand under load. 100% is no tremor. The " +
-        "paper treats hand tremor as a capability with consequences beyond input: 'the " +
-        "physical stability of the screen also plays a part, so that a person with hand " +
-        "tremors may find that the readable size of text depends on whether the screen is " +
-        "placed on a Table, or is held in their hand'.",
+        "MY CHOICE. Steadiness of the user's hand under load. FULL is no tremor; PARTIAL " +
+        "carries the percentage. The paper treats tremor as a capability with consequences " +
+        "beyond input: 'the physical stability of the screen also plays a part, so that a " +
+        "person with hand tremors may find that the readable size of text depends on " +
+        "whether the screen is placed on a Table, or is held in their hand'.",
     },
     minTargetSize: {
-      ontology: "motor",
-      type: "numeric",
-      min: 1,
-      max: 40,
-      unit: "mm",
-      precedence: ["pointerControl"],
+      ontology: "motor", precedence: ["pointerControl", "manualStability"],
+      measurement: { type: "numeric", min: 1, max: 40, unit: "mm" },
       description:
         "MY CHOICE. Smallest target the user can reliably acquire with a pointing device.",
     },
     sustainedPress: {
-      ontology: "motor",
-      type: "discrete",
-      values: PARTIAL_SCALE,
-      precedence: ["keyControl"],
+      ontology: "motor", precedence: ["keyControl"],
       description:
         "MY CHOICE. Can the user hold a key down, or chord two keys? NONE is the " +
         "capability that sticky-keys exists to answer.",
     },
     minKeyRepeatDelay: {
-      ontology: "motor",
-      type: "numeric",
-      min: 0,
-      max: 2000,
-      unit: "ms",
-      precedence: ["keyControl", "manualStability"],
+      ontology: "motor", precedence: ["keyControl", "manualStability"],
+      measurement: { type: "numeric", min: 1, max: 2000, unit: "ms" },
       description:
         "MY CHOICE. Minimum delay before a held key should repeat, below which tremor " +
-        "produces unintended repeats. Precedence crosses no ontology boundary here, but " +
-        "does take two parents.",
+        "produces unintended repeats.",
     },
 
-    /* --- language: Table 4, with its dangling parents supplied ------------ */
+    /* --- language: Table 4, with its dangling parents supplied ------------- */
 
     language: {
-      ontology: "language",
-      type: "discrete",
-      values: PARTIAL_SCALE,
-      precedence: [],
+      ontology: "language", precedence: [],
       description: "Can the user understand language (in any medium)?",
     },
     hapticLanguageSet: {
-      ontology: "language",
-      type: "discrete",
-      values: ["Braille", "HapticMap"],
-      precedence: ["language"],
-      description: "Tactile based languages understood by the user.",
+      ontology: "language", precedence: ["language", "touch"],
+      measurement: { type: "discrete", values: ["Braille", "HapticMap"], multiple: true },
+      description:
+        "Tactile based languages understood by the user. Table 4 gives the parent as " +
+        "Language; MY CHOICE adds touch, since a tactile language depends on touch.",
     },
-
-    /* MY CHOICE. Table 4 names readFontText and readAudioText as parents but,
-     * being "a small edited fragment", does not define them. Supplied here in
-     * the same idiom so the precedence trees close. readFontText deliberately
-     * takes parents in two ontologies — sight (visual) and language — which is
-     * exactly what Table 4's readSignText does with "sight + signLanguageSet",
-     * and demonstrates that precedence crosses ontology boundaries while
-     * ontology membership stays disjoint. */
     readFontText: {
-      ontology: "language",
-      type: "discrete",
-      values: PARTIAL_SCALE,
-      precedence: ["sight", "language"],
+      ontology: "language", precedence: ["sight", "language"],
       description:
         "MY CHOICE (supplying a parent Table 4 names but does not define). Can the user " +
-        "read written text visually?",
+        "read written text visually? Parents in two ontologies deliberately, mirroring " +
+        "Table 4's own readSignText with 'sight + signLanguageSet'.",
     },
     readAudioText: {
-      ontology: "language",
-      type: "discrete",
-      values: PARTIAL_SCALE,
-      precedence: ["hearing", "language"],
+      ontology: "language", precedence: ["hearing", "language"],
       description:
         "MY CHOICE (supplying a parent Table 4 names but does not define). Can the user " +
         "understand spoken text?",
     },
     minReadFontSizeForFont: {
       ontology: "language",
-      type: "numeric",
-      min: 4,
-      max: 96,
-      unit: "pt",
-      precedence: ["readFontText"],
+      precedence: ["readFontText", "manualStability"],
+      measurement: {
+        type: "composite",
+        parts: [
+          { name: "size", type: "numeric", min: 4, max: 96, unit: "pt" },
+          { name: "font", type: "text", maxLength: 64 },
+        ],
+      },
       description:
-        "Minimum readable font size for user defined in points when presented on a " +
-        "1024x768 pixel 15\" screen. Table 4 notes the difficulty this property exposes: " +
-        "'font size is also a property in Access for All. The problem with this approach " +
-        "is that there is only one setting allowed per property, yet properties such as " +
-        "font size are functionally dependent on context'.",
+        "Minimum readable font size for user, in points and per font, when presented on a " +
+        "1024x768 pixel 15\" screen. Table 4's own note on why this property is awkward: " +
+        "'there is only one setting allowed per property, yet properties such as font size " +
+        "are functionally dependent on context'. MY CHOICE adds manualStability as a second " +
+        "parent, because the paper's own example makes the readable size depend on whether " +
+        "the display is mounted or held.",
     },
     minInterWordGap: {
-      ontology: "language",
-      type: "numeric",
-      min: 0,
-      max: 2000,
-      unit: "ms",
-      precedence: ["readAudioText"],
+      ontology: "language", precedence: ["readAudioText"],
+      measurement: { type: "numeric", min: 1, max: 2000, unit: "ms" },
       description:
         "Minimum required gap in milliseconds between words required for the user to " +
         "understand the spoken word.",
     },
     writeFontSet: {
-      ontology: "language",
-      type: "discrete",
-      values: ["CURSIVE", "BLOCK", "SELECT"],
-      precedence: ["language", "keyControl"],
+      ontology: "language", precedence: ["language", "keyControl"],
+      measurement: {
+        type: "discrete", values: ["CURSIVE", "BLOCK", "SELECT"], multiple: true,
+      },
       description:
         "Modes some form of writing text. SELECT means some form of technology e.g. " +
         "keyboard, scanning, eye tracking etc. Table 4 gives the parent as " +
         "'fontLanguage + eSet', neither of which the fragment defines; MY CHOICE " +
-        "substitutes language and keyControl, which is what the values actually depend on.",
+        "substitutes language and keyControl.",
     },
   },
 
   /* Capability Templates: "views of Properties that reflect grouping such as
    * those of Tables 1 to 4. The same Property may exist in many templates."
-   * The overlap between `vision` and `colour` below is the paper's own example
-   * of why that matters. */
+   * The overlap of `sight` between vision and colour is the paper's own
+   * example of why that matters. */
   templates: {
     vision: {
       description: "Table 3 — example capability model of vision.",
