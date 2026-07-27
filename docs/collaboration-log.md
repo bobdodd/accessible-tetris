@@ -266,6 +266,59 @@ write-up: the earlier paper identifies the hole, the later one fills it.
 
 ---
 
+## D11 · decision · Bob decided, Claude agreed and added a reason
+
+**2026-07-27. Adaptation Model vocabulary: follow MSIADU'09** (issue #6, closed).
+`Instance Sequence` over `Instance Application`, `Sequence No` over
+`Application Order`, `Data Type` over `Attribute Value Type`.
+
+Bob's reasons: it is the later publication, so it is the citable one, and it is
+easier for non-modellers to follow, which matters for a cradle meant to be read
+and reimplemented.
+
+Claude added a third: **"Application" is overloaded across the two sources.** The
+Render Model note uses it for the *Application Model* (rendered content) and for
+*Instance Application* (the adaptation mechanism) — unrelated concepts, one
+word, one system. In code, `applicationOrder` sitting beside `ApplicationModel`
+is a standing invitation to misread. This point was not in Bob's reasoning and
+is the strongest of the three.
+
+**Claude also withdrew a claim.** Issue #6 as filed suggested the two models
+might differ semantically, because the Render Model's separate `Application
+Order` would be redundant if its container were already a sequence. Wrong:
+MSIADU'09 carries `Sequence No` in exactly the same way. Both have a container,
+an associative instance-to-apply, an explicit ordering attribute, and Instance.
+They are isomorphic. *Recorded because the log is worth nothing if it only keeps
+the claims that survived.*
+
+## N4 · note · Claude, asked for an opinion on 17-year-old models
+
+Bob asked whether either Adaptation Model is still a good idea, noting the newest
+is 17 years old. Assessment:
+
+**The mechanism has aged well, because it was never novel.** Ordered
+add/modify/delete applied as transactions is the database-transaction metaphor
+the paper explicitly names as its source. The same metaphor underlies event
+sourcing (state as an ordered log, folded to a projection), JSON Patch
+(RFC 6902, standardised 2013, with the same operation set), git commits, and
+JavaScript's own prototype chain, which is literally "Fred is like Jim except".
+The honest framing is convergence on a well-established idea, **not prescience**;
+claiming the paper anticipated event sourcing would overstate it.
+
+**Recommendation: keep the model, name the correspondences.** Replacing it with
+JSON Patch or an event-sourcing library would demonstrate JSON Patch, and the
+demonstrator exists to demonstrate CISNA. But a 2026 reader who knows event
+sourcing and not Shlaer-Mellor should be able to recognise what they are looking
+at, so the code should say so in comments.
+
+**Where the age does show, and it is not the Adaptation Model:** Actions in the
+Capacity Model have no defined evaluation order, no cycle handling, and no
+declared dependencies. Logged as issue #7 with a proposal to treat functionally
+dependent Settings as a derivation graph evaluated in topological order, which
+is what reactive systems settled on in the intervening years. That would be a
+departure from the paper's "mini program" formulation and would be recorded as
+one.
+
 ## X1 · disagreement · Bob corrected Claude's conclusion, not its facts
 
 **2026-07-27.** After C3, Claude concluded that the working practice should be
