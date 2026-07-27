@@ -357,21 +357,24 @@ export const handTremor = defineCapacity(
            * the formula or algorithm used to determine the value". */
           cite:
             "MOUNTED: fontSizeSeated.size. HANDHELD: fontSizeSeated.size scaled by " +
-            "(1 + (100 - manualStability)/100), clamped to 4..96pt. At 35% stability a " +
-            "hand-held display needs 1.65x the mounted size.",
+            "(1 + (100 - manualStability)/100), clamped to 4..96pt and rounded to 1dp. " +
+            "At 35% stability a hand-held display needs 1.65x the mounted size.",
           formula: A.tuple({
             size: A.ifThen(
               A.eq(A.influence("deviceStability"), A.lit("HANDHELD")),
-              A.clamp(
-                A.mul(
-                  A.field(A.measure("fontSizeSeated"), "size"),
-                  A.add(
-                    A.lit(1),
-                    A.div(A.sub(A.lit(100), A.measure("manualStability")), A.lit(100)),
+              A.round(
+                A.clamp(
+                  A.mul(
+                    A.field(A.measure("fontSizeSeated"), "size"),
+                    A.add(
+                      A.lit(1),
+                      A.div(A.sub(A.lit(100), A.measure("manualStability")), A.lit(100)),
+                    ),
                   ),
+                  A.lit(4),
+                  A.lit(96),
                 ),
-                A.lit(4),
-                A.lit(96),
+                1,
               ),
               A.field(A.measure("fontSizeSeated"), "size"),
             ),

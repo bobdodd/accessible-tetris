@@ -1,0 +1,328 @@
+/* Generate docs/user-profiles.md from the live models.
+ *
+ * The tables follow the presentation of Tables 1 to 4 in "User Capability in an
+ * Adaptive World" (MSIADU'09), because that is the form the models were
+ * published in and a reader who knows the paper should recognise the document.
+ *
+ * WHY GENERATED. A hand-written table drifts from the code within a week, and
+ * then the document quietly becomes the wrong answer that everyone quotes. This
+ * reads the actual Capability and Capacity Models and renders what is there, so
+ * "the document says X" and "the model does X" cannot come apart. If a profile
+ * changes, re-run it.
+ *
+ *     node docs/tools/render-profiles.mjs > docs/user-profiles.md
+ */
+
+import { userCapability } from "../../vocabulary/user-capability.js";
+import { exemplars } from "../../vocabulary/profiles.js";
+import { resolve } from "../../cradle/user/capacity.js";
+import { isOfInterest } from "../../cradle/user/capability.js";
+
+const out = [];
+const w = (...lines) => out.push(...lines);
+
+/* --- helpers -------------------------------------------------------------- */
+
+const esc = (s) => String(s).replace(/\|/g, "\\|");
+
+/** One line of prose from a description, for a table cell. The full text lives
+ *  in the source; a table that reprints three sentences per row is unreadable. */
+const brief = (text, max = 150) => {
+  const first = String(text).replace(/\s+/g, " ").trim();
+  if (first.length <= max) return esc(first);
+  const cut = first.slice(0, max);
+  const at = cut.lastIndexOf(". ");
+  return esc((at > 60 ? cut.slice(0, at + 1) : cut.trimEnd() + "…"));
+};
+
+/** Render a measurement specification the way the paper's Values column does. */
+function specOf(property) {
+  const m = property.measurement;
+  if (!m) return "—";
+  switch (m.type) {
+    case "boolean": return "TRUE / FALSE";
+    case "discrete": return `${m.values.join(", ")}${m.multiple ? " (one or more)" : ""}`;
+    case "numeric": return `${m.min}–${m.max} ${m.unit}`;
+    case "numericRange": return `range in ${m.unit}`;
+    case "text": return "text";
+    case "composite":
+      if (m.of) return `collection of ${specOf({ measurement: m.of })}, ${m.order}`;
+      return m.parts.map((p) => `${p.name}: ${specOf({ measurement: p })}`).join(" + ");
+    default: return m.type;
+  }
+}
+
+/** Render a measurement *value* as recorded in a profile. */
+function valueOf(measurement) {
+  if (measurement === null || measurement === undefined) return "—";
+  if (Array.isArray(measurement)) {
+    if (measurement.length && typeof measurement[0] === "object" && "from" in measurement[0]) {
+      return measurement.map((r) => `${r.from}–${r.to}`).join(", ");
+    }
+    return measurement.join(", ");
+  }
+  if (typeof measurement === "object") {
+    if ("from" in measurement) return `${measurement.from}–${measurement.to}`;
+    return Object.entries(measurement).map(([k, v]) => `${k} ${v}`).join(", ");
+  }
+  return String(measurement);
+}
+
+const unitOf = (property) => {
+  const m = property.measurement;
+  if (!m) return "";
+  if (m.unit) return ` ${m.unit}`;
+  return "";
+};
+
+const parentsOf = (name) => {
+  const p = userCapability.properties[name].precedence;
+  return p.length ? p.join(", ") : "None";
+};
+
+/* --- header --------------------------------------------------------------- */
+
+w(
+  "# User capability profiles",
+  "",
+  "Generated from the live models by `docs/tools/render-profiles.mjs`. Do not edit by",
+  "hand: re-run the script instead. The tables follow the presentation of Tables 1 to 4",
+  "in *User Capability in an Adaptive World* (Dodd, Green & Pearson, MSIADU'09,",
+  "[doi:10.1145/1631097.1631110](https://doi.org/10.1145/1631097.1631110)).",
+  "",
+  "## What these profiles are, and what they are not",
+  "",
+  "They are **stand-ins**. They exist so the cradle has something to adapt to before",
+  "there is anyone real to adapt to, and they are to be replaced or augmented with",
+  "lived experience as and when it is available. Every profile records its basis in",
+  "the data rather than only in prose, so a fixture cannot quietly become a finding.",
+  "",
+  "They are deliberately **not personas**. There is no name, age, occupation or",
+  "narrative, because those invite a reader to generalise from a character to a",
+  "population. What is recorded is capability and nothing else, which is the source",
+  "paper's own argument: *\"It is what the user can do, not why she cannot.\"*",
+  "",
+  "## How to read a capability",
+  "",
+  "Every property is **FULL**, **PARTIAL** or **NONE**. A measurement appears against",
+  "PARTIAL and against nothing else.",
+  "",
+  "| Value | Means | Measurement |",
+  "|---|---|---|",
+  "| `FULL` | The capability is unimpaired. | None — there is nothing left to qualify. |",
+  "| `PARTIAL` | The capability exists but is limited. | Required, where the property declares one. |",
+  "| `NONE` | The capability is absent. | None — there is nothing there to measure. |",
+  "",
+  "So a user who cannot perceive contrast has `contrastSensitivity: NONE`. Writing 0%",
+  "would claim that a measurement was taken of something that is not there.",
+  "",
+  "### Why most properties are missing from most profiles",
+  "",
+  "The paper attaches a rule to the top of every table: *\"Remaining template",
+  "properties only of interest for PARTIAL sight.\"* Read literally, and it is meant",
+  "literally, that says a child property is worth asking about only when its parent is",
+  "PARTIAL. A FULL parent leaves no impairment to describe; a NONE parent leaves",
+  "nothing to describe either.",
+  "",
+  "Two consequences run through every table below:",
+  "",
+  "- **NONE propagates.** A capability cannot exist beneath one that does not. The",
+  "  model refuses `colorLow: PARTIAL` under `sight: NONE`.",
+  "- **FULL does not propagate.** It makes children *uninteresting*, not forbidden.",
+  "  Someone with tunnel vision has PARTIAL sight and may have entirely FULL colour",
+  "  perception, and a Braille reader has FULL language with a very specific",
+  "  `hapticLanguageSet`. Recording either is extra detail, not a contradiction.",
+  "",
+  "This is why the reference profile below is seven lines and the blind exemplar is",
+  "one line different from it.",
+  "",
+);
+
+/* --- the capability model, by template ------------------------------------ */
+
+w(
+  "---",
+  "",
+  "## The Capability Model",
+  "",
+  "The schema: what *can* be known about a person. It holds no user data. The",
+  "`Values` column shows the measurement that qualifies PARTIAL, or `—` where PARTIAL",
+  "needs no further detail — `focus` is PARTIAL for blurred or double vision and that",
+  "is the whole statement.",
+  "",
+);
+
+for (const template of Object.values(userCapability.templates)) {
+  w(`### Template: ${template.name}`, "", template.description, "");
+  w("| Property | Values (PARTIAL measurement) | Parent | Ontology | Description |",
+    "|---|---|---|---|---|");
+  const ordered = userCapability.acquisitionOrder.filter((n) => template.properties.includes(n));
+  for (const name of ordered) {
+    const p = userCapability.properties[name];
+    w(`| \`${name}\` | ${specOf(p)} | ${parentsOf(name)} | ${p.ontology} | ${brief(p.description)} |`);
+  }
+  w("");
+}
+
+w(
+  "### Subject ontologies",
+  "",
+  "*\"Subject ontologies are disjoint, so individual properties exist in exactly one",
+  "ontology.\"* Precedence, by contrast, crosses them freely — `readFontText` has",
+  "parents in both `visual` and `language`, mirroring Table 4's own `readSignText`",
+  "with *\"sight + signLanguageSet\"*.",
+  "",
+  "| Ontology | Nesbitt design space | Properties |",
+  "|---|---|---|",
+);
+for (const o of Object.values(userCapability.ontologies)) {
+  w(`| ${o.name} | ${o.designSpace ? "yes" : "no"} | ${o.properties.length} |`);
+}
+w("");
+
+/* --- one table per profile ------------------------------------------------ */
+
+w("---", "", "## The profiles", "");
+
+for (const [key, profile] of Object.entries(exemplars)) {
+  const recorded = Object.values(profile.settings);
+  const byProperty = new Map(recorded.map((s) => [s.property, s.capability]));
+  const known = (n) => byProperty.get(n);
+
+  w(`### ${profile.entity.id}`, "", `*${profile.entity.description}*`, "");
+  w(`**Basis:** ${profile.entity.basis}  `);
+  w(`**Entity kind:** ${profile.entity.kind} · **Settings recorded:** ${recorded.length}`, "");
+
+  w("| Setting | Property | Capability | Measurement | Parent |", "|---|---|---|---|---|");
+  const order = userCapability.acquisitionOrder;
+  const sorted = [...recorded].sort(
+    (a, b) => order.indexOf(a.property) - order.indexOf(b.property),
+  );
+  for (const s of sorted) {
+    const p = userCapability.properties[s.property];
+    const measurement = s.derived
+      ? "*derived — see below*"
+      : s.measurement === null ? "—" : `${valueOf(s.measurement)}${
+          typeof s.measurement === "number" ? unitOf(p) : ""}`;
+    const settingName = s.id === s.property ? "—" : `\`${s.id}\``;
+    w(`| ${settingName} | \`${s.property}\` | **${s.capability}** | ${measurement} | ${parentsOf(s.property)} |`);
+  }
+  w("");
+
+  /* What is deliberately absent, and why. This is the most instructive column
+   * of the whole document: it is where the precedence hierarchy does its work. */
+  const notRecorded = Object.keys(userCapability.properties).filter((n) => !byProperty.has(n));
+  const forbidden = notRecorded.filter((n) =>
+    userCapability.properties[n].precedence.some((p) => known(p) === "NONE"));
+  const uninteresting = notRecorded.filter((n) => !forbidden.includes(n));
+
+  w(`**Not recorded: ${notRecorded.length} of ${Object.keys(userCapability.properties).length} properties.**`, "");
+  if (forbidden.length) {
+    w(`- **Cannot exist** (${forbidden.length}), because a precedence parent is NONE: ` +
+      forbidden.map((n) => `\`${n}\``).join(", ") + ".", "");
+  }
+  if (uninteresting.length) {
+    w(`- **Not of interest** (${uninteresting.length}), because no precedence parent is ` +
+      `PARTIAL: ` + uninteresting.slice(0, 12).map((n) => `\`${n}\``).join(", ") +
+      (uninteresting.length > 12 ? `, and ${uninteresting.length - 12} more` : "") + ".", "");
+  }
+
+  /* Derived settings, with the OOA96 §2.3 citation the model insists on. */
+  const derived = recorded.filter((s) => s.derived);
+  if (derived.length) {
+    w("#### Functionally dependent settings", "");
+    w("Marked **(M)** for mathematical dependence, per OOA96 §2.3: *\"given values of the",
+      "attributes in X, the value of Y can be determined by a formula or algorithm\"*. The",
+      "model requires each one to cite its formula.", "");
+    w("| Setting (M) | Reads | External influences | Formula |", "|---|---|---|---|");
+    for (const s of derived) {
+      w(`| \`${s.id}\` | ${s.derived.reads.map((r) => `\`${r}\``).join(", ")} | ` +
+        `${s.derived.influences.map((i) => `\`${i}\``).join(", ") || "—"} | ` +
+        `${esc(s.derived.cite)} |`);
+    }
+    w("");
+
+    /* Resolve under every combination of the influences it depends on, so the
+     * document shows the adaptation happening rather than describing it. */
+    const infl = [...new Set(derived.flatMap((s) => s.derived.influences))];
+    if (infl.length === 1) {
+      const name = infl[0];
+      const values = profile.influences[name].values ?? [];
+      w(`**Resolved against \`${name}\`:**`, "");
+      w(`| \`${name}\` | ` + derived.map((s) => `\`${s.id}\``).join(" | ") + " |",
+        "|---|" + derived.map(() => "---|").join(""));
+      for (const v of values) {
+        const r = resolve(userCapability, profile, { [name]: v });
+        w(`| ${v} | ` +
+          derived.map((s) => valueOf(r.settings[s.id].measurement)).join(" | ") + " |");
+      }
+      w("",
+        "One profile, two answers, no duplicated context. Access for All would need two",
+        "whole `<context>` blocks to say this, which is the duplication the paper's §3",
+        "criticises.", "");
+    }
+  }
+
+  /* Setting groups. */
+  const groups = Object.values(profile.groups);
+  if (groups.length) {
+    w("#### Setting groups (contexts)", "");
+    w("| Group | Template | Settings | Influenced by |", "|---|---|---|---|");
+    for (const g of groups) {
+      w(`| \`${g.id}\` | ${g.template ?? "—"} | ${g.settings.map((s) => `\`${s}\``).join(", ")} | ` +
+        `${g.influencedBy.map((i) => `\`${i}\``).join(", ") || "—"} |`);
+    }
+    w("");
+  }
+}
+
+/* --- comparison ----------------------------------------------------------- */
+
+w("---", "", "## All profiles compared", "");
+w("Only properties recorded in at least one profile appear. A blank cell means the",
+  "property is not recorded for that profile — either because a precedence parent is",
+  "NONE, or because no parent is PARTIAL and so the question does not arise.", "");
+
+const names = Object.keys(exemplars);
+const everyProperty = userCapability.acquisitionOrder.filter((n) =>
+  names.some((k) => Object.values(exemplars[k].settings).some((s) => s.property === n)));
+
+w("| Property | " + names.join(" | ") + " |",
+  "|---|" + names.map(() => "---|").join(""));
+for (const prop of everyProperty) {
+  const cells = names.map((k) => {
+    const settings = Object.values(exemplars[k].settings).filter((s) => s.property === prop);
+    if (!settings.length) return "";
+    return settings
+      .map((s) => {
+        if (s.derived) return "PARTIAL *(M)*";
+        if (s.capability !== "PARTIAL") return s.capability;
+        const p = userCapability.properties[prop];
+        const v = valueOf(s.measurement);
+        return v === "—" ? "PARTIAL" : `PARTIAL ${v}${typeof s.measurement === "number" ? unitOf(p) : ""}`;
+      })
+      .join("<br>");
+  });
+  w(`| \`${prop}\` | ` + cells.join(" | ") + " |");
+}
+w("");
+
+w("---", "",
+  "## What is still missing",
+  "",
+  "- **No sonic exemplar.** The demonstrator is audio-first, and the composite",
+  "  frequency-range-with-gaps is implemented and tested — notched loss, usable below",
+  "  2 kHz and above 6 kHz — but no profile uses it. A profile with high-frequency",
+  "  loss would exercise the sonic ontology the way `hand-tremor` exercises the motor",
+  "  one.",
+  "- **No Preference Model.** Figure 4 of the paper is not built. Capability and",
+  "  preference are deliberately separate models, and only the first two are here.",
+  "- **The Adaptation Model is partial.** Profiles are differences from a reference,",
+  "  which is the paper's §8 mechanism, but Event Triggers, Instance Sequences and",
+  "  Sequence No (Figure 5) are not implemented, so profiles cannot yet be composed in",
+  "  a declared order under a trigger.",
+  "- **Lived experience.** These are stand-ins. Everything above is a hypothesis about",
+  "  what would matter, held until someone can say otherwise.",
+  "");
+
+process.stdout.write(out.join("\n") + "\n");

@@ -60,6 +60,13 @@ ok("tuple and field compose and decompose a measurement", () => {
   eq(r.value, 12, "field");
 });
 
+ok("round keeps float noise out of a user-facing measurement", () => {
+  /* 12 * 1.65 is 19.799999999999997 in binary floating point, and a minimum
+   * readable font size should be a number a person could have said. */
+  eq(run(A.round(A.mul(A.lit(12), A.lit(1.65)), 1)).value, 19.8, "1dp");
+  eq(run(A.round(A.lit(19.4))).value, 19, "0dp default");
+});
+
 ok("event generator produces exactly one event", () => {
   const r = run(A.generate("FontSizeChanged", { to: A.lit(18) }));
   eq(r.events.length, 1, "count");
@@ -416,7 +423,7 @@ ok("hand tremor: mounted display uses the seated size", () => {
 
 ok("hand tremor: hand-held display needs a larger size", () => {
   const { settings, trace } = resolve(userCapability, handTremor, { deviceStability: "HANDHELD" });
-  near(settings.minReadFontSizeForFont.measurement.size, 19.8, "handheld");
+  eq(settings.minReadFontSizeForFont.measurement.size, 19.8, "handheld, exactly 19.8");
   eq(settings.minReadFontSizeForFont.measurement.font, "system-sans", "font carried through");
   if (!trace.find((t) => t.derived === "minReadFontSizeForFont")?.cite) {
     throw new Error("the (M) formula was not cited in the trace");

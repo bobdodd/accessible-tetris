@@ -159,6 +159,13 @@ export const A = {
   max: (a, b) => node("op", { op: "max", a, b }),
   clamp: (value, lo, hi) => node("clamp", { value, lo, hi }),
 
+  /** Round to `dp` decimal places. Not decoration: a derived measurement is
+   *  handed to a renderer, and "minimum readable size: 19.799999999999997pt"
+   *  is binary floating point leaking into a user-facing capability. Where a
+   *  formula produces a measurement, it should produce one a person could have
+   *  stated. */
+  round: (value, dp = 0) => node("round", { value, dp }),
+
   /** Build a composite measurement from named parts. A transformation: it
    *  computes a dataset and touches no store. */
   tuple: (parts) => node("tuple", { parts: Object.freeze({ ...parts }) }),
@@ -246,7 +253,7 @@ export function classify(action) {
       if (["+", "-", "*", "/", "min", "max"].includes(n.op)) found.transformations++;
       else found.tests++;
     }
-    if (n.kind === "clamp" || n.kind === "tuple" || n.kind === "field") found.transformations++;
+    if (["clamp", "tuple", "field", "round"].includes(n.kind)) found.transformations++;
     for (const key of Object.keys(n)) {
       const v = n[key];
       if (Array.isArray(v)) v.forEach(walk);
@@ -398,6 +405,13 @@ function evaluate(n, scope, ctx, depth) {
       const v = ev(n.value), lo = ev(n.lo), hi = ev(n.hi);
       if (lo > hi) throw new ActionError(`clamp bounds inverted: ${lo} > ${hi}`);
       return Math.min(hi, Math.max(lo, v));
+    }
+
+    case "round": {
+      const v = ev(n.value);
+      if (typeof v !== "number") throw new ActionError(`round of a ${typeof v}`);
+      const factor = 10 ** n.dp;
+      return Math.round(v * factor) / factor;
     }
 
     case "tuple": {
