@@ -369,6 +369,65 @@ with remote side effects into cooperating local ones. Directly applicable, since
 unrestricted cross-object writes are how the Action tangles arise in the first
 place.
 
+## C5 · correction · Bob corrected Claude for trusting a critic over the method
+
+**2026-07-27.** Having researched ADFDs (C4), Claude went further and endorsed a
+*criticism* found in the same paper: Wieringa & Saake's claim that OOA letting an
+action change any object's attributes is "at odds with the object-oriented
+principle of encapsulation", together with their proposed locality restriction,
+which Claude called "worth adopting".
+
+Bob's response: the authors do not fully understand Shlaer-Mellor. The event
+model's run-to-completion semantics is what makes global access safe, so
+encapsulation is unnecessary; SM is not the Booch/Rumbaugh model of classes and
+objects; it transcodes as naturally to C as to any OO language; and it has an
+explicit "is a" subtyping relation without formal polymorphism. He supplied Neil
+Lang, *Shlaer-Mellor Object-Oriented Analysis Rules* (ACM SIGSOFT SEN 18(1),
+Jan 1993) — Project Technology, i.e. Shlaer and Mellor's own company.
+
+**The primary source contradicts the critique flatly.**
+
+- **Rule 70** requires that cross-object data access be recorded on an **Object
+  Access Model**. The method does not forbid it; it gives it a dedicated
+  derivative model. The introduction pairs them: the Object Communication Model
+  summarises *asynchronous* communication, the Object Access Model summarises
+  *synchronous* access. Both first-class deliverables.
+- **Rules 35–37** put consistency at action completion: data "self-consistent
+  upon completion", relationships made consistent, subtypes and supertypes left
+  consistently populated. The action is the unit of consistency, which is exactly
+  what makes global access safe without encapsulation.
+- **Rule 56** states the dataflow semantics outright: "A process executes when
+  all of its data inputs and control inputs are available."
+- **Rule 61** gives the four process types: accessors, transformations, event
+  generators, tests.
+
+Wieringa & Saake's own stated reason for the restriction was that "communication
+is almost trivial to formalize if we require actions to have local effects only"
+— a convenience for their formalism. Claude relayed it as a finding about the
+method.
+
+**The failure mode, and it is the most instructive one yet.** Claude weighted
+source authority by *form* rather than by *provenance*. A peer-reviewed
+formalisation paper in Requirements Engineering looks authoritative: formal,
+citable, published. But it is an outsider's reconstruction with its own agenda,
+and where it disagrees with the method's own normative rules, the method wins.
+The tell was visible in the text Claude had already quoted — the authors say "for
+these reasons, we will add the restriction" — and Claude quoted that sentence
+without registering that a paper *adding* a restriction is not a paper
+*documenting* one.
+
+*Generalisation for the experience report: an AI asked to research a method will
+find secondary literature more readily than primary, because secondary
+literature is more indexed, more recent, and more often open-access. It will
+then treat critique as description. The correction required someone who knew the
+method well enough to say "that author has misunderstood this", which is
+precisely the knowledge that cannot be recovered from a search.*
+
+**Consequence for the build.** The locality restriction is dropped. Functionally
+dependent Settings are ADFDs under rules 56, 57, 61; cross-domain access is
+permitted and recorded on an Object Access Model per rule 70. §6a state is
+**MODEL SPECIFIES**, citable to a normative source.
+
 ## X1 · disagreement · Bob corrected Claude's conclusion, not its facts
 
 **2026-07-27.** After C3, Claude concluded that the working practice should be
