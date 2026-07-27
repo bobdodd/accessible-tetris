@@ -156,6 +156,57 @@ convergence rather than as a result.
 
 ---
 
+## 2026-07-27 — domains before bridges
+
+### C2 · correction · Bob corrected Claude
+**The programme put a bridge before either model it joins had a population.**
+`DEMOS.md` had the cradle built with the request/answer bridge in it from the
+start. Bob's objection was methodological: to have a bridge you need models with
+populations, so each domain must be considered independently and populated well
+enough to test on its own terms. Issue #5 is therefore not the next question at
+all — it is a bridge question, unanswerable until the domains either side stand
+up, and Bob's decision to *assume* it composes for now is safe precisely because
+nothing yet depends on the answer.
+
+*Assessment: Claude had the Shlaer-Mellor framing available — the case study says
+outright that the five layers are structurally an SM domain chart — and did not
+apply it. This is a different failure mode from C1. C1 was missing information;
+this was having the information and not drawing the consequence. For the
+experience report, that distinction is worth keeping: retrieval and inference
+fail separately.*
+
+### D8 · decision · Bob, refined by Claude
+**Start with the Render Model and the User/Capability domain.** Bob's call, on
+the grounds that representations of modalities and metaphors are where the Tetris
+research actually lies, and capability is needed to select modalities correctly.
+
+Claude agreed with both and refined the sequencing in `design/DOMAINS.md`: the
+Render Model is the *most* bridge-dependent domain of the eleven, so entering it
+directly means starting where least can be tested alone. The refinement is to
+enter it the way the thesis itself did, by hand-populating a concrete Application
+Model as a fixed point and working backwards to find what would have caused it.
+
+*The method is quoted from the note's own introduction. Claude did not invent it;
+it was recovered from the source and applied to a different domain. Recorded as
+recovery rather than contribution.*
+
+### D9 · decision · Claude
+**Populate the Interaction Model first.** Zero dependencies, smallest, and it
+constrains everything downstream, since a metaphor is a choice about how to use a
+medium's properties and until those are declared there is nothing to select
+against. It also completes the part of the note that trails off into "shown in
+XXX", so it is new work and is marked as such. Risk recorded in DOMAINS.md §7:
+Claude may be over-weighting this because it aligns with the palette argument
+already published in the LinkedIn article, and convergence is satisfying without
+being evidence.
+
+### D10 · decision · Bob
+**Licensing: all code GPL-3, all documents CC BY-SA.** `LICENSE` (GPL-3.0 full
+text) at the root; `docs/LICENSE` and `design/LICENSE` carrying the CC BY-SA 4.0
+notice with attribution and the Tetris trademark note.
+
+---
+
 ## Standing observations for the experience report
 
 Written as they become visible, and expected to change:

@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000" role="img" aria-labelledby="ddTitle ddDesc">
+<title id="ddTitle">Domain dependency: which CISNA domains can be populated independently</title>
+<desc id="ddDesc">Eleven domains arranged in two groups. On the left, five domains that can be populated independently with no bridge to another model: Interaction Model, Capability Model, Semantics (marked built), Inventory, and Application Model (marked hand-populated as a target). On the right, six bridge-dependent domains that cannot be meaningfully populated until their neighbours exist: Composition Model, Render Model, Adaptation, Navigation (marked unwritten in the source), Game (deferred to phase three), and External Content (not exercised). Arrows run from the independent domains to the bridge-dependent ones they feed, showing that Composition waits on Semantics, Inventory and Interaction; Render waits on Semantics, Composition and the Application Model; and Adaptation waits on Capability and Composition.</desc>
+<style>
+  .box   { stroke: #1a1a1a; stroke-width: 3; }
+  .indep { fill: #d8efdc; }
+  .dep   { fill: #f0e2d2; }
+  .done  { fill: #bfe3c8; }
+  .muted { fill: #ececec; }
+  .lbl   { font-family: Georgia, 'Iowan Old Style', serif; font-size: 25px; fill: #1a1a1a; }
+  .sub   { font-family: Georgia, serif; font-style: italic; font-size: 19px; fill: #444; }
+  .hdr   { font-family: Georgia, serif; font-size: 30px; font-weight: bold; fill: #1a1a1a; }
+  .note  { font-family: Georgia, serif; font-style: italic; font-size: 20px; fill: #555; }
+  .arrow { stroke: #555; stroke-width: 2.5; fill: none; }
+</style>
+<defs>
+  <marker id="ah" markerWidth="11" markerHeight="11" refX="9" refY="4.5" orient="auto">
+    <path d="M0,0 L9,4.5 L0,9 z" fill="#555"/>
+  </marker>
+</defs>
+<rect width="1600" height="1000" fill="#fbfaf7"/>
+
+<text x="60" y="66" class="hdr">Populatable alone</text>
+<text x="60" y="98" class="note">no bridge needed to say something true</text>
+
+<text x="900" y="66" class="hdr">Bridge-dependent</text>
+<text x="900" y="98" class="note">needs a populated neighbour first</text>
+
+<line x1="840" y1="120" x2="840" y2="950" stroke="#bbb" stroke-width="2" stroke-dasharray="10 8"/>
+
+<!-- independent -->
+<rect x="60" y="140" width="330" height="96" rx="10" class="box indep"/>
+<text x="85" y="180" class="lbl">Interaction Model</text>
+<text x="85" y="212" class="sub">spaces + properties</text>
+
+<rect x="60" y="266" width="330" height="96" rx="10" class="box indep"/>
+<text x="85" y="306" class="lbl">Capability Model</text>
+<text x="85" y="338" class="sub">perceive and act</text>
+
+<rect x="60" y="392" width="330" height="96" rx="10" class="box done"/>
+<text x="85" y="432" class="lbl">Semantics</text>
+<text x="85" y="464" class="sub">built and populated</text>
+
+<rect x="60" y="518" width="330" height="96" rx="10" class="box indep"/>
+<text x="85" y="558" class="lbl">Inventory</text>
+<text x="85" y="590" class="sub">media elements</text>
+
+<rect x="60" y="644" width="330" height="110" rx="10" class="box indep"/>
+<text x="85" y="684" class="lbl">Application Model</text>
+<text x="85" y="716" class="sub">hand-populated:</text>
+<text x="85" y="742" class="sub">the target</text>
+
+<!-- dependent -->
+<rect x="900" y="140" width="330" height="96" rx="10" class="box dep"/>
+<text x="925" y="180" class="lbl">Composition Model</text>
+<text x="925" y="212" class="sub">rule sets</text>
+
+<rect x="900" y="266" width="330" height="96" rx="10" class="box dep"/>
+<text x="925" y="306" class="lbl">Render Model</text>
+<text x="925" y="338" class="sub">meaning to presentation</text>
+
+<rect x="900" y="392" width="330" height="96" rx="10" class="box dep"/>
+<text x="925" y="432" class="lbl">Adaptation</text>
+<text x="925" y="464" class="sub">selects alternatives</text>
+
+<rect x="900" y="518" width="330" height="96" rx="10" class="box muted"/>
+<text x="925" y="558" class="lbl">Navigation</text>
+<text x="925" y="590" class="sub">unwritten in the source</text>
+
+<rect x="900" y="644" width="330" height="96" rx="10" class="box muted"/>
+<text x="925" y="684" class="lbl">Game</text>
+<text x="925" y="716" class="sub">deferred; tape stands in</text>
+
+<rect x="900" y="770" width="330" height="96" rx="10" class="box muted"/>
+<text x="925" y="810" class="lbl">External Content</text>
+<text x="925" y="842" class="sub">not exercised here</text>
+
+<!-- feeds -->
+<path d="M 390 188 C 620 188 660 188 900 188" class="arrow" marker-end="url(#ah)"/>
+<path d="M 390 440 C 620 420 660 200 900 196" class="arrow" marker-end="url(#ah)"/>
+<path d="M 390 566 C 620 560 660 220 900 206" class="arrow" marker-end="url(#ah)"/>
+
+<path d="M 390 448 C 640 460 680 300 900 302" class="arrow" marker-end="url(#ah)"/>
+<path d="M 1065 236 L 1065 266" class="arrow" marker-end="url(#ah)"/>
+<path d="M 390 690 C 700 690 780 330 900 316" class="arrow" marker-end="url(#ah)"/>
+
+<path d="M 390 314 C 660 320 700 430 900 434" class="arrow" marker-end="url(#ah)"/>
+<path d="M 1240 188 C 1330 188 1330 430 1235 434" class="arrow" marker-end="url(#ah)"/>
+
+<text x="60" y="852" class="note">Arrows read "is needed to populate".</text>
+<text x="60" y="886" class="note">A bridge is a relationship between two POPULATED models,</text>
+<text x="60" y="920" class="note">so nothing on the right can be tested until its sources on the left stand up.</text>
+</svg>
