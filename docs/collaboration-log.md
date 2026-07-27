@@ -319,6 +319,56 @@ is what reactive systems settled on in the intervening years. That would be a
 departure from the paper's "mini program" formulation and would be recorded as
 one.
 
+## C4 · correction · Bob corrected Claude, and the method beat the modern import
+
+**2026-07-27.** Claude proposed (issue #7) fixing the unspecified evaluation
+order of Capacity-Model Actions by borrowing from reactive systems: declare
+reads and writes, evaluate in topological order, reject cycles. Bob's response
+was that this is "actually very Shlaer-Mellor", that the method had **Action
+Data Flow Diagrams** for exactly this, and that ADFDs were how actions in Moore
+state models were described. He asked Claude to research it and check he was not
+mis-remembering.
+
+**He was not.** Verified against Wieringa & Saake, *Formal Analysis of the
+Shlaer-Mellor Method*, Requirements Engineering (1996) 1:106–131, reproducing
+figures from Shlaer & Mellor's *Object Lifecycles* (1991):
+
+- ADFDs describe actions: "an action data flow diagram (ADFD) that is specified
+  for each action in each state model and which shows which processes are
+  performed during the action" (p.108).
+- State models are Moore: "State models in OOA use the Moore convention"
+  (Fig. 5 caption, p.114).
+- Order is dataflow: Fig. 10 (p.119) shows processes connected by labelled data
+  flows over data stores. A process runs when its inputs arrive.
+
+**Why this entry matters more than the others.** Every previous correction was
+the human supplying information the AI could not have had (C1, C3) or catching
+an over-generalisation (X1). This one is different: Claude reasoned to a
+*correct* answer by the wrong route. The proposal was right in substance and
+wrong in provenance — presented as importing a modern idea, when the parent
+method had specified it in 1988 and the 2009 paper had *lost* it by describing
+Actions as "mini programs".
+
+For the demonstrator that distinction is not cosmetic. Under §6a the revised
+approach is **MODEL SPECIFIES**, by way of the parent method, rather than MY
+CHOICE. Had this gone unchecked, the write-up would have claimed a modern
+contribution where there was a restoration, which is the exact failure mode §6a
+exists to prevent, arriving from a direction §6a did not anticipate: not
+inventing what the model lacked, but failing to notice the model already had it.
+
+*Generalisation for the experience report: an AI trained largely on current
+practice will reach for current practice, and will reach for it even when the
+domain's own older literature holds the same answer with better provenance. The
+answer being right disguises the error. The human's contribution here was not
+knowledge Claude lacked access to, but knowing where to look.*
+
+**Also surfaced:** the same paper criticises OOA for allowing an action to change
+attributes of any object, "at odds with the object-oriented principle of
+encapsulation" (p.120), and proposes a locality restriction, splitting actions
+with remote side effects into cooperating local ones. Directly applicable, since
+unrestricted cross-object writes are how the Action tangles arise in the first
+place.
+
 ## X1 · disagreement · Bob corrected Claude's conclusion, not its facts
 
 **2026-07-27.** After C3, Claude concluded that the working practice should be
