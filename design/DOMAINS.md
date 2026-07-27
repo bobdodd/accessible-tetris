@@ -53,6 +53,92 @@ whole basis of the recommendation below.
 | **Game** | Nothing, technically, but it is deferred by DESIGN.md §8 and replaced by the tape until phase 3. |
 | **External Content** | Not exercised by this demonstrator: the game generates its own content. |
 
+## 1a. The Architecture domain is first-class, and Recursive Design is not adopted
+
+Bob's ruling, 2026-07-27: **we are not beholden to Shlaer-Mellor.** We take from
+it what serves and adapt the rest. The reason is specific rather than general —
+if the method were followed, **Recursive Design would completely change our
+runtime model.**
+
+In canonical Shlaer-Mellor the Architecture domain is not a peer. It is the
+translator: the domain that consumes every other domain's OOA models and emits
+code by way of archetypes and mechanisms. Its specialness *is* the translation
+mechanism. Other domains are analysed; the architecture translates them.
+
+Bob's move, which he notes he never made in practice with Shlaer-Mellor itself,
+is to put **the Architecture and RD domains into the domain tree as first-class
+domains** — analysed like any other, with their own models, populated at runtime,
+connected by wormholes rather than by translation.
+
+**Why this is the load-bearing decision.** Demote the Architecture domain to a
+peer and translation stops being the organising principle. The cradle then
+*interprets* populated models at runtime instead of compiling them ahead of
+time — which is what the cradle already is, and what makes the demonstrator
+inspectable in a browser rather than a build artefact.
+
+It also explains a structure that would otherwise look accidental. CISNA carries
+both a five-layer Document Model *and* a Runtime System (User Profiling, Render
+Model, Composition Model, Runtime Inventory). Under canonical SM that pairing is
+odd, because the runtime side is architecture and architecture does not belong in
+the analysis tree. Under Bob's framing it is exactly right: **the Runtime System
+is the Architecture domain, modelled rather than built.** The eleven domains in
+§1 already mix both, and this is why that is principled rather than sloppy.
+
+It is also the published CISNA deviation seen from another angle — the model is
+"a Shlaer-Mellor domain chart with peer relationships rather than the canonical
+SM client-server hierarchy". Peer relationships and a first-class Architecture
+domain are the same move, stated twice.
+
+### What follows, concretely
+
+| Taken from Shlaer-Mellor | Declined |
+|---|---|
+| ADFD semantics for Actions: four process types, execution on data availability, acyclic (OOA96 §9.1, §9.3) | Recursive Design — translation, archetypes, colouring |
+| Wormholes as the declared cross-domain transfer of control (§9.5.2) | The Architecture domain as translator |
+| Mathematical dependence, `(M)`-marked with a cited formula (§2.3) | Compile-time model translation of any kind |
+| The information / state / process model structure | The requirement that every domain reach code by translation |
+
+The test for any future borrowing is the one Bob stated: does it serve, and does
+it leave the runtime model intact? Constructs that **specify** — ADFDs,
+wormholes, `(M)` — port cleanly to an interpreter, because they say what a thing
+*means* rather than how it is compiled. Constructs that **translate** do not, and
+are declined.
+
+**§6a status of this section: deliberate deviation from the parent method.** Not
+a gap in CISNA, and not a fault in Shlaer-Mellor. A choice, made for a stated
+reason, recorded so the write-up cannot later present it as either.
+
+## 1b. Two constructs adopted from OOA96
+
+**Functionally dependent Settings use mathematical dependence.** *User Capability
+in an Adaptive World* describes dependent Settings as functionally dependent,
+realised through Actions. OOA96 §2.3 offers a stronger and more precise
+construct: an attribute is *mathematically dependent* on a set of others when its
+value "can be determined by a formula or algorithm", is marked `(M)` on the
+Information Model, and carries the formula or algorithm in its description.
+
+Decision: **use `(M)`.** A derived Setting states its formula declaratively and
+the runtime evaluates it. An ADFD is reserved for Actions that genuinely
+process — external influences, conditional branching, event generation. The
+simple cases, which are most of them, need no process graph at all. Where an
+`(M)` attribute's formula reads other Settings, the acyclicity rule of §9.1
+still governs the resulting dependency graph.
+
+**Cross-domain communication is by wormhole.** OOA96 §5.5 forbids the
+alternative outright: "Events generated in an action in a domain must be received
+by an instance in the same domain. It is no longer permitted to generate an event
+that is intended for an object in another domain." §9.5.2 supplies the
+replacement — the wormhole, a declared transfer of control whose description must
+state what the caller expects, "stated in the semantic world of the caller", and
+"any return communication required by the caller", and which is explicitly
+agnostic as to synchronous or asynchronous implementation.
+
+Decision: **the CISNA layers are domains, so inter-layer communication is
+wormholes.** The request/answer bridge of DESIGN.md §2 is a wormhole with a
+declared return. The construct's sync/async agnosticism is precisely the property
+that let the rendezvous discipline travel out of telephony in the first place.
+Bears directly on issue #5.
+
 ## 2. Where I think Bob is right, and where I would refine it
 
 Bob's instinct was that the first Tetris work lies in the **Render Model**

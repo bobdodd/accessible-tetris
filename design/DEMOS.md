@@ -261,6 +261,32 @@ an Application Model. One is an interaction discipline, the other a construction
 mechanism. Whether they compose cleanly, or disagree about what drives what, is
 not yet established.
 
+## 6b. The parent method is a resource, not an authority
+
+§6a governs our relationship to CISNA, which is unfinished. A separate question
+is our relationship to **Shlaer-Mellor**, which is not unfinished at all. It is a
+complete, published, rigorous method — and we still do not follow all of it.
+
+Bob's ruling: we are not beholden to it, we take what serves and adapt the rest.
+Specifically, **Recursive Design is not adopted**, because it would change the
+runtime model entirely, and the Architecture domain is promoted to a first-class
+domain in the tree. DOMAINS.md §1a carries the reasoning and the consequences.
+
+This adds a fourth state to the three above, and it must not be collapsed into
+any of them:
+
+- *the model specifies this*
+- *the model is silent and this is my choice*
+- *the model says something that does not work, and here is what was done instead*
+- **the parent method specifies this, it works, and we have declined it for a
+  stated reason**
+
+The fourth is the easiest to misreport, and it can be got wrong in both
+directions. Presenting a declined construct as a gap in the method flatters us;
+presenting an adopted one as our invention flatters us more. C4 and C5 in the
+collaboration log are both instances of getting exactly this wrong, in opposite
+directions, within a single day.
+
 ## 7. Publishing
 
 Each demo becomes a page under `/adaptation` on a11ybob.com when it works or

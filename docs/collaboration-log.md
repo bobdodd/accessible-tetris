@@ -555,6 +555,50 @@ communication is wormholes, not events — and the request/answer bridge with it
 rendezvous is a wormhole whose return communication is declared. The
 sync/async-agnosticism of the construct is exactly the property the bridge needs.
 
+## D12 · decision · Not beholden to Shlaer-Mellor; the Architecture domain becomes first-class
+
+**2026-07-27.** Two constructs adopted from OOA96 on Bob's instruction —
+mathematical dependence `(M)` for derived Settings (§2.3), and wormholes for
+cross-domain communication (§9.5.2) — and with them a governing principle that
+matters more than either.
+
+**Bob's ruling, verbatim:** "we are not beholden to Shlaer-Mellor, and we take
+from it as we need and adapt as required. If we were following it, Recursive
+Design would completely change our runtime model."
+
+**And his own methodological move**, which he notes he never made in practice
+with Shlaer-Mellor itself: the Architecture and RD domains become **first-class
+domains in the domain tree**, rather than the canonical arrangement in which the
+Architecture domain is the translator consuming every other domain's models.
+
+**Why it is load-bearing.** In canonical SM the Architecture domain's specialness
+*is* the translation mechanism. Demote it to a peer and translation stops being
+the organising principle, which is what permits a runtime interpreter instead of
+a compiler — what the cradle already is. It also makes sense of CISNA carrying
+both a Document Model and a Runtime System: the Runtime System *is* the
+Architecture domain, modelled rather than built. And it is the same move as the
+peer-relationships deviation published with CISNA in 2008, stated from the other
+side.
+
+Recorded in DOMAINS.md §1a and §1b, with a fourth §6a state added in DEMOS.md
+§6b for "the parent method specifies this, it works, and we have declined it for
+a stated reason".
+
+**Worth marking for the experience report.** This is the first entry in this log
+that is a positive methodological contribution from Bob rather than a correction
+of mine, and it arrived immediately after two corrections in a row. The sequence
+is itself the finding: three rounds of me getting the provenance wrong (C4 wrong
+route, C5 wrong source authority, S2 wrong historical mechanism) forced the
+question of what our relationship to the parent method actually *is* — at which
+point Bob answered it with a rule that had been implicit in his practice since
+2008 but never written down. The corrections were not friction on the way to the
+work. They produced the governing principle.
+
+*Generalisation: the value of the human's corrections was not that they fixed
+three errors. It was that being made to justify a borrowing three times surfaced
+a policy for borrowing. An AI that had been right the first time would not have
+prompted it.*
+
 ## X1 · disagreement · Bob corrected Claude's conclusion, not its facts
 
 **2026-07-27.** After C3, Claude concluded that the working practice should be
