@@ -689,6 +689,83 @@ found indispensable. Worth stating plainly in the write-up rather than smoothing
 over: relationships are the backbone of the Information Model, and OOA96 gives no
 runtime way to walk them.
 
+## D13 · decision · Capability and Capacity Models built and populated
+
+**2026-07-27.** Bob: extend Action Language as needed, then "a working
+capability model that we can populate with exemplars to test with:
+blind-since-birth no other disability, Low vision (contrast), low vision
+(colour). Perhaps keyboard only and someone with hand tremors? … to later
+replace or augment with lived experience as and when available."
+
+Built: `cradle/action/action-language.js` (the four OOA96 process types plus
+`navigate`), `cradle/user/capability.js` (Figure 2), `cradle/user/capacity.js`
+(Figure 3), `vocabulary/user-capability.js` (the schema), `vocabulary/profiles.js`
+(six exemplars). 44 tests, all passing; 57 across the repo.
+
+### §6a states, so the write-up cannot blur them
+
+**MODEL SPECIFIES.** Tables 2, 3 and 4 transcribed with their values, parents
+and descriptions. Ontology disjointness. Precedence as acquisition order. The
+Composite Property with CompositionOrder — the frequency-range-with-gaps case is
+the paper's own justification for the type and is tested as such. Settings as
+first-class referenced values rather than per-context copies. Partial groups
+being well-formed. Profiles as differences from a reference (§8, "Fred is like
+Jim except…").
+
+**MY CHOICE, on extension points the paper opens explicitly.**
+
+- *A `motor` subject ontology.* The paper scopes ontologies "such as visual,
+  sonic, and haptic" — an exemplary list — and says outright that "it is
+  possible to imagine other groupings, not related to specific design spaces,
+  with use of language one obvious candidate", tabulating that one as Table 4.
+  Motor capability is modelled throughout the paper (writeFontSet's SELECT
+  covers "keyboard, scanning, eye tracking"; hand tremors appear twice as
+  worked examples) but never given an ontology. This supplies one, flagged
+  `designSpace: false` because it is not a Nesbitt display space and the
+  distinction should survive.
+- *`contrastSensitivity`.* Table 2 models colour and intensity per frequency
+  band but has no contrast property, and contrast is the whole of one requested
+  exemplar. Written in the paper's percentage idiom.
+- *Table 4's dangling parents.* `readFontText` and `readAudioText` are named as
+  parents by Table 4 but not defined in what the paper calls "a small edited
+  fragment". Supplied so the precedence trees close. `readFontText` takes
+  parents in two ontologies deliberately, mirroring Table 4's own
+  `readSignText` ("sight + signLanguageSet") — precedence crosses ontologies
+  while membership stays disjoint, and there is a test for it.
+- *`viewRectangle` as a Composite of two Numeric Ranges.* Table 3 gives it as
+  "x, y, w, h in pixels". A rectangle is a horizontal extent and a vertical
+  extent, and Numeric Range is one of the five intrinsic types; encoding four
+  scalars into a Text property would put structure inside a string, which is
+  what first normal form exists to prevent (OOA96 §2.1.1).
+- *The sonic and haptic groups entirely.* "Property groupings are also
+  identifiable for the sonic and haptic design spaces" — said, not tabulated.
+
+**Two modelling choices worth defending rather than assuming.**
+
+*The blind exemplar removes settings beneath sight rather than zeroing them.*
+`contrastSensitivity: 0` would assert something false — not that contrast is
+irrelevant, but that it was measured and found absent. Precedence exists to say
+"do not ask", and absence is how the model says it.
+
+*"Since birth" changes nothing in the profile, and that is correct.* Capability
+is what the user can do; the model has no place for aetiology, by design. Where
+it would matter is in Semantics and Composition — a listener with no visual
+memory is a different audience for a spatial metaphor than one who lost sight
+later — and that belongs in the metaphor work, not here.
+
+### On what the exemplars are
+
+Every Entity records `basis: "exemplar — stands in for lived experience, not
+derived from any person"`, in the data rather than only in a comment. They are
+deliberately not personas: no name, age, occupation or narrative, because those
+invite generalisation from a character to a population. Capability values and
+nothing else, which is the paper's own argument.
+
+Bob's framing — "to later replace or augment with lived experience as and when
+available" — is the honest position and is what makes the fixtures usable now
+without their becoming a claim. Recorded here because it is exactly the kind of
+qualification that erodes silently between a repo and a conference paper.
+
 ## X1 · disagreement · Bob corrected Claude's conclusion, not its facts
 
 **2026-07-27.** After C3, Claude concluded that the working practice should be
