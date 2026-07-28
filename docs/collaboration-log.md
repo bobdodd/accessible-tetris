@@ -1531,6 +1531,95 @@ for.*
 
 56 properties, 16 exemplars, 130 tests.
 
+## C11 · correction · The model had become hand-centric, and nobody decided that
+
+**2026-07-28.** Bob: "There is more to do with touch. You can't just have
+fingers, we need a broader model. We need head mobility — being able to look
+around and up/down. We need feet/toes for people who don't have hands/arms who
+type with their toes."
+
+Three things, and they were one fault: **every part of the model that touched the
+body assumed hands**, and no one had ever decided it should.
+
+### `touch` has now been wrong in both directions
+
+It began as "contact on the skin" — whole body, with no way to say that vibration
+white finger takes the fingers and leaves everything else. So I narrowed it to
+the hands and fingertips, recorded "no body-site granularity" as a known limit,
+and moved on.
+
+**Narrowing was the wrong fix**, and the toe typist proves it: a person who types
+with their feet has superb sensation in their toes and, under a hands-only
+reading, none worth recording. I traded one inexpressible person for another and
+called it a resolution.
+
+The right fix is to say WHERE, which the model could already do — a collection
+of `{site, level}` tuples, exactly as `knownLanguages` carries four skills per
+language. The convention is the model's own: **list only the sites that differ
+from full**, because absence means "not of interest" everywhere else too.
+
+Body sites are a **set**, never a rank — a head is not more than a foot — while
+levels are ordered. There is a test for both, because getting that backwards
+would be a quiet insult encoded as a schema.
+
+### Naming the effector became compulsory
+
+`keyControl` was FULL/PARTIAL/NONE with no way to say *with what*. A head switch
+and a toe are different design problems at the same count, and "PARTIAL" for a
+fluent toe typist would have been a falsehood as well as an insult.
+
+`keyControl` and `pointerControl` now carry effector sites, and adding the
+measurement forced every existing PARTIAL setting to name its sites — the change
+audited the profiles for me.
+
+### `manualStability` → `effectorStability`
+
+The old name assumed hands, which is the same fault in a third place. A foot is
+an effector and so is a chin. Renamed in source; the collaboration log keeps the
+old name where it appears, because this file records what was said and done and
+must not be retro-edited.
+
+### Head mobility is not head control
+
+`headControl` answered "can you direct your head", and Bob's question was "how
+far can you turn it". Different question, and asked far less often than it
+should be: someone may point precisely within a narrow arc and be unable to look
+up at all, and a screen outside that arc is unusable however good the pointing.
+
+`headRange` records four directions rather than two axes, because the limits are
+frequently asymmetric. It bites hardest on eye gaze, where the literature is
+explicit that a device too high causes eyelid fatigue and one too low is misread
+because the upper lid obscures the pupil — both placement problems, and
+placement is bounded by this property.
+
+### The toe typist, and what it is careful NOT to say
+
+Nothing in that profile is PARTIAL below the site lists. No reduced dexterity, no
+reduced speed, no reduced endurance — `effectorStability` is FULL and stated
+explicitly, because the temptation to assume a foot is less steady than a hand is
+exactly the bias the profile exists to catch. The only rows differing from the
+reference are the ones naming *where*.
+
+The design consequence is still real: feet are further from the screen, larger,
+and reach a smaller comfortable area. That is layout and placement, which is what
+the site list and `headRange` are for — not a lesser capability.
+
+### And two more tests that outlived their model
+
+Fixing this broke two assertions that encoded the hands-only reading, both
+expecting `touch: NONE`. That is the **third** time today a passing test turned
+out to be a superseded understanding written down as a requirement (C7, the
+deafened frequency range, now this).
+
+The pattern is worth naming precisely, because it is not carelessness: **a test
+written at the same moment as the code cannot check the code, only restate it.**
+It becomes evidence only later, when someone changes the model and the old
+assertion refuses. Both times, that refusal is what surfaced the real change —
+which is an argument for keeping tests specific enough to fail rather than
+general enough to survive.
+
+57 properties, 17 exemplars, 137 tests.
+
 ## X1 · disagreement · Bob corrected Claude's conclusion, not its facts
 
 **2026-07-27.** After C3, Claude concluded that the working practice should be

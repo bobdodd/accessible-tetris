@@ -52,6 +52,24 @@ const minutes = (max = 480) => ({ type: "numeric", min: 1, max, unit: "min" });
 
 const FLUENCY = ["none", "basic", "conversational", "fluent", "native"];
 
+/** Body sites, used wherever the model needs to say WHERE — sensation, and which
+ *  part of a person operates a control. Ordered head to foot for readability
+ *  only; this list is NOT an ordered scale and must never be ranked. */
+const BODY_SITES = [
+  "head", "face", "mouth", "trunk",
+  "arms", "hands", "fingertips",
+  "legs", "feet", "toes",
+];
+
+/** How much sensation a site has. Ordered least to most. */
+const SENSATION = ["none", "trace", "reduced", "full"];
+
+/** Which body sites operate a control. A capability, not an equipment list:
+ *  "types with toes" is a fact about the person, not about the keyboard. */
+const effectorSites = {
+  type: "discrete", values: BODY_SITES, multiple: true,
+};
+
 export const userCapability = defineCapability({
   id: "cisna.user-capability",
   version: "0.3.0",
@@ -316,31 +334,42 @@ export const userCapability = defineCapability({
 
     touch: {
       ontology: "haptic", precedence: [],
-      /* NARROWED, deliberately, to the hands and fingertips.
+      /* WHOLE BODY AGAIN, with sites.
        *
-       * An earlier draft read "contact on the skin", which is whole-body and
-       * turned out to be unusable. Vibration white finger takes tactile sense
-       * from the fingers and leaves it everywhere else, and under a whole-body
-       * reading that person is inexpressible: NONE would be false about their
-       * back and their feet, FULL would be false about the only part that
-       * touches a device.
+       * This property has now been wrong in both directions. It began as
+       * "contact on the skin" — whole body, with no way to say that vibration
+       * white finger takes the fingers and leaves everything else. So it was
+       * narrowed to the hands and fingertips, which fixed that case and broke a
+       * larger one: a person with no arms who types with their toes needs toe
+       * sensation, and under a hands-only reading they have none worth
+       * recording.
        *
-       * The narrowing costs nothing, because EVERY property that depends on
-       * touch is already about hands — reading Braille, receiving tactile sign,
-       * spelling onto someone's hand, feeling a device vibrate. Whole-body
-       * tactile sense has no consumer here.
+       * Narrowing was the wrong fix. The right one is to say WHERE, which the
+       * model can already do — a collection of tuples, exactly as
+       * knownLanguages carries four skills per language.
        *
-       * KNOWN LIMIT, recorded rather than hidden: the model has no body-site
-       * granularity, so a person with sensation in one hand and not the other,
-       * or in the palm but not the fingertips, is not expressible. Same shape of
-       * limit as laterality in hearing, and resolved the same way — the model
-       * carries the functional consequence at the interaction surface, not the
-       * anatomy. */
+       * CONVENTION, and it matters: list only the sites that differ from full.
+       * An unlisted site is unimpaired, which is the same rule the whole model
+       * runs on — absence means "not of interest", never "zero". A profile that
+       * enumerated every intact site would be unreadable and would say nothing
+       * extra. */
+      measurement: {
+        type: "composite",
+        of: {
+          type: "composite",
+          parts: [
+            { name: "site", type: "discrete", values: BODY_SITES },
+            { name: "level", type: "discrete", ordered: true, values: SENSATION },
+          ],
+        },
+        order: "asDeclared",
+      },
       description:
-        "MY CHOICE. Tactile perception AT THE HANDS AND FINGERTIPS — the surface that " +
-        "meets a device, reads Braille, and finds another person's hand. Deliberately " +
-        "not whole-body: every dependent property is a hand task, and conditions such " +
-        "as vibration white finger take the fingers while leaving the rest intact.",
+        "MY CHOICE. Tactile perception, by body site. FULL is unimpaired everywhere; " +
+        "NONE is absent everywhere; PARTIAL lists the sites that differ from full and " +
+        "leaves the rest unlisted. Fingertips and toes are separated from hands and feet " +
+        "because reading Braille, feeling a key and finding another person's hand are " +
+        "fingertip tasks, and because a great many conditions take the extremities first.",
     },
     vibrationDetection: {
       ontology: "haptic", precedence: ["touch"], measurement: percent,
@@ -370,8 +399,9 @@ export const userCapability = defineCapability({
 
     pointerControl: {
       ontology: "motor", precedence: [],
+      measurement: effectorSites,
       description:
-        "MY CHOICE. Can the user operate a continuous pointing device WITH A HAND? NONE " +
+        "MY CHOICE. Can the user operate a continuous pointing device, and with what? NONE " +
         "is the capability usually described as 'keyboard only' — and describing it as " +
         "capability rather than preference is the paper's whole argument: 'Does the user " +
         "need a screen reader, or does she simply wish to use one?' Head and eye pointing " +
@@ -438,7 +468,38 @@ export const userCapability = defineCapability({
       description:
         "MY CHOICE. Can the user direct head position deliberately, for head pointing or " +
         "head switches? Preserved in high cervical injury well below the level at which " +
-        "the hands are not, which is why it is a separate channel from pointerControl.",
+        "the hands are not, which is why it is a separate channel from pointerControl. " +
+        "How FAR they can turn is headRange.",
+    },
+    /* MY CHOICE. Range of motion, which is a different question from control and
+     * is asked far less often than it should be. Someone may direct their head
+     * precisely within a narrow arc and be unable to look up at all — and a
+     * screen or camera placed outside that arc is simply unusable, however good
+     * the pointing.
+     *
+     * It bites hardest on eye gaze, where the literature is explicit that a
+     * device positioned too high causes eyelid fatigue and eyestrain from
+     * looking upwards, while one too low is misread because the upper lid
+     * obscures the pupil. Both are placement problems, and placement is bounded
+     * by this property.
+     *
+     * Four directions rather than two axes, because the limits are frequently
+     * asymmetric — torticollis, hemiplegia, a fused joint, an old injury. */
+    headRange: {
+      ontology: "motor", precedence: ["headControl"],
+      measurement: {
+        type: "composite",
+        parts: [
+          { name: "up", type: "numeric", min: 0, max: 90, unit: "deg" },
+          { name: "down", type: "numeric", min: 0, max: 90, unit: "deg" },
+          { name: "left", type: "numeric", min: 0, max: 90, unit: "deg" },
+          { name: "right", type: "numeric", min: 0, max: 90, unit: "deg" },
+        ],
+      },
+      description:
+        "MY CHOICE. How far the user can turn and tilt their head, in degrees from " +
+        "centre, given separately for each direction because the limits are often " +
+        "asymmetric. Bounds where a screen, camera or switch may usefully be placed.",
     },
 
     breathControl: {
@@ -495,13 +556,23 @@ export const userCapability = defineCapability({
         "constraint that most often decides how long a session can be.",
     },
     keyControl: {
-      ontology: "motor", precedence: [],
-      description: "MY CHOICE. Can the user operate discrete keys or switches?",
-    },
-    manualStability: {
-      ontology: "motor", precedence: [], measurement: percent,
+      ontology: "motor", precedence: [], measurement: effectorSites,
       description:
-        "MY CHOICE. Steadiness of the user's hand under load. FULL is no tremor; PARTIAL " +
+        "MY CHOICE. Can the user operate discrete keys or switches, and WITH WHAT? FULL " +
+        "assumes the usual fingers; PARTIAL names the sites that actually do the work — " +
+        "toes, a chin, a knee, a head. Someone with no arms who types with their toes has " +
+        "full discrete control and needs a different layout, not a lesser one, and the " +
+        "model must be able to tell those apart.",
+    },
+    effectorStability: {
+      ontology: "motor", precedence: [], measurement: percent,
+      /* RENAMED from manualStability. The old name assumed hands, which is the
+       * same hand-centric fault that had `touch` meaning fingertips and
+       * `keyControl` meaning fingers. A toe typist has an effector and it is not
+       * a hand; so does someone driving a switch with their chin. */
+      description:
+        "MY CHOICE. Steadiness of whatever body part operates the control, under load — " +
+        "hand, foot, chin or head. FULL is no tremor; PARTIAL " +
         "carries the percentage. The paper treats tremor as a capability with consequences " +
         "beyond input: 'the physical stability of the screen also plays a part, so that a " +
         "person with hand tremors may find that the readable size of text depends on " +
@@ -513,7 +584,7 @@ export const userCapability = defineCapability({
        * needs a pointing device, a steady hand, AND knowing where your hand is
        * — and the third is the one usually forgotten, because most people have
        * it and never notice using it. */
-      precedence: ["pointerControl", "manualStability", "kinaesthesia"],
+      precedence: ["pointerControl", "effectorStability", "kinaesthesia"],
       measurement: { type: "numeric", min: 1, max: 40, unit: "mm" },
       description:
         "MY CHOICE. Smallest target the user can reliably acquire with a pointing device.",
@@ -537,7 +608,7 @@ export const userCapability = defineCapability({
         "speechRecognisedByMachine.",
     },
     minKeyRepeatDelay: {
-      ontology: "motor", precedence: ["keyControl", "manualStability"],
+      ontology: "motor", precedence: ["keyControl", "effectorStability"],
       measurement: { type: "numeric", min: 1, max: 2000, unit: "ms" },
       description:
         "MY CHOICE. Minimum delay before a held key should repeat, below which tremor " +
@@ -759,7 +830,7 @@ export const userCapability = defineCapability({
     },
     minReadFontSizeForFont: {
       ontology: "language",
-      precedence: ["readFontText", "manualStability"],
+      precedence: ["readFontText", "effectorStability"],
       measurement: {
         type: "composite",
         parts: [
@@ -771,7 +842,7 @@ export const userCapability = defineCapability({
         "Minimum readable font size for user, in points and per font, when presented on a " +
         "1024x768 pixel 15\" screen. Table 4's own note on why this property is awkward: " +
         "'there is only one setting allowed per property, yet properties such as font size " +
-        "are functionally dependent on context'. MY CHOICE adds manualStability as a second " +
+        "are functionally dependent on context'. MY CHOICE adds effectorStability as a second " +
         "parent, because the paper's own example makes the readable size depend on whether " +
         "the display is mounted or held.",
     },
@@ -831,10 +902,10 @@ export const userCapability = defineCapability({
      */
     writeFontSet: {
       ontology: "language",
-      /* manualStability added: CURSIVE and BLOCK are handwriting and need a
+      /* effectorStability added: CURSIVE and BLOCK are handwriting and need a
        * steady hand, while SELECT explicitly does not — which is why the modes
        * live in the measurement rather than in separate properties. */
-      precedence: ["language", "keyControl", "manualStability"],
+      precedence: ["language", "keyControl", "effectorStability"],
       measurement: {
         type: "discrete", values: ["CURSIVE", "BLOCK", "SELECT"], multiple: true,
       },
@@ -842,7 +913,7 @@ export const userCapability = defineCapability({
         "Modes some form of writing text. SELECT means some form of technology e.g. " +
         "keyboard, scanning, eye tracking etc. Table 4 gives the parent as " +
         "'fontLanguage + eSet', neither of which the fragment defines; MY CHOICE " +
-        "substitutes language, keyControl and manualStability.",
+        "substitutes language, keyControl and effectorStability.",
     },
     /* MY CHOICE. The production counterpart of readSignText and readTactileSign,
      * which the paper does not have. Both modes are one property because the
@@ -857,7 +928,7 @@ export const userCapability = defineCapability({
      * measurement, not by blocking the whole property. */
     writeSignSet: {
       ontology: "language",
-      precedence: ["signLanguageSet", "manualStability", "kinaesthesia"],
+      precedence: ["signLanguageSet", "effectorStability", "kinaesthesia"],
       measurement: {
         type: "discrete", values: ["Visual", "Tactile"], multiple: true,
       },
@@ -873,7 +944,7 @@ export const userCapability = defineCapability({
      * feel. This is Bob's case exactly. */
     writeTactileSet: {
       ontology: "language",
-      precedence: ["hapticLanguageSet", "manualStability", "touch"],
+      precedence: ["hapticLanguageSet", "effectorStability", "touch"],
       measurement: {
         type: "discrete",
         values: ["Braille", "DeafblindManual", "PrintOnPalm", "BlockAlphabet", "Lorm"],
@@ -916,7 +987,7 @@ export const userCapability = defineCapability({
     input: {
       description: "MY CHOICE. Motor capability: what the user can do to the device.",
       properties: [
-        "pointerControl", "keyControl", "manualStability", "minTargetSize",
+        "pointerControl", "keyControl", "effectorStability", "minTargetSize",
         "sustainedPress", "minKeyRepeatDelay", "kinaesthesia", "speech",
         "headControl", "inputDuration",
       ],

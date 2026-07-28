@@ -166,7 +166,7 @@ export const referenceSpec = {
     language: { capability: "FULL" },
     pointerControl: { capability: "FULL" },
     keyControl: { capability: "FULL" },
-    manualStability: { capability: "FULL" },
+    effectorStability: { capability: "FULL" },
   },
   groups: {
     seeing: {
@@ -184,7 +184,7 @@ export const referenceSpec = {
     input: {
       description: "How the user drives the game.",
       template: "input",
-      settings: ["pointerControl", "keyControl", "manualStability"],
+      settings: ["pointerControl", "keyControl", "effectorStability"],
     },
   },
 };
@@ -352,8 +352,8 @@ export const keyboardOnly = defineCapacity(
  * duplication §3 attacks.
  *
  * Sight and language are FULL. minReadFontSizeForFont is still of interest
- * because manualStability is PARTIAL, and that property has both readFontText
- * and manualStability as precedence parents — which is why the second parent
+ * because effectorStability is PARTIAL, and that property has both readFontText
+ * and effectorStability as precedence parents — which is why the second parent
  * was added to the schema.
  */
 export const handTremor = defineCapacity(
@@ -368,9 +368,9 @@ export const handTremor = defineCapacity(
       basis: EXEMPLAR,
     },
     modify: {
-      manualStability: { capability: "PARTIAL", measurement: 35 },
-      pointerControl: { capability: "PARTIAL" },
-      keyControl: { capability: "PARTIAL" },
+      effectorStability: { capability: "PARTIAL", measurement: 35 },
+      pointerControl: { capability: "PARTIAL", measurement: ["hands", "fingertips"] },
+      keyControl: { capability: "PARTIAL", measurement: ["hands", "fingertips"] },
     },
     add: {
       sustainedPress: { capability: "PARTIAL" },
@@ -390,13 +390,13 @@ export const handTremor = defineCapacity(
       minReadFontSizeForFont: {
         capability: "PARTIAL",
         derived: {
-          reads: ["fontSizeSeated", "manualStability"],
+          reads: ["fontSizeSeated", "effectorStability"],
           influences: ["deviceStability"],
           /* OOA96 §2.3 requires the dependent variable's description to "cite
            * the formula or algorithm used to determine the value". */
           cite:
             "MOUNTED: fontSizeSeated.size. HANDHELD: fontSizeSeated.size scaled by " +
-            "(1 + (100 - manualStability)/100), clamped to 4..96pt and rounded to 1dp. " +
+            "(1 + (100 - effectorStability)/100), clamped to 4..96pt and rounded to 1dp. " +
             "At 35% stability a hand-held display needs 1.65x the mounted size.",
           formula: A.tuple({
             size: A.ifThen(
@@ -407,7 +407,7 @@ export const handTremor = defineCapacity(
                     A.field(A.measure("fontSizeSeated"), "size"),
                     A.add(
                       A.lit(1),
-                      A.div(A.sub(A.lit(100), A.measure("manualStability")), A.lit(100)),
+                      A.div(A.sub(A.lit(100), A.measure("effectorStability")), A.lit(100)),
                     ),
                   ),
                   A.lit(4),
@@ -645,9 +645,9 @@ export const multipleSclerosis = defineCapacity(
     modify: {
       sight: { capability: "PARTIAL" },
       touch: { capability: "NONE" },
-      manualStability: { capability: "PARTIAL", measurement: 30 },
-      pointerControl: { capability: "PARTIAL" },
-      keyControl: { capability: "PARTIAL" },
+      effectorStability: { capability: "PARTIAL", measurement: 30 },
+      pointerControl: { capability: "PARTIAL", measurement: ["hands", "fingertips"] },
+      keyControl: { capability: "PARTIAL", measurement: ["hands", "fingertips"] },
     },
     add: {
       /* Diplopia: two images, not fused. */
@@ -815,14 +815,23 @@ export const deafenedNotch = defineCapacity(
     },
     modify: {
       hearing: { capability: "PARTIAL" },
-      /* The fingers, not the body. See the note on `touch` in the schema. */
-      touch: { capability: "NONE" },
-      pointerControl: { capability: "PARTIAL" },
+      /* Fingertips only. Under the old whole-body reading this had to be NONE,
+        * which was false about his back and his feet; under the hands-only
+        * reading it was true but unsayable for anyone else. With sites it is
+        * simply accurate — and the palm keeps enough to feel a phone buzz. */
+       touch: {
+         capability: "PARTIAL",
+         measurement: [
+           { site: "fingertips", level: "none" },
+           { site: "hands", level: "reduced" },
+         ],
+       },
+      pointerControl: { capability: "PARTIAL", measurement: ["hands", "fingertips"] },
       /* Grip and fine control, reduced by the same exposure. The percentage is
        * pseudo-precision and issue #8 will replace it with an anchored scale;
        * recorded here in the property's current type rather than inventing a
        * one-off. */
-      manualStability: { capability: "PARTIAL", measurement: 55 },
+      effectorStability: { capability: "PARTIAL", measurement: 55 },
     },
     add: {
       /* THE GAP. Two bands, nothing usable between 3 and 6 kHz — which is
@@ -1011,8 +1020,10 @@ export const switchScanning = defineCapacity(
     },
     modify: {
       pointerControl: { capability: "NONE" },
-      keyControl: { capability: "PARTIAL" },
-      manualStability: { capability: "PARTIAL", measurement: 15 },
+      /* One site, and the model now makes us say which. A head switch is a
+        * different design problem from a hand switch even at the same count. */
+       keyControl: { capability: "PARTIAL", measurement: ["head"] },
+       effectorStability: { capability: "PARTIAL", measurement: 15 },
     },
     add: {
       /* One site, so scanning must be timed — the count is what forces it. */
@@ -1074,7 +1085,7 @@ export const eyeGazeALS = defineCapacity(
       /* Motor output is gone; sensation is not. */
       pointerControl: { capability: "NONE" },
       keyControl: { capability: "NONE" },
-      manualStability: { capability: "NONE" },
+      effectorStability: { capability: "NONE" },
       /* ALS spares sensory neurons — touch and kinaesthesia stay intact. */
       touch: { capability: "FULL" },
     },
@@ -1134,9 +1145,23 @@ export const sipAndPuff = defineCapacity(
     modify: {
       pointerControl: { capability: "NONE" },
       keyControl: { capability: "NONE" },
-      manualStability: { capability: "NONE" },
-      /* At the hands. Sensation above the injury is unaffected. */
-      touch: { capability: "NONE" },
+      effectorStability: { capability: "NONE" },
+      /* Below the injury. At C4 sensation is preserved in the head, face and
+        * upper shoulders and absent from everything beneath — which is a great
+        * deal of body to enumerate, and enumerating it is the honest cost of
+        * being able to say it at all. */
+       touch: {
+         capability: "PARTIAL",
+         measurement: [
+           { site: "arms", level: "none" },
+           { site: "hands", level: "none" },
+           { site: "fingertips", level: "none" },
+           { site: "trunk", level: "none" },
+           { site: "legs", level: "none" },
+           { site: "feet", level: "none" },
+           { site: "toes", level: "none" },
+         ],
+       },
     },
     add: {
       kinaesthesia: { capability: "NONE" },
@@ -1154,6 +1179,78 @@ export const sipAndPuff = defineCapacity(
        * selection alongside head pointing. */
       breathControl: { capability: "PARTIAL", measurement: 4 },
       inputDuration: { capability: "PARTIAL", measurement: 45 },
+    },
+  }),
+);
+
+/**
+ * Types with their toes.
+ *
+ * Born without arms. Full sight, hearing, language and speech; full sensation
+ * everywhere they have a body to feel with; and complete, practised, fine motor
+ * control in both feet. Types, points, and plays.
+ *
+ * WHAT THIS PROFILE BROKE, and it was three things at once. The model had become
+ * hand-centric without anyone deciding it should:
+ *
+ *   `touch` meant fingertips, so this person's tactile sense was unrecordable —
+ *   they have superb sensation in their toes and the model had nowhere to put
+ *   it. It is now by body site, which is what it should have been from the
+ *   start.
+ *
+ *   `keyControl` was FULL/PARTIAL/NONE with no way to say WITH WHAT. A toe
+ *   typist has full discrete control and needs a different keyboard layout, not
+ *   a lesser one — and "PARTIAL" would have been an insult as well as a
+ *   falsehood.
+ *
+ *   `manualStability` was named for hands. Renamed `effectorStability`, because
+ *   a foot is an effector and so is a chin.
+ *
+ * NOTHING IS PARTIAL BELOW THE SITE LIST. This person has no impairment of
+ * dexterity, speed, accuracy or endurance — they simply do it with their feet.
+ * The only rows that differ from the reference are the ones naming WHERE, and
+ * that is the correct shape for this profile. A model that recorded "reduced
+ * motor control" would be describing a disability that is not there.
+ *
+ * THE DESIGN CONSEQUENCE IS REAL THOUGH. Feet are further from the screen,
+ * larger, and reach a smaller area comfortably; a device on a desk at hand
+ * height is unusable. That is layout and placement, which is precisely what
+ * `keyControl`'s site list and `headRange` are for.
+ */
+export const toeTypist = defineCapacity(
+  userCapability,
+  variation(referenceSpec, {
+    entity: {
+      id: "toe-typist",
+      description:
+        "Born without arms. Types, points and plays with both feet, with full dexterity " +
+        "and full sensation in the toes. Full sight, hearing, language and speech. " +
+        "Needs the controls within reach of a foot, and nothing else.",
+      basis: EXEMPLAR,
+    },
+    modify: {
+      /* FULL control — with feet. Naming the site is the whole point, and the
+       * capability is not diminished by it. */
+      pointerControl: { capability: "PARTIAL", measurement: ["feet", "toes"] },
+      keyControl: { capability: "PARTIAL", measurement: ["feet", "toes"] },
+      /* Sensation is intact everywhere the person has a body. The sites that
+       * differ from full are the ones that are absent. */
+      touch: {
+        capability: "PARTIAL",
+        measurement: [
+          { site: "arms", level: "none" },
+          { site: "hands", level: "none" },
+          { site: "fingertips", level: "none" },
+        ],
+      },
+      /* Restated rather than left implicit. It is FULL in the reference and
+       * would carry through untouched, but the temptation to assume a foot is
+       * less steady than a hand is exactly the bias this profile exists to
+       * catch, and an explicit row is harder to overlook than an absent one. */
+      effectorStability: { capability: "FULL" },
+    },
+    add: {
+      minTargetSize: { capability: "PARTIAL", measurement: 15 },
     },
   }),
 );
@@ -1228,5 +1325,6 @@ export const exemplars = Object.freeze({
   switchScanning,
   eyeGazeALS,
   sipAndPuff,
+  toeTypist,
   switchScanningWithBuddy,
 });

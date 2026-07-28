@@ -21,7 +21,7 @@ import { exemplars, reference, blindSinceBirth, lowVisionContrast,
          deaf, deafenedAsymmetric, multipleSclerosis,
          deafBlind, deafenedNotch, secondLanguage,
          switchScanning, eyeGazeALS, sipAndPuff,
-         switchScanningWithBuddy } from "../vocabulary/profiles.js";
+         switchScanningWithBuddy, toeTypist } from "../vocabulary/profiles.js";
 
 let pass = 0, fail = 0;
 const ok = (label, fn) => {
@@ -191,7 +191,7 @@ ok("only NONE propagates — FULL is a heuristic, not an implication", () => {
 ok("an acquisition wizard is ofInterest() in a loop", () => {
   const asked = ofInterest(userCapability, { sight: "NONE", hearing: "FULL", language: "FULL",
                                              touch: "FULL", pointerControl: "FULL",
-                                             keyControl: "FULL", manualStability: "FULL" });
+                                             keyControl: "FULL", effectorStability: "FULL" });
   if (asked.includes("colorLow")) throw new Error("must not ask about colour with no sight");
   if (asked.includes("minReadFontSizeForFont")) throw new Error("the paper's own example");
   if (!asked.includes("sight")) throw new Error("root properties are always asked");
@@ -238,8 +238,8 @@ throws("a composed collection without a CompositionOrder is refused", Capability
 /* ------------------------------------------------------------------ */
 console.log("\nCapacity Model — a measurement qualifies PARTIAL and nothing else:");
 
-ok("all sixteen exemplars build", () => {
-  eq(Object.keys(exemplars).length, 16, "count");
+ok("all seventeen exemplars build", () => {
+  eq(Object.keys(exemplars).length, 17, "count");
   for (const [name, p] of Object.entries(exemplars)) {
     if (!p.entity.basis.startsWith("exemplar")) throw new Error(`${name} records no basis`);
   }
@@ -329,7 +329,7 @@ throws("a composite tuple missing a part is refused", CapacityError, () =>
     entity: { id: "x", kind: "user" },
     settings: {
       sight: { capability: "PARTIAL" }, language: { capability: "FULL" },
-      manualStability: { capability: "FULL" }, readFontText: { capability: "PARTIAL" },
+      effectorStability: { capability: "FULL" }, readFontText: { capability: "PARTIAL" },
       minReadFontSizeForFont: { capability: "PARTIAL", measurement: { size: 14 } },
     },
   }));
@@ -634,8 +634,8 @@ ok("reception is sensory, production is motor — the parents differ", () => {
   eq(P.readTactileSign.precedence.includes("touch"), true, "reading sign by hand needs touch");
   eq(P.readSignText.precedence.includes("sight"), true, "reading sign by eye needs sight");
   /* Producing depends on hands. */
-  eq(P.writeSignSet.precedence.includes("manualStability"), true, "signing needs steady hands");
-  eq(P.writeTactileSet.precedence.includes("manualStability"), true, "spelling needs steady hands");
+  eq(P.writeSignSet.precedence.includes("effectorStability"), true, "signing needs steady hands");
+  eq(P.writeTactileSet.precedence.includes("effectorStability"), true, "spelling needs steady hands");
   /* And crucially, producing does NOT depend on the receiving sense. Signing
    * visually needs no tactile sense, so touch must not gate the whole property
    * — that would be the same over-constraining error as C7 and C8. */
@@ -659,7 +659,7 @@ ok("a tremor can leave someone fluent at receiving and unable to deliver", () =>
       touch: { capability: "FULL" },
       keyControl: { capability: "FULL" },
       kinaesthesia: { capability: "FULL" },
-      manualStability: { capability: "PARTIAL", measurement: 20 },
+      effectorStability: { capability: "PARTIAL", measurement: 20 },
       hapticLanguageSet: { capability: "PARTIAL", measurement: ["DeafblindManual"] },
       signLanguageSet: { capability: "PARTIAL", measurement: ["ASL"] },
       /* Receives fine. */
@@ -736,8 +736,88 @@ ok("MS is spiky: capabilities at all three levels across four ontologies", () =>
 
 ok("minTargetSize needs three parents, one in another ontology", () => {
   const p = userCapability.properties.minTargetSize;
-  eq(p.precedence.join(","), "pointerControl,manualStability,kinaesthesia", "parents");
+  eq(p.precedence.join(","), "pointerControl,effectorStability,kinaesthesia", "parents");
   eq(userCapability.properties.kinaesthesia.ontology, "haptic", "crosses from motor to haptic");
+});
+
+console.log("\nthe body, not just the hands:");
+
+ok("touch says WHERE, and unlisted sites are unimpaired", () => {
+  const spec = userCapability.properties.touch.measurement;
+  const parts = spec.of.parts.map((p) => p.name);
+  eq(parts.join(","), "site,level", "a site and a level per entry");
+  /* Vibration white finger: fingertips gone, hands reduced, everything else
+   * unlisted and therefore fine. Neither whole-body nor hands-only could say
+   * this — the property has now been wrong in both directions. */
+  const wf = deafenedNotch.settings.touch;
+  eq(wf.capability, "PARTIAL", "not NONE — his back is fine");
+  const sites = Object.fromEntries(wf.measurement.map((m) => [m.site, m.level]));
+  eq(sites.fingertips, "none", "fingertips");
+  eq(sites.hands, "reduced", "palm keeps enough to feel a buzz");
+  if ("trunk" in sites) throw new Error("intact sites must not be enumerated");
+});
+
+ok("C4: sensation preserved above the injury, absent below", () => {
+  const sites = sipAndPuff.settings.touch.measurement.map((m) => m.site);
+  for (const gone of ["arms", "hands", "fingertips", "trunk", "legs", "feet", "toes"]) {
+    if (!sites.includes(gone)) throw new Error(`${gone} should be listed as absent`);
+  }
+  /* Head and face unlisted, therefore intact — which is exactly the fact a
+   * whole-body `touch: NONE` destroyed. */
+  if (sites.includes("head") || sites.includes("face")) {
+    throw new Error("head and face are preserved at C4 and must not be listed");
+  }
+});
+
+ok("body sites are a SET, never a rank", () => {
+  const spec = userCapability.properties.touch.measurement.of.parts
+    .find((p) => p.name === "site");
+  eq(spec.ordered, false, "sites have no order — a head is not more than a foot");
+  const level = userCapability.properties.touch.measurement.of.parts
+    .find((p) => p.name === "level");
+  eq(level.ordered, true, "levels do: none < trace < reduced < full");
+});
+
+ok("a toe typist has FULL control, done with feet", () => {
+  const s = toeTypist.settings;
+  /* The capability is not diminished by the site. "PARTIAL" here means "the
+   * sites are named", not "reduced" — and effectorStability is FULL. */
+  eq(s.keyControl.measurement.join(","), "feet,toes", "types with feet");
+  eq(s.pointerControl.measurement.join(","), "feet,toes", "points with feet");
+  eq(s.effectorStability.capability, "FULL", "no less steady than a hand");
+  /* And sensation lives where the person does. */
+  const sites = Object.fromEntries(s.touch.measurement.map((m) => [m.site, m.level]));
+  eq(sites.hands, "none", "no hands");
+  if ("toes" in sites) throw new Error("toe sensation is intact and must not be listed");
+});
+
+ok("naming the effector is now compulsory for partial control", () => {
+  /* Before this, `keyControl: PARTIAL` said nothing about what does the work.
+   * A head switch and a toe are different design problems at the same count. */
+  eq(switchScanning.settings.keyControl.measurement.join(","), "head", "a head switch");
+  eq(handTremor.settings.keyControl.measurement.join(","), "hands,fingertips", "hands");
+  eq(userCapability.properties.keyControl.measurement.multiple, true, "one or more sites");
+});
+
+ok("effectorStability is not named for hands", () => {
+  /* Renamed from manualStability. A foot is an effector and so is a chin. */
+  if (userCapability.properties.manualStability) {
+    throw new Error("manualStability should be gone");
+  }
+  eq(!!userCapability.properties.effectorStability, true, "effectorStability exists");
+  if (/\bhand's\b/.test(userCapability.properties.effectorStability.description)) {
+    throw new Error("the description still assumes hands");
+  }
+});
+
+ok("head range is asked separately from head control", () => {
+  const P = userCapability.properties;
+  eq(P.headRange.precedence.join(","), "headControl", "range hangs off control");
+  const dirs = P.headRange.measurement.parts.map((p) => p.name);
+  eq(dirs.join(","), "up,down,left,right", "four directions, because limits are asymmetric");
+  /* Someone may point precisely within a narrow arc and be unable to look up at
+   * all, and a screen outside that arc is unusable however good the pointing. */
+  for (const d of P.headRange.measurement.parts) eq(d.unit, "deg", `${d.name} in degrees`);
 });
 
 console.log("\nplaying as a pair — what a co-pilot can and cannot lend:");
@@ -750,7 +830,7 @@ ok("a pair is a group Entity, and the paper says group Entities exist", () => {
 
 ok("motor capability delegates: the assistant supplies hands and timing", () => {
   const lent = assistantContribution(switchScanningWithBuddy);
-  for (const expected of ["pointerControl", "keyControl", "manualStability"]) {
+  for (const expected of ["pointerControl", "keyControl", "effectorStability"]) {
     if (!lent.includes(expected)) throw new Error(`assistant should supply ${expected}`);
   }
   /* And the pair can now do what the primary alone could not. */
@@ -842,7 +922,7 @@ ok("ALS: sight is FULL while gaze control is not", () => {
 ok("ALS: motor neurons go, sensory neurons stay", () => {
   /* A model that assumed paralysis implies numbness would be wrong about this
    * whole population. */
-  eq(eyeGazeALS.settings.manualStability.capability, "NONE", "no movement");
+  eq(eyeGazeALS.settings.effectorStability.capability, "NONE", "no movement");
   eq(eyeGazeALS.settings.touch.capability, "FULL", "full sensation");
 });
 
@@ -866,13 +946,13 @@ ok("ALS: dwell tolerance is the number that decides usability", () => {
   if (spec.max < 2500) throw new Error("the scale must reach the slow-movement case");
 });
 
-ok("sip-and-puff: two channels, and the narrowed touch pays off again", () => {
+ok("sip-and-puff: two channels, and sensation by site", () => {
   eq(sipAndPuff.settings.headControl.capability, "FULL", "continuous pointing by head");
   eq(sipAndPuff.settings.breathControl.measurement, 4, "sip, puff, hard and soft");
-  /* At C4 sensation is preserved above the injury and absent below: head and
-   * neck feel everything, hands feel nothing. Whole-body `touch` could not say
-   * this — the same limit the vibration white finger profile exposed. */
-  eq(sipAndPuff.settings.touch.capability, "NONE", "at the hands");
+  /* At C4 sensation is preserved above the injury and absent below. This test
+   * previously asserted `touch: NONE`, which was the hands-only reading and was
+   * false about his head and face — the assertion outlived the model twice. */
+  eq(sipAndPuff.settings.touch.capability, "PARTIAL", "absent below the injury, not everywhere");
   eq(sipAndPuff.settings.speech.capability, "FULL", "C4 leaves the diaphragm working");
 });
 
@@ -1029,12 +1109,16 @@ ok("the two deafened profiles fail in opposite directions", () => {
 
 console.log("\nvibration white finger — touch is the hands, and the cold matters:");
 
-ok("touch is narrowed to the hands, so fingertip loss is expressible", () => {
-  eq(deafenedNotch.settings.touch.capability, "NONE", "no tactile sense at the fingers");
-  /* Whole-body touch would have made this person inexpressible: NONE false
-   * about their back, FULL false about the only part that meets a device. */
-  if (!/hands and fingertips/i.test(userCapability.properties.touch.description)) {
-    throw new Error("touch must document that it means the interaction surface");
+ok("fingertip loss is expressible without claiming whole-body numbness", () => {
+  /* This property has been wrong in both directions. Whole-body made this
+   * person inexpressible; hands-only made the toe typist inexpressible. Sites
+   * fix both, and this assertion has now been rewritten twice to follow. */
+  eq(deafenedNotch.settings.touch.capability, "PARTIAL", "his back is fine");
+  const sites = Object.fromEntries(
+    deafenedNotch.settings.touch.measurement.map((m) => [m.site, m.level]));
+  eq(sites.fingertips, "none", "the fingertips are the loss");
+  if (!/by body site/i.test(userCapability.properties.touch.description)) {
+    throw new Error("touch must document that it records where");
   }
   eq(deafenedNotch.settings.vibrationDetection.capability, "NONE",
      "and no vibrotactile sense — which rules out haptic feedback as a substitute");
