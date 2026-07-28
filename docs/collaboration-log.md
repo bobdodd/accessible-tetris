@@ -1693,6 +1693,71 @@ is worth recording separately from the channel.
 
 59 properties, 26 decisions, 17 exemplars, 137 tests.
 
+## C13 · correction · A gap I had recorded twice was actually a falsehood
+
+**2026-07-28.** Bob: "I seem to remember you saying we couldn't describe
+one-handedness, is that still true?"
+
+I had written laterality off as a known limit **twice** — once for ears in the
+deafened profile, once for hands in the vibration white finger one — and both
+times moved on satisfied that recording a limit was enough.
+
+Asked directly, I tested rather than remembered, and the answer was worse than
+"yes":
+
+    touch: [{ site: "hands", level: "none" }]     <- claims BOTH hands
+    keyControl: ["hands", "fingertips"]           <- which hand? unsayable
+
+**The model did not fail to describe one-handedness. It described it wrongly.** A
+one-handed person's remaining hand feels perfectly well, and the model asserted
+it does not.
+
+That distinction is the whole of this entry. **An incomplete model is a gap; a
+model that states the opposite of the truth is a defect**, and I had filed the
+second as the first. Twice. A recorded limitation felt like diligence and was
+actually a way of not looking.
+
+### The fix, and why it passes the test we had just set
+
+`side` is now a part on `touch` and on effector sites — orthogonal to `site`,
+which is why it is a separate field rather than a doubled list of "leftHand",
+"rightHand" and so on.
+
+It earns its place by C12's rule: **which side a person works with decides where
+controls, switches and a screen go**, and which one-handed layout to offer. That
+is placement, and placement is a system decision.
+
+`both` must be stated rather than defaulted, because an unstated default is
+precisely how "hands" came to mean "both hands" silently in the first place.
+
+### The one-handed profile, and what it refuses to say
+
+Left hemiplegia. Works with the right hand; the left has trace sensation and no
+useful movement. `effectorStability` is FULL and stated explicitly, and
+`textEntryRate` is 22 wpm — slower than two-handed typing, far faster than any
+scanning method, and squarely in a middle of the range the model previously had
+no way to place anyone in.
+
+**One-handed is not clumsy**, and there is a test asserting it. The same bias the
+toe typist exists to catch, arriving from a different direction.
+
+### Still not fixed, and named rather than half-solved
+
+Hemiplegia commonly comes with **hemianopia** — visual field loss on the same
+side — and the visual properties have no `side` at all. `viewRectangle` can
+describe the remaining field as a rectangle, which is close and not the same
+thing. Recorded on the profile so the next person meets it, rather than
+discovering it the way this one was discovered.
+
+*Generalisation, and it is about how I record limitations rather than about
+laterality. Writing "known limit" in a comment felt like rigour and functioned as
+a filing cabinet: once written, I stopped testing whether the limit was benign.
+The correction cost one question and one probe. Limits should be probed
+periodically, not archived — especially the ones recorded more than once, since
+a limit that keeps recurring is a limit that keeps mattering.*
+
+59 properties, 18 exemplars, 140 tests.
+
 ## X1 · disagreement · Bob corrected Claude's conclusion, not its facts
 
 **2026-07-27.** After C3, Claude concluded that the working practice should be

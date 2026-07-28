@@ -64,10 +64,36 @@ const BODY_SITES = [
 /** How much sensation a site has. Ordered least to most. */
 const SENSATION = ["none", "trace", "reduced", "full"];
 
-/** Which body sites operate a control. A capability, not an equipment list:
- *  "types with toes" is a fact about the person, not about the keyboard. */
+/** WHICH SIDE. Orthogonal to site, which is why it is a separate part rather
+ *  than a doubled list of "leftHand", "rightHand" and so on.
+ *
+ *  Added because the model could not describe one-handedness, and did not merely
+ *  fail — it asserted something false. `{site: "hands", level: "none"}` claims
+ *  BOTH hands have no sensation, and a one-handed person's remaining hand feels
+ *  perfectly well. An incomplete model is a gap; a model that states the
+ *  opposite of the truth is a defect.
+ *
+ *  It earns its place by the `decides` test: which side a person works with
+ *  decides where controls, switches and a screen go, and which one-handed
+ *  layout to offer. That is placement, and placement is a system decision.
+ *
+ *  `both` is the ordinary case and must be stated rather than assumed, because
+ *  an unstated default is how "hands" came to mean "both hands" silently. */
+const SIDES = ["left", "right", "both", "midline"];
+
+/** Which body sites operate a control, and on which side. A capability, not an
+ *  equipment list: "types with toes" is a fact about the person, not about the
+ *  keyboard. */
 const effectorSites = {
-  type: "discrete", values: BODY_SITES, multiple: true,
+  type: "composite",
+  of: {
+    type: "composite",
+    parts: [
+      { name: "site", type: "discrete", values: BODY_SITES },
+      { name: "side", type: "discrete", values: SIDES },
+    ],
+  },
+  order: "asDeclared",
 };
 
 export const userCapability = defineCapability({
@@ -435,6 +461,7 @@ export const userCapability = defineCapability({
           type: "composite",
           parts: [
             { name: "site", type: "discrete", values: BODY_SITES },
+            { name: "side", type: "discrete", values: SIDES },
             { name: "level", type: "discrete", ordered: true, values: SENSATION },
           ],
         },

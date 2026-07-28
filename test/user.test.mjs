@@ -21,7 +21,7 @@ import { exemplars, reference, blindSinceBirth, lowVisionContrast,
          deaf, deafenedAsymmetric, multipleSclerosis,
          deafBlind, deafenedNotch, secondLanguage,
          switchScanning, eyeGazeALS, sipAndPuff,
-         switchScanningWithBuddy, toeTypist } from "../vocabulary/profiles.js";
+         switchScanningWithBuddy, toeTypist, oneHanded } from "../vocabulary/profiles.js";
 
 let pass = 0, fail = 0;
 const ok = (label, fn) => {
@@ -238,8 +238,8 @@ throws("a composed collection without a CompositionOrder is refused", Capability
 /* ------------------------------------------------------------------ */
 console.log("\nCapacity Model — a measurement qualifies PARTIAL and nothing else:");
 
-ok("all seventeen exemplars build", () => {
-  eq(Object.keys(exemplars).length, 17, "count");
+ok("all eighteen exemplars build", () => {
+  eq(Object.keys(exemplars).length, 18, "count");
   for (const [name, p] of Object.entries(exemplars)) {
     if (!p.entity.basis.startsWith("exemplar")) throw new Error(`${name} records no basis`);
   }
@@ -818,6 +818,34 @@ ok("head range is asked separately from head control", () => {
   /* Someone may point precisely within a narrow arc and be unable to look up at
    * all, and a screen outside that arc is unusable however good the pointing. */
   for (const d of P.headRange.measurement.parts) eq(d.unit, "deg", `${d.name} in degrees`);
+});
+
+ok("one-handedness is expressible, and the working side is named", () => {
+  /* Previously the model did not merely fail at this — it asserted the
+   * opposite. `{site: "hands", level: "none"}` claimed BOTH hands, and this
+   * person's right hand feels perfectly well. */
+  const s = oneHanded.settings;
+  const works = s.keyControl.measurement;
+  eq(works.every((e) => e.side === "right"), true, "works with the right hand");
+  const feel = Object.fromEntries(s.touch.measurement.map((e) => [e.side + " " + e.site, e.level]));
+  eq(feel["left fingertips"], "none", "left side affected");
+  if ("right hands" in feel) throw new Error("the right hand is unimpaired and must not be listed");
+});
+
+ok("side is orthogonal to site, not a doubled list", () => {
+  const site = userCapability.properties.touch.measurement.of.parts.find((p) => p.name === "site");
+  const side = userCapability.properties.touch.measurement.of.parts.find((p) => p.name === "side");
+  eq(site.values.includes("leftHand"), false, "no leftHand pseudo-site");
+  eq(side.values.join(","), "left,right,both,midline", "a separate part");
+  /* `both` must be stated rather than assumed — an unstated default is how
+   * "hands" came to mean "both hands" silently in the first place. */
+  eq(side.values.includes("both"), true, "the ordinary case is explicit");
+});
+
+ok("one-handed is not clumsy — a distinction the model must keep", () => {
+  eq(oneHanded.settings.effectorStability.capability, "FULL", "the working hand is steady");
+  eq(oneHanded.settings.simultaneousContacts.measurement, 5, "five, because one hand");
+  eq(oneHanded.settings.textEntryRate.measurement, 22, "slower than two hands, far faster than scanning");
 });
 
 console.log("\nplaying as a pair — what a co-pilot can and cannot lend:");

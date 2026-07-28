@@ -369,8 +369,8 @@ export const handTremor = defineCapacity(
     },
     modify: {
       effectorStability: { capability: "PARTIAL", measurement: 35 },
-      pointerControl: { capability: "PARTIAL", measurement: ["hands", "fingertips"] },
-      keyControl: { capability: "PARTIAL", measurement: ["hands", "fingertips"] },
+      pointerControl: { capability: "PARTIAL", measurement: [{ site: "hands", side: "both" }, { site: "fingertips", side: "both" }] },
+      keyControl: { capability: "PARTIAL", measurement: [{ site: "hands", side: "both" }, { site: "fingertips", side: "both" }] },
     },
     add: {
       sustainedPress: { capability: "PARTIAL" },
@@ -646,8 +646,8 @@ export const multipleSclerosis = defineCapacity(
       sight: { capability: "PARTIAL" },
       touch: { capability: "NONE" },
       effectorStability: { capability: "PARTIAL", measurement: 30 },
-      pointerControl: { capability: "PARTIAL", measurement: ["hands", "fingertips"] },
-      keyControl: { capability: "PARTIAL", measurement: ["hands", "fingertips"] },
+      pointerControl: { capability: "PARTIAL", measurement: [{ site: "hands", side: "both" }, { site: "fingertips", side: "both" }] },
+      keyControl: { capability: "PARTIAL", measurement: [{ site: "hands", side: "both" }, { site: "fingertips", side: "both" }] },
     },
     add: {
       /* Diplopia: two images, not fused. */
@@ -822,11 +822,11 @@ export const deafenedNotch = defineCapacity(
        touch: {
          capability: "PARTIAL",
          measurement: [
-           { site: "fingertips", level: "none" },
-           { site: "hands", level: "reduced" },
+           { site: "fingertips", side: "both", level: "none" },
+           { site: "hands", side: "both", level: "reduced" },
          ],
        },
-      pointerControl: { capability: "PARTIAL", measurement: ["hands", "fingertips"] },
+      pointerControl: { capability: "PARTIAL", measurement: [{ site: "hands", side: "both" }, { site: "fingertips", side: "both" }] },
       /* Grip and fine control, reduced by the same exposure. The percentage is
        * pseudo-precision and issue #8 will replace it with an anchored scale;
        * recorded here in the property's current type rather than inventing a
@@ -1022,7 +1022,7 @@ export const switchScanning = defineCapacity(
       pointerControl: { capability: "NONE" },
       /* One site, and the model now makes us say which. A head switch is a
         * different design problem from a hand switch even at the same count. */
-       keyControl: { capability: "PARTIAL", measurement: ["head"] },
+       keyControl: { capability: "PARTIAL", measurement: [{ site: "head", side: "midline" }] },
        effectorStability: { capability: "PARTIAL", measurement: 15 },
     },
     add: {
@@ -1166,13 +1166,13 @@ export const sipAndPuff = defineCapacity(
        touch: {
          capability: "PARTIAL",
          measurement: [
-           { site: "arms", level: "none" },
-           { site: "hands", level: "none" },
-           { site: "fingertips", level: "none" },
-           { site: "trunk", level: "none" },
-           { site: "legs", level: "none" },
-           { site: "feet", level: "none" },
-           { site: "toes", level: "none" },
+           { site: "arms", side: "both", level: "none" },
+           { site: "hands", side: "both", level: "none" },
+           { site: "fingertips", side: "both", level: "none" },
+           { site: "trunk", side: "midline", level: "none" },
+           { site: "legs", side: "both", level: "none" },
+           { site: "feet", side: "both", level: "none" },
+           { site: "toes", side: "both", level: "none" },
          ],
        },
     },
@@ -1249,16 +1249,16 @@ export const toeTypist = defineCapacity(
     modify: {
       /* FULL control — with feet. Naming the site is the whole point, and the
        * capability is not diminished by it. */
-      pointerControl: { capability: "PARTIAL", measurement: ["feet", "toes"] },
-      keyControl: { capability: "PARTIAL", measurement: ["feet", "toes"] },
+      pointerControl: { capability: "PARTIAL", measurement: [{ site: "feet", side: "both" }, { site: "toes", side: "both" }] },
+      keyControl: { capability: "PARTIAL", measurement: [{ site: "feet", side: "both" }, { site: "toes", side: "both" }] },
       /* Sensation is intact everywhere the person has a body. The sites that
        * differ from full are the ones that are absent. */
       touch: {
         capability: "PARTIAL",
         measurement: [
-          { site: "arms", level: "none" },
-          { site: "hands", level: "none" },
-          { site: "fingertips", level: "none" },
+          { site: "arms", side: "both", level: "none" },
+          { site: "hands", side: "both", level: "none" },
+          { site: "fingertips", side: "both", level: "none" },
         ],
       },
       /* Restated rather than left implicit. It is FULL in the reference and
@@ -1276,6 +1276,85 @@ export const toeTypist = defineCapacity(
       textEntryRate: { capability: "PARTIAL", measurement: 30 },
       /* Two feet, so modifier-plus-key works; ten-finger chording does not. */
       simultaneousContacts: { capability: "PARTIAL", measurement: 2 },
+    },
+  }),
+);
+
+/**
+ * One-handed, after a stroke. Left hemiplegia.
+ *
+ * WHY THIS PROFILE EXISTS. I recorded twice that laterality was a known limit of
+ * the model — once for ears, once for hands — and both times moved on. Asked
+ * directly whether one-handedness was still inexpressible, the honest answer was
+ * worse than "no": the model did not merely fail to say it, **it said something
+ * false**. `{site: "hands", level: "none"}` claims BOTH hands have no sensation,
+ * and this person's right hand feels perfectly well.
+ *
+ * An incomplete model is a gap. A model that asserts the opposite of the truth
+ * is a defect, and it took a direct question to notice the difference.
+ *
+ * WHAT `side` BUYS. Not tidiness — placement. Which hand works decides which
+ * side of the screen the controls go, which one-handed keyboard layout to offer,
+ * where to mount a switch, and which way to orient a device. That is a system
+ * decision, so it passes the test every property now has to pass.
+ *
+ * WHAT IS STILL ONE-SIDED AND NOT RECORDED HERE. Hemiplegia commonly comes with
+ * hemianopia — loss of the visual field on the same side — and the visual
+ * properties have no `side` at all. `viewRectangle` could describe the remaining
+ * field as a rectangle, which is close but not the same thing. Left as a known
+ * limit rather than half-solved, and noted here so the next person meets it.
+ */
+export const oneHanded = defineCapacity(
+  userCapability,
+  variation(referenceSpec, {
+    entity: {
+      id: "one-handed",
+      description:
+        "Works entirely with the right hand, which is unimpaired and feels normally. " +
+        "The left arm and hand have no useful movement and reduced sensation. Full " +
+        "sight, hearing, language and speech.",
+      basis: EXEMPLAR,
+    },
+    modify: {
+      /* The working side, named. Under the old model this read "hands" and was
+       * silently a claim about both. */
+      pointerControl: {
+        capability: "PARTIAL",
+        measurement: [
+          { site: "hands", side: "right" },
+          { site: "fingertips", side: "right" },
+        ],
+      },
+      keyControl: {
+        capability: "PARTIAL",
+        measurement: [
+          { site: "hands", side: "right" },
+          { site: "fingertips", side: "right" },
+        ],
+      },
+      /* Sensation is reduced on the affected side and normal on the other. This
+       * is the sentence the model could not previously form at all. */
+      touch: {
+        capability: "PARTIAL",
+        measurement: [
+          { site: "arms", side: "left", level: "trace" },
+          { site: "hands", side: "left", level: "trace" },
+          { site: "fingertips", side: "left", level: "none" },
+        ],
+      },
+      /* The working hand is steady. Restated because "one-handed" invites an
+       * assumption of general clumsiness that is simply not the case. */
+      effectorStability: { capability: "FULL" },
+    },
+    add: {
+      /* Five, not ten — and the reason is one hand rather than weak fingers.
+       * Enough for a modifier and a key on the same hand if they are close
+       * together; not enough for anything spanning a keyboard. */
+      simultaneousContacts: { capability: "PARTIAL", measurement: 5 },
+      /* Slower than two-handed touch typing and far faster than any scanning
+       * method — which is exactly the middle of the range the model previously
+       * had no way to place anyone in. */
+      textEntryRate: { capability: "PARTIAL", measurement: 22 },
     },
   }),
 );
@@ -1351,5 +1430,6 @@ export const exemplars = Object.freeze({
   eyeGazeALS,
   sipAndPuff,
   toeTypist,
+  oneHanded,
   switchScanningWithBuddy,
 });

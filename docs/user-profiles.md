@@ -110,13 +110,13 @@ MY CHOICE. Motor capability: what the user can do to the device.
 
 | Property | Values (PARTIAL measurement) | Parent | What it decides |
 |---|---|---|---|
-| `keyControl` | head, face, mouth, trunk, arms, hands, fingertips, legs, feet, toes (one or more) | None | which input channels are available, and from which body site — *with `pointerControl`, `headControl`, `gazeControl`, `breathControl`, `speech`* |
+| `keyControl` | collection of site: head, face, mouth, trunk, arms, hands, fingertips, legs, feet, toes + side: left, right, both, midline, asDeclared | None | which input channels are available, and from which body site — *with `pointerControl`, `headControl`, `gazeControl`, `breathControl`, `speech`* |
 | `effectorStability` | 1–99 % | None | the smallest a control may be drawn — *with `minTargetSize`, `gazeAccuracy`* |
 | `headControl` | — | None | which input channels are available, and from which body site — *with `pointerControl`, `keyControl`, `gazeControl`, `breathControl`, `speech`* |
 | `inputDuration` | 1–480 min | None | how long a session may run before a break is offered — *with `focusDuration`, `trackingDuration`, `listeningDuration`* |
 | `kinaesthesia` | 1–99 % | None | whether the user needs visual confirmation of where their effector is |
 | `minKeyRepeatDelay` | 1–2000 ms | keyControl, effectorStability | how long a selection must be held, and how long before it repeats — *with `sustainedPress`, `dwellTolerance`* |
-| `pointerControl` | head, face, mouth, trunk, arms, hands, fingertips, legs, feet, toes (one or more) | None | which input channels are available, and from which body site — *with `keyControl`, `headControl`, `gazeControl`, `breathControl`, `speech`* |
+| `pointerControl` | collection of site: head, face, mouth, trunk, arms, hands, fingertips, legs, feet, toes + side: left, right, both, midline, asDeclared | None | which input channels are available, and from which body site — *with `keyControl`, `headControl`, `gazeControl`, `breathControl`, `speech`* |
 | `minTargetSize` | 1–40 mm | pointerControl, effectorStability, kinaesthesia | the smallest a control may be drawn — *with `effectorStability`, `gazeAccuracy`* |
 | `speech` | — | None | which input channels are available, and from which body site — *with `pointerControl`, `keyControl`, `headControl`, `gazeControl`, `breathControl`* |
 | `sustainedPress` | — | keyControl | how long a selection must be held, and how long before it repeats — *with `minKeyRepeatDelay`, `dwellTolerance`* |
@@ -127,7 +127,7 @@ MY CHOICE. Switch, breath, head and gaze access — the channels used when a han
 
 | Property | Values (PARTIAL measurement) | Parent | What it decides |
 |---|---|---|---|
-| `keyControl` | head, face, mouth, trunk, arms, hands, fingertips, legs, feet, toes (one or more) | None | which input channels are available, and from which body site — *with `pointerControl`, `headControl`, `gazeControl`, `breathControl`, `speech`* |
+| `keyControl` | collection of site: head, face, mouth, trunk, arms, hands, fingertips, legs, feet, toes + side: left, right, both, midline, asDeclared | None | which input channels are available, and from which body site — *with `pointerControl`, `headControl`, `gazeControl`, `breathControl`, `speech`* |
 | `activationTiming` | cannot reliably time a moving target, needs a slow scan, needs a moderate scan, any scan rate | keyControl | whether scanning must be timed, and how fast it may advance — *with `switchSites`* |
 | `breathControl` | 1–4 signals | None | which input channels are available, and from which body site — *with `pointerControl`, `keyControl`, `headControl`, `gazeControl`, `speech`* |
 | `gazeControl` | — | sight | which input channels are available, and from which body site — *with `pointerControl`, `keyControl`, `headControl`, `breathControl`, `speech`* |
@@ -169,7 +169,7 @@ MY CHOICE. The haptic design space, both halves of it.
 
 | Property | Values (PARTIAL measurement) | Parent | What it decides |
 |---|---|---|---|
-| `touch` | collection of site: head, face, mouth, trunk, arms, hands, fingertips, legs, feet, toes + level: none, trace, reduced, full, asDeclared | None | whether haptic feedback may be used, and where — *with `vibrationDetection`* |
+| `touch` | collection of site: head, face, mouth, trunk, arms, hands, fingertips, legs, feet, toes + side: left, right, both, midline + level: none, trace, reduced, full, asDeclared | None | whether haptic feedback may be used, and where — *with `vibrationDetection`* |
 | `kinaesthesia` | 1–99 % | None | whether the user needs visual confirmation of where their effector is |
 | `vibrationDetection` | 1–99 % | touch | whether haptic feedback may be used, and where — *with `touch`* |
 
@@ -412,7 +412,7 @@ with *"sight + signLanguageSet"*.
 
 | Setting | Property | Capability | Measurement | Parent |
 |---|---|---|---|---|
-| — | `keyControl` | **PARTIAL** | hands, fingertips | None |
+| — | `keyControl` | **PARTIAL** | site hands, side both; site fingertips, side both | None |
 | — | `hearing` | **FULL** | — | None |
 | — | `sight` | **FULL** | — | None |
 | — | `effectorStability` | **PARTIAL** | 35 % | None |
@@ -421,7 +421,7 @@ with *"sight + signLanguageSet"*.
 | — | `minKeyRepeatDelay` | **PARTIAL** | 900 ms | keyControl, effectorStability |
 | `fontSizeSeated` | `minReadFontSizeForFont` | **PARTIAL** | size 12, font system-sans | readFontText, effectorStability |
 | — | `minReadFontSizeForFont` | **PARTIAL** | *derived — see below* | readFontText, effectorStability |
-| — | `pointerControl` | **PARTIAL** | hands, fingertips | None |
+| — | `pointerControl` | **PARTIAL** | site hands, side both; site fingertips, side both | None |
 | — | `minTargetSize` | **PARTIAL** | 18 mm | pointerControl, effectorStability, kinaesthesia |
 | — | `sustainedPress` | **PARTIAL** | — | keyControl |
 
@@ -544,7 +544,7 @@ criticises.
 
 | Setting | Property | Capability | Measurement | Parent |
 |---|---|---|---|---|
-| — | `keyControl` | **PARTIAL** | hands, fingertips | None |
+| — | `keyControl` | **PARTIAL** | site hands, side both; site fingertips, side both | None |
 | — | `hearing` | **FULL** | — | None |
 | — | `sight` | **PARTIAL** | — | None |
 | — | `effectorStability` | **PARTIAL** | 30 % | None |
@@ -557,7 +557,7 @@ criticises.
 | — | `minKeyRepeatDelay` | **PARTIAL** | 1200 ms | keyControl, effectorStability |
 | — | `readFontText` | **PARTIAL** | — | sight, language |
 | — | `minReadFontSizeForFont` | **PARTIAL** | size 20, font system-sans | readFontText, effectorStability |
-| — | `pointerControl` | **PARTIAL** | hands, fingertips | None |
+| — | `pointerControl` | **PARTIAL** | site hands, side both; site fingertips, side both | None |
 | — | `minTargetSize` | **PARTIAL** | 28 mm | pointerControl, effectorStability, kinaesthesia |
 | — | `stereo` | **NONE** | — | sight |
 | — | `sustainedPress` | **PARTIAL** | — | keyControl |
@@ -636,12 +636,12 @@ criticises.
 | — | `effectorStability` | **PARTIAL** | 55 % | None |
 | — | `elevationResolution` | **PARTIAL** | 30 deg | hearing |
 | — | `language` | **FULL** | — | None |
-| — | `touch` | **PARTIAL** | site fingertips, level none; site hands, level reduced | None |
+| — | `touch` | **PARTIAL** | site fingertips, side both, level none; site hands, side both, level reduced | None |
 | — | `readAudioText` | **PARTIAL** | — | hearing, language |
 | — | `intelligibleVoicePitch` | **PARTIAL** | 165–300 | readAudioText |
 | — | `listeningDuration` | **PARTIAL** | 25 min | hearing |
 | — | `minInterWordGap` | **PARTIAL** | 260 ms | readAudioText |
-| — | `pointerControl` | **PARTIAL** | hands, fingertips | None |
+| — | `pointerControl` | **PARTIAL** | site hands, side both; site fingertips, side both | None |
 | `targetSizeWarm` | `minTargetSize` | **PARTIAL** | 12 mm | pointerControl, effectorStability, kinaesthesia |
 | — | `minTargetSize` | **PARTIAL** | *derived — see below* | pointerControl, effectorStability, kinaesthesia |
 | — | `usableFrequencyRange` | **PARTIAL** | 20–3000, 6000–12000 | hearing |
@@ -723,7 +723,7 @@ criticises.
 
 | Setting | Property | Capability | Measurement | Parent |
 |---|---|---|---|---|
-| — | `keyControl` | **PARTIAL** | head | None |
+| — | `keyControl` | **PARTIAL** | site head, side midline | None |
 | — | `activationTiming` | **PARTIAL** | needs a slow scan | keyControl |
 | — | `hearing` | **FULL** | — | None |
 | — | `sight` | **FULL** | — | None |
@@ -809,7 +809,7 @@ criticises.
 | — | `sight` | **FULL** | — | None |
 | — | `effectorStability` | **NONE** | — | None |
 | — | `language` | **FULL** | — | None |
-| — | `touch` | **PARTIAL** | site arms, level none; site hands, level none; site fingertips, level none; site trunk, level none; site legs, level none; site feet, level none; site toes, level none | None |
+| — | `touch` | **PARTIAL** | site arms, side both, level none; site hands, side both, level none; site fingertips, side both, level none; site trunk, side midline, level none; site legs, side both, level none; site feet, side both, level none; site toes, side both, level none | None |
 | — | `headControl` | **FULL** | — | None |
 | — | `inputDuration` | **PARTIAL** | 45 min | None |
 | — | `kinaesthesia` | **NONE** | — | None |
@@ -841,13 +841,13 @@ criticises.
 
 | Setting | Property | Capability | Measurement | Parent |
 |---|---|---|---|---|
-| — | `keyControl` | **PARTIAL** | feet, toes | None |
+| — | `keyControl` | **PARTIAL** | site feet, side both; site toes, side both | None |
 | — | `hearing` | **FULL** | — | None |
 | — | `sight` | **FULL** | — | None |
 | — | `effectorStability` | **FULL** | — | None |
 | — | `language` | **FULL** | — | None |
-| — | `touch` | **PARTIAL** | site arms, level none; site hands, level none; site fingertips, level none | None |
-| — | `pointerControl` | **PARTIAL** | feet, toes | None |
+| — | `touch` | **PARTIAL** | site arms, side both, level none; site hands, side both, level none; site fingertips, side both, level none | None |
+| — | `pointerControl` | **PARTIAL** | site feet, side both; site toes, side both | None |
 | — | `minTargetSize` | **PARTIAL** | 15 mm | pointerControl, effectorStability, kinaesthesia |
 | — | `simultaneousContacts` | **PARTIAL** | 2 points | None |
 | — | `textEntryRate` | **PARTIAL** | 30 wpm | None |
@@ -855,6 +855,37 @@ criticises.
 **Not recorded: 49 of 59 properties.**
 
 - **Not of interest** (49), because no precedence parent is PARTIAL: `stereo`, `focus`, `focusDuration`, `tracking`, `trackingDuration`, `viewRectangle`, `nonViewRectangle`, `colorLow`, `colorMedium`, `colorHigh`, `intensityLow`, `intensityMedium`, and 37 more.
+
+#### Setting groups (contexts)
+
+| Group | Template | Settings | Influenced by |
+|---|---|---|---|
+| `seeing` | vision | `sight` | `deviceStability` |
+| `listening` | listening | `hearing` | `ambientNoise` |
+| `input` | input | `pointerControl`, `keyControl`, `effectorStability` | — |
+
+### one-handed
+
+*Works entirely with the right hand, which is unimpaired and feels normally. The left arm and hand have no useful movement and reduced sensation. Full sight, hearing, language and speech.*
+
+**Basis:** exemplar — stands in for lived experience, not derived from any person  
+**Entity kind:** user · **Settings recorded:** 9
+
+| Setting | Property | Capability | Measurement | Parent |
+|---|---|---|---|---|
+| — | `keyControl` | **PARTIAL** | site hands, side right; site fingertips, side right | None |
+| — | `hearing` | **FULL** | — | None |
+| — | `sight` | **FULL** | — | None |
+| — | `effectorStability` | **FULL** | — | None |
+| — | `language` | **FULL** | — | None |
+| — | `touch` | **PARTIAL** | site arms, side left, level trace; site hands, side left, level trace; site fingertips, side left, level none | None |
+| — | `pointerControl` | **PARTIAL** | site hands, side right; site fingertips, side right | None |
+| — | `simultaneousContacts` | **PARTIAL** | 5 points | None |
+| — | `textEntryRate` | **PARTIAL** | 22 wpm | None |
+
+**Not recorded: 50 of 59 properties.**
+
+- **Not of interest** (50), because no precedence parent is PARTIAL: `stereo`, `focus`, `focusDuration`, `tracking`, `trackingDuration`, `viewRectangle`, `nonViewRectangle`, `colorLow`, `colorMedium`, `colorHigh`, `intensityLow`, `intensityMedium`, and 38 more.
 
 #### Setting groups (contexts)
 
@@ -932,64 +963,64 @@ Only properties recorded in at least one profile appear. A blank cell means the
 property is not recorded for that profile — either because a precedence parent is
 NONE, or because no parent is PARTIAL and so the question does not arise.
 
-| Property | reference | blindSinceBirth | lowVisionContrast | lowVisionColour | keyboardOnly | handTremor | deaf | deafenedAsymmetric | multipleSclerosis | deafBlind | deafenedNotch | secondLanguage | switchScanning | eyeGazeALS | sipAndPuff | toeTypist | switchScanningWithBuddy |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| `keyControl` | FULL | FULL | FULL | FULL | FULL | PARTIAL hands, fingertips | FULL | FULL | PARTIAL hands, fingertips | FULL | FULL | FULL | PARTIAL head | NONE | NONE | PARTIAL feet, toes | FULL |
-| `activationTiming` |  |  |  |  |  |  |  |  |  |  |  |  | PARTIAL needs a slow scan |  |  |  | PARTIAL needs a slow scan |
-| `hearing` | FULL | FULL | FULL | FULL | FULL | FULL | NONE | PARTIAL | FULL | NONE | PARTIAL | FULL | FULL | FULL | FULL | FULL | FULL |
-| `binauralHearing` |  |  |  |  |  |  |  | PARTIAL 800–8000 |  |  | PARTIAL 20–3000, 6000–12000 |  |  |  |  |  |  |
-| `azimuthResolution` |  |  |  |  |  |  |  | PARTIAL 45 deg |  |  | PARTIAL 20 deg |  |  |  |  |  |  |
-| `breathControl` |  |  |  |  |  |  |  |  |  |  |  |  |  |  | PARTIAL 4 signals |  |  |
-| `sight` | FULL | NONE | PARTIAL | PARTIAL | FULL | FULL | FULL | FULL | PARTIAL | NONE | FULL | FULL | FULL | FULL | FULL | FULL | FULL |
-| `colorHigh` |  |  | FULL | PARTIAL 80 % |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| `colorLow` |  |  | FULL | PARTIAL 40 % |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| `colorMedium` |  |  | FULL | PARTIAL 25 % |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| `concurrentStreams` |  |  |  |  |  |  |  | PARTIAL 2 streams |  |  | PARTIAL 2 streams |  |  |  |  |  |  |
-| `contrastSensitivity` |  |  | PARTIAL 30 % | FULL |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| `gazeControl` |  |  |  |  |  |  |  |  |  |  |  |  |  | PARTIAL |  |  |  |
-| `dwellTolerance` |  |  |  |  |  |  |  |  |  |  |  |  |  | PARTIAL 2500 ms |  |  |  |
-| `effectorStability` | FULL | FULL | FULL | FULL | FULL | PARTIAL 35 % | FULL | FULL | PARTIAL 30 % | FULL | PARTIAL 55 % | FULL | PARTIAL 15 % | NONE | NONE | FULL | FULL |
-| `elevationResolution` |  |  |  |  |  |  |  | PARTIAL 40 deg |  |  | PARTIAL 30 deg |  |  |  |  |  |  |
-| `focus` |  |  | PARTIAL |  |  |  |  |  | PARTIAL |  |  |  |  |  |  |  |  |
-| `focusDuration` |  |  | PARTIAL 25 min |  |  |  |  |  | PARTIAL 8 min |  |  |  |  |  |  |  |  |
-| `gazeAccuracy` |  |  |  |  |  |  |  |  |  |  |  |  |  | PARTIAL 3 deg |  |  |  |
-| `language` | FULL | FULL | FULL | FULL | FULL | FULL | FULL | FULL | FULL | FULL | FULL | FULL | FULL | FULL | FULL | FULL | FULL |
-| `touch` | FULL | FULL | FULL | FULL | FULL | FULL | FULL | FULL | NONE | FULL | PARTIAL site fingertips, level none; site hands, level reduced | FULL | FULL | FULL | PARTIAL site arms, level none; site hands, level none; site fingertips, level none; site trunk, level none; site legs, level none; site feet, level none; site toes, level none | PARTIAL site arms, level none; site hands, level none; site fingertips, level none | FULL |
-| `hapticLanguageSet` |  | PARTIAL Braille |  |  |  |  |  |  |  | PARTIAL Braille, DeafblindManual, PrintOnPalm |  |  |  |  |  |  |  |
-| `headControl` |  |  |  |  |  |  |  |  |  |  |  |  |  | NONE | FULL |  |  |
-| `inputDuration` |  |  |  |  |  |  |  |  |  |  |  |  | PARTIAL 20 min | PARTIAL 15 min | PARTIAL 45 min |  | PARTIAL 20 min |
-| `readAudioText` |  |  |  |  |  |  | NONE | PARTIAL |  | NONE | PARTIAL |  |  |  |  |  |  |
-| `intelligibleVoicePitch` |  |  |  |  |  |  |  | PARTIAL 165–300 |  |  | PARTIAL 165–300 |  |  |  |  |  |  |
-| `intensityHigh` |  |  | PARTIAL 45 % |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| `intensityLow` |  |  | PARTIAL 45 % |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| `intensityMedium` |  |  | PARTIAL 45 % | PARTIAL 70 % |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| `kinaesthesia` |  |  |  |  |  |  |  |  | PARTIAL 25 % |  |  |  |  |  | NONE |  |  |
-| `knownLanguages` |  |  |  |  |  |  | PARTIAL **en-CA** — listening none, speaking basic, reading fluent, writing fluent |  |  |  |  | PARTIAL **pa** — listening native, speaking native, reading fluent, writing conversational; **en-CA** — listening fluent, speaking conversational, reading fluent, writing conversational |  | PARTIAL **en-CA** — listening native, speaking none, reading native, writing native |  |  |  |
-| `listeningDuration` |  |  |  |  |  |  |  | PARTIAL 20 min | PARTIAL 15 min |  | PARTIAL 25 min |  |  |  |  |  |  |
-| `minInterWordGap` |  |  |  |  |  |  |  | PARTIAL 220 ms |  |  | PARTIAL 260 ms |  |  |  |  |  |  |
-| `minKeyRepeatDelay` |  |  |  |  |  | PARTIAL 900 ms |  |  | PARTIAL 1200 ms |  |  |  |  |  |  |  |  |
-| `readFontText` |  | NONE | PARTIAL |  |  |  |  |  | PARTIAL | NONE |  | PARTIAL |  |  |  |  |  |
-| `minReadFontSizeForFont` |  |  | PARTIAL size 18, font system-sans |  |  | PARTIAL size 12, font system-sans; PARTIAL *(M)* |  |  | PARTIAL size 20, font system-sans |  |  |  |  |  |  |  |  |
-| `pointerControl` | FULL | FULL | FULL | FULL | NONE | PARTIAL hands, fingertips | FULL | FULL | PARTIAL hands, fingertips | FULL | PARTIAL hands, fingertips | FULL | NONE | NONE | NONE | PARTIAL feet, toes | FULL |
-| `minTargetSize` |  |  |  |  |  | PARTIAL 18 mm |  |  | PARTIAL 28 mm |  | PARTIAL 12 mm; PARTIAL *(M)* |  |  |  |  | PARTIAL 15 mm |  |
-| `signLanguageSet` |  |  |  |  |  |  | PARTIAL ASL |  |  | PARTIAL ASL |  |  |  |  |  |  |  |
-| `readSignText` |  |  |  |  |  |  | FULL |  |  | NONE |  |  |  |  |  |  |  |
-| `readTactileSign` |  |  |  |  |  |  |  |  |  | FULL |  |  |  |  |  |  |  |
-| `simultaneousContacts` |  |  |  |  |  |  |  |  |  |  |  |  | PARTIAL 1 points | PARTIAL 1 points | PARTIAL 2 points | PARTIAL 2 points | PARTIAL 1 points |
-| `speech` |  |  |  |  |  |  | PARTIAL |  |  |  |  | FULL | PARTIAL | NONE | FULL |  | PARTIAL |
-| `speechIntelligibility` |  |  |  |  |  |  | PARTIAL familiar listeners |  |  |  |  | PARTIAL most listeners | PARTIAL familiar listeners |  |  |  | PARTIAL familiar listeners |
-| `speechRecognisedByMachine` |  |  |  |  |  |  | NONE |  |  |  |  | PARTIAL with frequent corrections | NONE |  |  |  | NONE |
-| `stereo` |  |  |  |  |  |  |  |  | NONE |  |  |  |  |  |  |  |  |
-| `sustainedPress` |  |  |  |  |  | PARTIAL |  |  | PARTIAL |  |  |  | PARTIAL |  |  |  | PARTIAL |
-| `switchSites` |  |  |  |  |  |  |  |  |  |  |  |  | PARTIAL 1 sites |  |  |  | PARTIAL 1 sites |
-| `textEntryRate` |  |  |  |  |  |  |  |  |  |  |  |  | PARTIAL 3 wpm | PARTIAL 6 wpm | PARTIAL 12 wpm | PARTIAL 30 wpm | PARTIAL 3 wpm |
-| `tracking` |  |  | PARTIAL |  |  |  |  |  | PARTIAL |  |  |  |  |  |  |  |  |
-| `trackingDuration` |  |  | PARTIAL 12 min |  |  |  |  |  | PARTIAL 4 min |  |  |  |  |  |  |  |  |
-| `usableFrequencyRange` |  |  |  |  |  |  |  | PARTIAL 20–8000 |  |  | PARTIAL 20–3000, 6000–12000 |  |  |  |  |  |  |
-| `vibrationDetection` |  |  |  |  |  |  |  |  |  | PARTIAL 85 % | NONE |  |  |  |  |  |  |
-| `writeFontSet` |  |  |  |  | PARTIAL SELECT |  |  |  |  |  |  |  |  |  |  |  |  |
-| `writeSignSet` |  |  |  |  |  |  | PARTIAL Visual |  |  | PARTIAL Visual, Tactile |  |  |  |  |  |  |  |
-| `writeTactileSet` |  |  |  |  |  |  |  |  |  | PARTIAL Braille, DeafblindManual, PrintOnPalm |  |  |  |  |  |  |  |
+| Property | reference | blindSinceBirth | lowVisionContrast | lowVisionColour | keyboardOnly | handTremor | deaf | deafenedAsymmetric | multipleSclerosis | deafBlind | deafenedNotch | secondLanguage | switchScanning | eyeGazeALS | sipAndPuff | toeTypist | oneHanded | switchScanningWithBuddy |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| `keyControl` | FULL | FULL | FULL | FULL | FULL | PARTIAL site hands, side both; site fingertips, side both | FULL | FULL | PARTIAL site hands, side both; site fingertips, side both | FULL | FULL | FULL | PARTIAL site head, side midline | NONE | NONE | PARTIAL site feet, side both; site toes, side both | PARTIAL site hands, side right; site fingertips, side right | FULL |
+| `activationTiming` |  |  |  |  |  |  |  |  |  |  |  |  | PARTIAL needs a slow scan |  |  |  |  | PARTIAL needs a slow scan |
+| `hearing` | FULL | FULL | FULL | FULL | FULL | FULL | NONE | PARTIAL | FULL | NONE | PARTIAL | FULL | FULL | FULL | FULL | FULL | FULL | FULL |
+| `binauralHearing` |  |  |  |  |  |  |  | PARTIAL 800–8000 |  |  | PARTIAL 20–3000, 6000–12000 |  |  |  |  |  |  |  |
+| `azimuthResolution` |  |  |  |  |  |  |  | PARTIAL 45 deg |  |  | PARTIAL 20 deg |  |  |  |  |  |  |  |
+| `breathControl` |  |  |  |  |  |  |  |  |  |  |  |  |  |  | PARTIAL 4 signals |  |  |  |
+| `sight` | FULL | NONE | PARTIAL | PARTIAL | FULL | FULL | FULL | FULL | PARTIAL | NONE | FULL | FULL | FULL | FULL | FULL | FULL | FULL | FULL |
+| `colorHigh` |  |  | FULL | PARTIAL 80 % |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| `colorLow` |  |  | FULL | PARTIAL 40 % |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| `colorMedium` |  |  | FULL | PARTIAL 25 % |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| `concurrentStreams` |  |  |  |  |  |  |  | PARTIAL 2 streams |  |  | PARTIAL 2 streams |  |  |  |  |  |  |  |
+| `contrastSensitivity` |  |  | PARTIAL 30 % | FULL |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| `gazeControl` |  |  |  |  |  |  |  |  |  |  |  |  |  | PARTIAL |  |  |  |  |
+| `dwellTolerance` |  |  |  |  |  |  |  |  |  |  |  |  |  | PARTIAL 2500 ms |  |  |  |  |
+| `effectorStability` | FULL | FULL | FULL | FULL | FULL | PARTIAL 35 % | FULL | FULL | PARTIAL 30 % | FULL | PARTIAL 55 % | FULL | PARTIAL 15 % | NONE | NONE | FULL | FULL | FULL |
+| `elevationResolution` |  |  |  |  |  |  |  | PARTIAL 40 deg |  |  | PARTIAL 30 deg |  |  |  |  |  |  |  |
+| `focus` |  |  | PARTIAL |  |  |  |  |  | PARTIAL |  |  |  |  |  |  |  |  |  |
+| `focusDuration` |  |  | PARTIAL 25 min |  |  |  |  |  | PARTIAL 8 min |  |  |  |  |  |  |  |  |  |
+| `gazeAccuracy` |  |  |  |  |  |  |  |  |  |  |  |  |  | PARTIAL 3 deg |  |  |  |  |
+| `language` | FULL | FULL | FULL | FULL | FULL | FULL | FULL | FULL | FULL | FULL | FULL | FULL | FULL | FULL | FULL | FULL | FULL | FULL |
+| `touch` | FULL | FULL | FULL | FULL | FULL | FULL | FULL | FULL | NONE | FULL | PARTIAL site fingertips, side both, level none; site hands, side both, level reduced | FULL | FULL | FULL | PARTIAL site arms, side both, level none; site hands, side both, level none; site fingertips, side both, level none; site trunk, side midline, level none; site legs, side both, level none; site feet, side both, level none; site toes, side both, level none | PARTIAL site arms, side both, level none; site hands, side both, level none; site fingertips, side both, level none | PARTIAL site arms, side left, level trace; site hands, side left, level trace; site fingertips, side left, level none | FULL |
+| `hapticLanguageSet` |  | PARTIAL Braille |  |  |  |  |  |  |  | PARTIAL Braille, DeafblindManual, PrintOnPalm |  |  |  |  |  |  |  |  |
+| `headControl` |  |  |  |  |  |  |  |  |  |  |  |  |  | NONE | FULL |  |  |  |
+| `inputDuration` |  |  |  |  |  |  |  |  |  |  |  |  | PARTIAL 20 min | PARTIAL 15 min | PARTIAL 45 min |  |  | PARTIAL 20 min |
+| `readAudioText` |  |  |  |  |  |  | NONE | PARTIAL |  | NONE | PARTIAL |  |  |  |  |  |  |  |
+| `intelligibleVoicePitch` |  |  |  |  |  |  |  | PARTIAL 165–300 |  |  | PARTIAL 165–300 |  |  |  |  |  |  |  |
+| `intensityHigh` |  |  | PARTIAL 45 % |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| `intensityLow` |  |  | PARTIAL 45 % |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| `intensityMedium` |  |  | PARTIAL 45 % | PARTIAL 70 % |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| `kinaesthesia` |  |  |  |  |  |  |  |  | PARTIAL 25 % |  |  |  |  |  | NONE |  |  |  |
+| `knownLanguages` |  |  |  |  |  |  | PARTIAL **en-CA** — listening none, speaking basic, reading fluent, writing fluent |  |  |  |  | PARTIAL **pa** — listening native, speaking native, reading fluent, writing conversational; **en-CA** — listening fluent, speaking conversational, reading fluent, writing conversational |  | PARTIAL **en-CA** — listening native, speaking none, reading native, writing native |  |  |  |  |
+| `listeningDuration` |  |  |  |  |  |  |  | PARTIAL 20 min | PARTIAL 15 min |  | PARTIAL 25 min |  |  |  |  |  |  |  |
+| `minInterWordGap` |  |  |  |  |  |  |  | PARTIAL 220 ms |  |  | PARTIAL 260 ms |  |  |  |  |  |  |  |
+| `minKeyRepeatDelay` |  |  |  |  |  | PARTIAL 900 ms |  |  | PARTIAL 1200 ms |  |  |  |  |  |  |  |  |  |
+| `readFontText` |  | NONE | PARTIAL |  |  |  |  |  | PARTIAL | NONE |  | PARTIAL |  |  |  |  |  |  |
+| `minReadFontSizeForFont` |  |  | PARTIAL size 18, font system-sans |  |  | PARTIAL size 12, font system-sans; PARTIAL *(M)* |  |  | PARTIAL size 20, font system-sans |  |  |  |  |  |  |  |  |  |
+| `pointerControl` | FULL | FULL | FULL | FULL | NONE | PARTIAL site hands, side both; site fingertips, side both | FULL | FULL | PARTIAL site hands, side both; site fingertips, side both | FULL | PARTIAL site hands, side both; site fingertips, side both | FULL | NONE | NONE | NONE | PARTIAL site feet, side both; site toes, side both | PARTIAL site hands, side right; site fingertips, side right | FULL |
+| `minTargetSize` |  |  |  |  |  | PARTIAL 18 mm |  |  | PARTIAL 28 mm |  | PARTIAL 12 mm; PARTIAL *(M)* |  |  |  |  | PARTIAL 15 mm |  |  |
+| `signLanguageSet` |  |  |  |  |  |  | PARTIAL ASL |  |  | PARTIAL ASL |  |  |  |  |  |  |  |  |
+| `readSignText` |  |  |  |  |  |  | FULL |  |  | NONE |  |  |  |  |  |  |  |  |
+| `readTactileSign` |  |  |  |  |  |  |  |  |  | FULL |  |  |  |  |  |  |  |  |
+| `simultaneousContacts` |  |  |  |  |  |  |  |  |  |  |  |  | PARTIAL 1 points | PARTIAL 1 points | PARTIAL 2 points | PARTIAL 2 points | PARTIAL 5 points | PARTIAL 1 points |
+| `speech` |  |  |  |  |  |  | PARTIAL |  |  |  |  | FULL | PARTIAL | NONE | FULL |  |  | PARTIAL |
+| `speechIntelligibility` |  |  |  |  |  |  | PARTIAL familiar listeners |  |  |  |  | PARTIAL most listeners | PARTIAL familiar listeners |  |  |  |  | PARTIAL familiar listeners |
+| `speechRecognisedByMachine` |  |  |  |  |  |  | NONE |  |  |  |  | PARTIAL with frequent corrections | NONE |  |  |  |  | NONE |
+| `stereo` |  |  |  |  |  |  |  |  | NONE |  |  |  |  |  |  |  |  |  |
+| `sustainedPress` |  |  |  |  |  | PARTIAL |  |  | PARTIAL |  |  |  | PARTIAL |  |  |  |  | PARTIAL |
+| `switchSites` |  |  |  |  |  |  |  |  |  |  |  |  | PARTIAL 1 sites |  |  |  |  | PARTIAL 1 sites |
+| `textEntryRate` |  |  |  |  |  |  |  |  |  |  |  |  | PARTIAL 3 wpm | PARTIAL 6 wpm | PARTIAL 12 wpm | PARTIAL 30 wpm | PARTIAL 22 wpm | PARTIAL 3 wpm |
+| `tracking` |  |  | PARTIAL |  |  |  |  |  | PARTIAL |  |  |  |  |  |  |  |  |  |
+| `trackingDuration` |  |  | PARTIAL 12 min |  |  |  |  |  | PARTIAL 4 min |  |  |  |  |  |  |  |  |  |
+| `usableFrequencyRange` |  |  |  |  |  |  |  | PARTIAL 20–8000 |  |  | PARTIAL 20–3000, 6000–12000 |  |  |  |  |  |  |  |
+| `vibrationDetection` |  |  |  |  |  |  |  |  |  | PARTIAL 85 % | NONE |  |  |  |  |  |  |  |
+| `writeFontSet` |  |  |  |  | PARTIAL SELECT |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| `writeSignSet` |  |  |  |  |  |  | PARTIAL Visual |  |  | PARTIAL Visual, Tactile |  |  |  |  |  |  |  |  |
+| `writeTactileSet` |  |  |  |  |  |  |  |  |  | PARTIAL Braille, DeafblindManual, PrintOnPalm |  |  |  |  |  |  |  |  |
 
 ---
 
