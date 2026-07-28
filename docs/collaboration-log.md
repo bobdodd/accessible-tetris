@@ -1620,6 +1620,79 @@ general enough to survive.
 
 57 properties, 17 exemplars, 137 tests.
 
+## C12 · correction · The model was drifting into a medical description of a person
+
+**2026-07-28.** Bob: "With our larger model of capability, have we strayed away
+from its intent? The intent is to describe practically how the user can interact
+with the computer/system/program. mobility knowledge is good, but it needs to
+help us know how fast you can write, how big a touch area has to be (are toes the
+same size as fingers?), how many places you can touch at once. We aren't looking
+for a medical model of a human."
+
+**Yes, we had.** I audited it rather than argued: **41 of 57 properties described
+a person without stating what a system would do about it.** That is the drift,
+measured, and it had happened one reasonable-looking property at a time.
+
+### The structural fix
+
+`decides` is now a REQUIRED field on every property. A property that cannot name
+a decision some renderer, input handler or content selector actually makes is a
+medical observation with a schema around it, and `defineCapability` refuses it.
+It fails at declaration rather than being noticed a year later.
+
+### Bob's second correction, and it is the better half
+
+My first version made `decides` a plain string, one decision per property. He
+stopped it: "it may only help to decide as part of a group of properties, not
+just itself. `decides` has to handle that. It's not a boolean thing."
+
+He is right, and the string version would have produced **57 overstated claims**.
+`contrastSensitivity` sets no palette alone; it does so with six colour and
+intensity bands. `gazeAccuracy` fixes no target size until read with
+`minTargetSize` and `effectorStability`.
+
+So a property declares either a decision it makes, or a contribution:
+
+    decides: "the smallest a control may be drawn"
+    decides: { what: "the visual palette", with: ["colorLow", "colorMedium"] }
+
+`decisionGroups()` then reports which properties must be read together, and the
+generated document carries the index. **26 decisions, 17 of them joint** — so
+two thirds of the model's decisions need more than one property, which the
+one-property-one-decision version would have hidden entirely.
+
+*This is the second time today Bob has stopped me flattening something that is
+genuinely many-to-many. The first was reception versus production, where I had
+one property doing two jobs. Both times my instinct was the tidier structure, and
+both times the tidiness was a false claim about how the world works.*
+
+### The three practical questions, checked
+
+- **How fast can you write?** The model could not say. `writeFontSet` gives the
+  MODES and never the RATE. Added `textEntryRate` in words per minute, and the
+  spread across the exemplars is tenfold: switch scanning **3**, gaze **6**,
+  sip-and-puff **12**, toe typist **30**. Below about ten, free text entry stops
+  being a feature and becomes an obstacle — which is a design decision no amount
+  of anatomy delivers.
+- **How big must a touch area be?** Already answered: `minTargetSize` in mm, and
+  the toe typist records 15 against a hand's 5. So no, toes are not the same size
+  as fingers, and the model already said so.
+- **How many places at once?** The model could not say. Added
+  `simultaneousContacts`. One means every interaction is strictly sequential: no
+  modifier keys, no chords, no multi-touch gesture at all. Distinct from
+  `switchSites`, which counts signals a person can produce rather than how many
+  can be live at the same instant — and the two come apart, since a toe typist
+  has ten digits and one site.
+
+### One thing the audit caught in passing
+
+`textEntryRate` was first hung off `keyControl`, which would have forced a gaze
+user's rate to NONE — they type perfectly well, just not with keys. Un-parented.
+The rate is independent of the channel that produces it, which is exactly why it
+is worth recording separately from the channel.
+
+59 properties, 26 decisions, 17 exemplars, 137 tests.
+
 ## X1 · disagreement · Bob corrected Claude's conclusion, not its facts
 
 **2026-07-27.** After C3, Claude concluded that the working practice should be

@@ -111,6 +111,7 @@ export const userCapability = defineCapability({
     sight: {
       ontology: "visual",
       precedence: [],
+      decides: "whether to render visually at all",
       description:
         "Top-level property for vision. Remaining template properties only of interest " +
         "for PARTIAL sight.",
@@ -118,11 +119,19 @@ export const userCapability = defineCapability({
     stereo: {
       ontology: "visual",
       precedence: ["sight"],
+      decides: {
+        what: "whether detail, depth and motion may carry meaning",
+        with: ["focus", "tracking"],
+      },
       description: "Stereo vision.",
     },
     focus: {
       ontology: "visual",
       precedence: ["sight"],
+      decides: {
+        what: "whether detail, depth and motion may carry meaning",
+        with: ["tracking", "stereo"],
+      },
       description:
         "Can the user focus on a point? PARTIAL would suggest blurred/double vision. " +
         "Example of NONE would be a user with low vision who can distinguish light and " +
@@ -132,6 +141,10 @@ export const userCapability = defineCapability({
       ontology: "visual",
       precedence: ["focus"],
       measurement: minutes(),
+      decides: {
+        what: "how long a session may run before a break is offered",
+        with: ["trackingDuration", "listeningDuration", "inputDuration"],
+      },
       description:
         "Length of time the user can continue to focus on a point (not necessarily the " +
         "same point) before experiencing fatigue. FULL is indefinitely; PARTIAL carries " +
@@ -140,6 +153,10 @@ export const userCapability = defineCapability({
     tracking: {
       ontology: "visual",
       precedence: ["focus"],
+      decides: {
+        what: "whether detail, depth and motion may carry meaning",
+        with: ["focus", "stereo"],
+      },
       description:
         "Can the user visually track a moving item? This is not a measure of focus (the " +
         "image may be blurred for instance) but it is related: identifying and tracking " +
@@ -149,6 +166,10 @@ export const userCapability = defineCapability({
       ontology: "visual",
       precedence: ["tracking"],
       measurement: minutes(),
+      decides: {
+        what: "how long a session may run before a break is offered",
+        with: ["focusDuration", "listeningDuration", "inputDuration"],
+      },
       description:
         "Length of time the user can continue to track a moving image before experiencing " +
         "fatigue. Assuming tracking a moving image is a greater cognitive load than simply " +
@@ -165,6 +186,10 @@ export const userCapability = defineCapability({
           { name: "w", type: "numeric", min: 1, max: 8192, unit: "px" },
           { name: "h", type: "numeric", min: 1, max: 8192, unit: "px" },
         ],
+      },
+      decides: {
+        what: "where on screen content may be placed",
+        with: ["nonViewRectangle"],
       },
       description:
         "A viewing rectangle within the user's field of vision. Nominally a rectangle " +
@@ -184,6 +209,10 @@ export const userCapability = defineCapability({
           { name: "h", type: "numeric", min: 1, max: 8192, unit: "px" },
         ],
       },
+      decides: {
+        what: "where on screen content may be placed",
+        with: ["viewRectangle"],
+      },
       description:
         "A rectangle within the user's field of vision NOT readable by the user. Any such " +
         "centrally placed rectangle would suggest either poor or no central vision, " +
@@ -194,32 +223,60 @@ export const userCapability = defineCapability({
 
     colorLow: {
       ontology: "visual", precedence: ["sight"], measurement: percent,
+      decides: {
+        what: "the visual palette — which hues and tones may carry meaning",
+        with: ["colorMedium", "colorHigh", "intensityLow", "intensityMedium", "intensityHigh", "contrastSensitivity"],
+      },
       description:
         "The effective low frequency colour perception of the user. FULL is no impairment; " +
         "NONE is no low-frequency colour perception at all; PARTIAL carries the percentage.",
     },
     colorMedium: {
       ontology: "visual", precedence: ["sight"], measurement: percent,
+      decides: {
+        what: "the visual palette — which hues and tones may carry meaning",
+        with: ["colorLow", "colorHigh", "intensityLow", "intensityMedium", "intensityHigh", "contrastSensitivity"],
+      },
       description: "The effective medium frequency colour perception of the user.",
     },
     colorHigh: {
       ontology: "visual", precedence: ["sight"], measurement: percent,
+      decides: {
+        what: "the visual palette — which hues and tones may carry meaning",
+        with: ["colorLow", "colorMedium", "intensityLow", "intensityMedium", "intensityHigh", "contrastSensitivity"],
+      },
       description: "The effective high frequency colour perception of the user.",
     },
     intensityLow: {
       ontology: "visual", precedence: ["sight"], measurement: percent,
+      decides: {
+        what: "the visual palette — which hues and tones may carry meaning",
+        with: ["colorLow", "colorMedium", "colorHigh", "intensityMedium", "intensityHigh", "contrastSensitivity"],
+      },
       description: "The effective low frequency intensity perception of the user.",
     },
     intensityMedium: {
       ontology: "visual", precedence: ["sight"], measurement: percent,
+      decides: {
+        what: "the visual palette — which hues and tones may carry meaning",
+        with: ["colorLow", "colorMedium", "colorHigh", "intensityLow", "intensityHigh", "contrastSensitivity"],
+      },
       description: "The effective medium frequency intensity perception of the user.",
     },
     intensityHigh: {
       ontology: "visual", precedence: ["sight"], measurement: percent,
+      decides: {
+        what: "the visual palette — which hues and tones may carry meaning",
+        with: ["colorLow", "colorMedium", "colorHigh", "intensityLow", "intensityMedium", "contrastSensitivity"],
+      },
       description: "The effective high frequency intensity perception of the user.",
     },
     contrastSensitivity: {
       ontology: "visual", precedence: ["sight"], measurement: percent,
+      decides: {
+        what: "the visual palette — which hues and tones may carry meaning",
+        with: ["colorLow", "colorMedium", "colorHigh", "intensityLow", "intensityMedium", "intensityHigh"],
+      },
       description:
         "MY CHOICE. Effective contrast discrimination. Table 2 models colour and intensity " +
         "per frequency band but has no contrast property, and contrast is the limiting " +
@@ -232,6 +289,7 @@ export const userCapability = defineCapability({
     hearing: {
       ontology: "sonic",
       precedence: [],
+      decides: "whether to render aurally at all",
       description:
         "MY CHOICE. Top-level property for hearing, following the shape of `sight`. " +
         "Remaining sonic properties only of interest for PARTIAL hearing.",
@@ -244,6 +302,7 @@ export const userCapability = defineCapability({
         of: { type: "numericRange", unit: "Hz", min: 0, max: 22050 },
         order: "lowestToHighest",
       },
+      decides: "which frequencies a cue may be placed at",
       description:
         "The usable audio frequency range, as a collection of bands with gaps between " +
         "them. The paper's own worked justification for Composite Property: 'a collection " +
@@ -280,6 +339,10 @@ export const userCapability = defineCapability({
         of: { type: "numericRange", unit: "Hz", min: 0, max: 22050 },
         order: "lowestToHighest",
       },
+      decides: {
+        what: "how a soundscape may be spatialised",
+        with: ["azimuthResolution", "elevationResolution"],
+      },
       description:
         "MY CHOICE. Over which frequencies do the two ears still combine? NONE is " +
         "genuinely monaural listening. PARTIAL carries the bands where binaural " +
@@ -290,6 +353,10 @@ export const userCapability = defineCapability({
     azimuthResolution: {
       ontology: "sonic", precedence: ["hearing", "binauralHearing"],
       measurement: { type: "numeric", min: 1, max: 180, unit: "deg" },
+      decides: {
+        what: "how a soundscape may be spatialised",
+        with: ["elevationResolution", "binauralHearing"],
+      },
       description:
         "MY CHOICE. Smallest left-right angular difference the user can reliably " +
         "distinguish. Directly bounds how many positions a spatialised soundscape can " +
@@ -311,6 +378,10 @@ export const userCapability = defineCapability({
        * when in fact one axis survives and the other does not. */
       ontology: "sonic", precedence: ["hearing"],
       measurement: { type: "numeric", min: 1, max: 180, unit: "deg" },
+      decides: {
+        what: "how a soundscape may be spatialised",
+        with: ["azimuthResolution", "binauralHearing"],
+      },
       description:
         "MY CHOICE. Smallest up-down angular difference the user can reliably distinguish. " +
         "Typically much coarser than azimuth for most listeners.",
@@ -318,6 +389,7 @@ export const userCapability = defineCapability({
     concurrentStreams: {
       ontology: "sonic", precedence: ["hearing"],
       measurement: { type: "numeric", min: 1, max: 8, unit: "streams" },
+      decides: "how many sounds may play at once",
       description:
         "MY CHOICE. How many simultaneous audio streams the user can attend to and still " +
         "separate. The sonic analogue of Table 3's tracking.",
@@ -325,6 +397,10 @@ export const userCapability = defineCapability({
     listeningDuration: {
       ontology: "sonic", precedence: ["hearing"],
       measurement: minutes(),
+      decides: {
+        what: "how long a session may run before a break is offered",
+        with: ["focusDuration", "trackingDuration", "inputDuration"],
+      },
       description:
         "MY CHOICE. Length of time the user can attend to a dense soundscape before " +
         "experiencing fatigue. The sonic analogue of trackingDuration.",
@@ -364,6 +440,10 @@ export const userCapability = defineCapability({
         },
         order: "asDeclared",
       },
+      decides: {
+        what: "whether haptic feedback may be used, and where",
+        with: ["vibrationDetection"],
+      },
       description:
         "MY CHOICE. Tactile perception, by body site. FULL is unimpaired everywhere; " +
         "NONE is absent everywhere; PARTIAL lists the sites that differ from full and " +
@@ -373,6 +453,10 @@ export const userCapability = defineCapability({
     },
     vibrationDetection: {
       ontology: "haptic", precedence: ["touch"], measurement: percent,
+      decides: {
+        what: "whether haptic feedback may be used, and where",
+        with: ["touch"],
+      },
       description: "MY CHOICE. Effective detection of device vibration.",
     },
     /* MY CHOICE, added for the MS profile. Haptics is conventionally BOTH
@@ -387,6 +471,7 @@ export const userCapability = defineCapability({
      * proprioception intact, and proprioception lost with touch intact. */
     kinaesthesia: {
       ontology: "haptic", precedence: [], measurement: percent,
+      decides: "whether the user needs visual confirmation of where their effector is",
       description:
         "MY CHOICE. Can the user tell where their hand is without looking at it? " +
         "The other half of the haptic design space: limb position and movement " +
@@ -400,6 +485,10 @@ export const userCapability = defineCapability({
     pointerControl: {
       ontology: "motor", precedence: [],
       measurement: effectorSites,
+      decides: {
+        what: "which input channels are available, and from which body site",
+        with: ["keyControl", "headControl", "gazeControl", "breathControl", "speech"],
+      },
       description:
         "MY CHOICE. Can the user operate a continuous pointing device, and with what? NONE " +
         "is the capability usually described as 'keyboard only' — and describing it as " +
@@ -432,6 +521,10 @@ export const userCapability = defineCapability({
     switchSites: {
       ontology: "motor", precedence: ["keyControl"],
       measurement: { type: "numeric", min: 1, max: 8, unit: "sites" },
+      decides: {
+        what: "whether scanning must be timed, and how fast it may advance",
+        with: ["activationTiming"],
+      },
       description:
         "MY CHOICE. How many independent body sites the user can operate a switch from, " +
         "reliably and repeatably — head, hand, foot, knee, chin, eyebrow. One site forces " +
@@ -456,6 +549,10 @@ export const userCapability = defineCapability({
           "any scan rate",
         ],
       },
+      decides: {
+        what: "whether scanning must be timed, and how fast it may advance",
+        with: ["switchSites"],
+      },
       description:
         "MY CHOICE. Can the user activate a switch at the moment a scan reaches the item " +
         "they want? Ordered least to most capable. Independent of switchSites, because " +
@@ -465,6 +562,10 @@ export const userCapability = defineCapability({
 
     headControl: {
       ontology: "motor", precedence: [],
+      decides: {
+        what: "which input channels are available, and from which body site",
+        with: ["pointerControl", "keyControl", "gazeControl", "breathControl", "speech"],
+      },
       description:
         "MY CHOICE. Can the user direct head position deliberately, for head pointing or " +
         "head switches? Preserved in high cervical injury well below the level at which " +
@@ -496,6 +597,7 @@ export const userCapability = defineCapability({
           { name: "right", type: "numeric", min: 0, max: 90, unit: "deg" },
         ],
       },
+      decides: "where a screen, camera or switch may be placed",
       description:
         "MY CHOICE. How far the user can turn and tilt their head, in degrees from " +
         "centre, given separately for each direction because the limits are often " +
@@ -505,6 +607,10 @@ export const userCapability = defineCapability({
     breathControl: {
       ontology: "motor", precedence: [],
       measurement: { type: "numeric", min: 1, max: 4, unit: "signals" },
+      decides: {
+        what: "which input channels are available, and from which body site",
+        with: ["pointerControl", "keyControl", "headControl", "gazeControl", "speech"],
+      },
       description:
         "MY CHOICE. How many distinguishable breath signals the user can produce on " +
         "demand — sip and puff, each optionally hard and soft, so up to four. Counting " +
@@ -519,6 +625,10 @@ export const userCapability = defineCapability({
      * would take every visual property down with it. */
     gazeControl: {
       ontology: "motor", precedence: ["sight"],
+      decides: {
+        what: "which input channels are available, and from which body site",
+        with: ["pointerControl", "keyControl", "headControl", "breathControl", "speech"],
+      },
       description:
         "MY CHOICE. Can the user direct their gaze deliberately at a target? A MOTOR " +
         "capability that depends on sight but is not sight: in late-stage ALS vision is " +
@@ -527,6 +637,10 @@ export const userCapability = defineCapability({
     gazeAccuracy: {
       ontology: "motor", precedence: ["gazeControl"],
       measurement: { type: "numeric", min: 1, max: 15, unit: "deg" },
+      decides: {
+        what: "the smallest a control may be drawn",
+        with: ["minTargetSize", "effectorStability"],
+      },
       description:
         "MY CHOICE. The angular error within which the user can place their gaze. Sets " +
         "the minimum on-screen target size directly. Demonstrable rather than reportable " +
@@ -536,11 +650,67 @@ export const userCapability = defineCapability({
     dwellTolerance: {
       ontology: "motor", precedence: ["gazeControl"],
       measurement: { type: "numeric", min: 100, max: 4000, unit: "ms" },
+      decides: {
+        what: "how long a selection must be held, and how long before it repeats",
+        with: ["sustainedPress", "minKeyRepeatDelay"],
+      },
       description:
         "MY CHOICE. How long the user can hold a fixation steady enough to confirm a " +
         "selection. Published dwell thresholds run 500-1000 ms and cap communication at " +
         "5-10 words per minute; users with slow eye movement may need 2500 ms. This is " +
         "the number that decides whether a dwell interface is usable at all.",
+    },
+
+    /* MY CHOICE, and the model could not answer this at all — which was the
+     * clearest evidence that it had drifted from interaction toward anatomy.
+     * `writeFontSet` says which MODES a user writes in and never how FAST, yet
+     * the rate is the fact everything downstream turns on.
+     *
+     * The spread is enormous and decides the design, not the trimming of it:
+     * a single-switch scanning user manages a few words a minute, a gaze user
+     * five to ten, a competent toe typist thirty or more. Below roughly ten
+     * words a minute, free text entry stops being a feature and becomes an
+     * obstacle — the answer is prediction, stored phrases, or not asking for
+     * text at all. No amount of knowing which body site does the typing tells
+     * you that. */
+    textEntryRate: {
+      /* NO precedence parent, deliberately. An early draft hung this off
+       * keyControl, which would have forced a gaze user's text entry rate to
+       * NONE — they type perfectly well, just not with keys. The rate is
+       * independent of the channel that produces it, which is the whole reason
+       * it is worth recording separately from the channel. */
+      ontology: "motor", precedence: [],
+      measurement: { type: "numeric", min: 1, max: 120, unit: "wpm" },
+      decides: {
+        what: "how long to allow for text entry, and whether to offer it at all",
+        with: ["writeFontSet", "simultaneousContacts"],
+      },
+      description:
+        "MY CHOICE. How fast the user enters text, in words per minute, by whatever means " +
+        "they use. Not a measure of skill or effort — a fluent scanning user and a fluent " +
+        "touch typist differ by an order of magnitude and neither is trying harder.",
+    },
+
+    /* MY CHOICE. How many places at once — the second thing the model simply
+     * could not say. Chording, two-finger gestures, shift-and-key, hold-one-
+     * press-another: all of them assume more than one simultaneous contact, and
+     * all of them silently exclude anyone with a single switch, a head pointer
+     * or one usable digit.
+     *
+     * Distinct from switchSites, which counts independent SIGNALS a person can
+     * produce. This counts how many can be live at the same instant, and the
+     * two come apart: a toe typist has ten digits and one site. */
+    simultaneousContacts: {
+      ontology: "motor", precedence: [],
+      measurement: { type: "numeric", min: 1, max: 10, unit: "points" },
+      decides: {
+        what: "whether chording, multi-touch or hold-and-press may be required",
+        with: ["sustainedPress"],
+      },
+      description:
+        "MY CHOICE. How many controls the user can operate at the same instant — keys, " +
+        "switches or touch points. One means every interaction must be sequential, which " +
+        "rules out modifier keys and every multi-touch gesture.",
     },
 
     /* Fatigue, for doing rather than perceiving. The model had focusDuration,
@@ -550,6 +720,10 @@ export const userCapability = defineCapability({
     inputDuration: {
       ontology: "motor", precedence: [],
       measurement: minutes(),
+      decides: {
+        what: "how long a session may run before a break is offered",
+        with: ["focusDuration", "trackingDuration", "listeningDuration"],
+      },
       description:
         "MY CHOICE. How long the user can sustain deliberate input before fatigue forces " +
         "a break. The motor counterpart of focusDuration and listeningDuration, and the " +
@@ -557,6 +731,10 @@ export const userCapability = defineCapability({
     },
     keyControl: {
       ontology: "motor", precedence: [], measurement: effectorSites,
+      decides: {
+        what: "which input channels are available, and from which body site",
+        with: ["pointerControl", "headControl", "gazeControl", "breathControl", "speech"],
+      },
       description:
         "MY CHOICE. Can the user operate discrete keys or switches, and WITH WHAT? FULL " +
         "assumes the usual fingers; PARTIAL names the sites that actually do the work — " +
@@ -570,6 +748,10 @@ export const userCapability = defineCapability({
        * same hand-centric fault that had `touch` meaning fingertips and
        * `keyControl` meaning fingers. A toe typist has an effector and it is not
        * a hand; so does someone driving a switch with their chin. */
+      decides: {
+        what: "the smallest a control may be drawn",
+        with: ["minTargetSize", "gazeAccuracy"],
+      },
       description:
         "MY CHOICE. Steadiness of whatever body part operates the control, under load — " +
         "hand, foot, chin or head. FULL is no tremor; PARTIAL " +
@@ -586,11 +768,19 @@ export const userCapability = defineCapability({
        * it and never notice using it. */
       precedence: ["pointerControl", "effectorStability", "kinaesthesia"],
       measurement: { type: "numeric", min: 1, max: 40, unit: "mm" },
+      decides: {
+        what: "the smallest a control may be drawn",
+        with: ["effectorStability", "gazeAccuracy"],
+      },
       description:
         "MY CHOICE. Smallest target the user can reliably acquire with a pointing device.",
     },
     sustainedPress: {
       ontology: "motor", precedence: ["keyControl"],
+      decides: {
+        what: "how long a selection must be held, and how long before it repeats",
+        with: ["minKeyRepeatDelay", "dwellTolerance"],
+      },
       description:
         "MY CHOICE. Can the user hold a key down, or chord two keys? NONE is the " +
         "capability that sticky-keys exists to answer.",
@@ -602,6 +792,10 @@ export const userCapability = defineCapability({
      * qualifies. */
     speech: {
       ontology: "motor", precedence: [],
+      decides: {
+        what: "which input channels are available, and from which body site",
+        with: ["pointerControl", "keyControl", "headControl", "gazeControl", "breathControl"],
+      },
       description:
         "MY CHOICE. Can the user produce spoken output at all? Independent of whether " +
         "anyone or anything understands it, which is speechIntelligibility and " +
@@ -610,6 +804,10 @@ export const userCapability = defineCapability({
     minKeyRepeatDelay: {
       ontology: "motor", precedence: ["keyControl", "effectorStability"],
       measurement: { type: "numeric", min: 1, max: 2000, unit: "ms" },
+      decides: {
+        what: "how long a selection must be held, and how long before it repeats",
+        with: ["sustainedPress", "dwellTolerance"],
+      },
       description:
         "MY CHOICE. Minimum delay before a held key should repeat, below which tremor " +
         "produces unintended repeats.",
@@ -619,6 +817,7 @@ export const userCapability = defineCapability({
 
     language: {
       ontology: "language", precedence: [],
+      decides: "whether language may be used at all",
       description: "Can the user understand language (in any medium)?",
     },
 
@@ -660,6 +859,7 @@ export const userCapability = defineCapability({
         },
         order: "asDeclared",
       },
+      decides: "which language to present in, and at what complexity",
       description:
         "The spoken and written languages the user knows, each with the four standard " +
         "skills rated separately. Tags are BCP 47, so regional variety (en-CA vs en-GB) " +
@@ -692,6 +892,10 @@ export const userCapability = defineCapability({
           "any listener",
         ],
       },
+      decides: {
+        what: "whether speech may be accepted as input",
+        with: ["speechRecognisedByMachine"],
+      },
       description:
         "How readily the user's speech is understood by other people. Ordered least to " +
         "most capable. Carries the functional consequence of Deaf voice, strong accent " +
@@ -723,6 +927,10 @@ export const userCapability = defineCapability({
           "reliably",
         ],
       },
+      decides: {
+        what: "whether speech may be accepted as input",
+        with: ["speechIntelligibility"],
+      },
       description:
         "MY CHOICE. Whether automatic speech recognition can transcribe this user. " +
         "Deliberately separate from speechIntelligibility, because ASR is trained on a " +
@@ -742,6 +950,10 @@ export const userCapability = defineCapability({
           "HapticMap",
         ],
         multiple: true,
+      },
+      decides: {
+        what: "which script or signed language to present in",
+        with: ["signLanguageSet"],
       },
       description:
         "Tactile scripts and codes the user reads by touch. Table 4 gives the parent as " +
@@ -785,6 +997,10 @@ export const userCapability = defineCapability({
         ],
         multiple: true,
       },
+      decides: {
+        what: "which script or signed language to present in",
+        with: ["hapticLanguageSet"],
+      },
       description:
         "MY CHOICE (supplying a parent Table 4 names but does not define). Signed " +
         "languages the user knows, independent of how they receive them. ASL and LSQ " +
@@ -801,6 +1017,10 @@ export const userCapability = defineCapability({
      * is precisely why signLanguageSet had to stop depending on sight. */
     readTactileSign: {
       ontology: "language", precedence: ["touch", "signLanguageSet"],
+      decides: {
+        what: "which channels may carry text to the user",
+        with: ["readFontText", "readAudioText", "readSignText"],
+      },
       description:
         "MY CHOICE. Can the user receive sign hand-over-hand? The tactile counterpart " +
         "of Table 4's readSignText, and the primary channel for many DeafBlind signers. " +
@@ -813,10 +1033,18 @@ export const userCapability = defineCapability({
      * ontology membership stays disjoint. */
     readSignText: {
       ontology: "language", precedence: ["sight", "signLanguageSet"],
+      decides: {
+        what: "which channels may carry text to the user",
+        with: ["readFontText", "readAudioText", "readTactileSign"],
+      },
       description: "Can the user read (and see) sign?",
     },
     readFontText: {
       ontology: "language", precedence: ["sight", "language"],
+      decides: {
+        what: "which channels may carry text to the user",
+        with: ["readAudioText", "readSignText", "readTactileSign"],
+      },
       description:
         "MY CHOICE (supplying a parent Table 4 names but does not define). Can the user " +
         "read written text visually? Parents in two ontologies deliberately, mirroring " +
@@ -824,6 +1052,10 @@ export const userCapability = defineCapability({
     },
     readAudioText: {
       ontology: "language", precedence: ["hearing", "language"],
+      decides: {
+        what: "which channels may carry text to the user",
+        with: ["readFontText", "readSignText", "readTactileSign"],
+      },
       description:
         "MY CHOICE (supplying a parent Table 4 names but does not define). Can the user " +
         "understand spoken text?",
@@ -838,6 +1070,7 @@ export const userCapability = defineCapability({
           { name: "font", type: "text", maxLength: 64 },
         ],
       },
+      decides: "the smallest type that may be set",
       description:
         "Minimum readable font size for user, in points and per font, when presented on a " +
         "1024x768 pixel 15\" screen. Table 4's own note on why this property is awkward: " +
@@ -870,6 +1103,10 @@ export const userCapability = defineCapability({
     intelligibleVoicePitch: {
       ontology: "language", precedence: ["readAudioText"],
       measurement: { type: "numericRange", unit: "Hz", min: 50, max: 500 },
+      decides: {
+        what: "how speech synthesis must be paced and voiced",
+        with: ["minInterWordGap"],
+      },
       description:
         "The range of talker fundamental frequency the user understands well. FULL " +
         "means any voice works. PARTIAL carries the band that does — for reference, " +
@@ -879,6 +1116,10 @@ export const userCapability = defineCapability({
     minInterWordGap: {
       ontology: "language", precedence: ["readAudioText"],
       measurement: { type: "numeric", min: 1, max: 2000, unit: "ms" },
+      decides: {
+        what: "how speech synthesis must be paced and voiced",
+        with: ["intelligibleVoicePitch"],
+      },
       description:
         "Minimum required gap in milliseconds between words required for the user to " +
         "understand the spoken word.",
@@ -909,6 +1150,10 @@ export const userCapability = defineCapability({
       measurement: {
         type: "discrete", values: ["CURSIVE", "BLOCK", "SELECT"], multiple: true,
       },
+      decides: {
+        what: "which modes may accept text, sign or tactile script from the user",
+        with: ["writeSignSet", "writeTactileSet", "textEntryRate"],
+      },
       description:
         "Modes some form of writing text. SELECT means some form of technology e.g. " +
         "keyboard, scanning, eye tracking etc. Table 4 gives the parent as " +
@@ -932,6 +1177,10 @@ export const userCapability = defineCapability({
       measurement: {
         type: "discrete", values: ["Visual", "Tactile"], multiple: true,
       },
+      decides: {
+        what: "which modes may accept text, sign or tactile script from the user",
+        with: ["writeFontSet", "writeTactileSet"],
+      },
       description:
         "MY CHOICE. Modes of sign the user can PRODUCE. Visual is signing to someone " +
         "who watches; Tactile is signing into their hands. Depends on hands and on " +
@@ -949,6 +1198,10 @@ export const userCapability = defineCapability({
         type: "discrete",
         values: ["Braille", "DeafblindManual", "PrintOnPalm", "BlockAlphabet", "Lorm"],
         multiple: true,
+      },
+      decides: {
+        what: "which modes may accept text, sign or tactile script from the user",
+        with: ["writeFontSet", "writeSignSet"],
       },
       description:
         "MY CHOICE. Tactile scripts the user can PRODUCE, as distinct from those they " +
@@ -1001,7 +1254,7 @@ export const userCapability = defineCapability({
         "keyControl", "switchSites", "activationTiming", "sustainedPress",
         "headControl", "breathControl",
         "gazeControl", "gazeAccuracy", "dwellTolerance",
-        "inputDuration",
+        "inputDuration", "textEntryRate", "simultaneousContacts",
       ],
     },
     reading: {

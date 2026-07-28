@@ -17,7 +17,7 @@ import { userCapability } from "../../vocabulary/user-capability.js";
 import { exemplars } from "../../vocabulary/profiles.js";
 import { resolve } from "../../cradle/user/capacity.js";
 import { assistantContribution, supersededSettings } from "../../cradle/user/group.js";
-import { isOfInterest } from "../../cradle/user/capability.js";
+import { isOfInterest, decisionGroups } from "../../cradle/user/capability.js";
 
 const out = [];
 const w = (...lines) => out.push(...lines);
@@ -174,17 +174,37 @@ w(
 
 for (const template of Object.values(userCapability.templates)) {
   w(`### Template: ${template.name}`, "", template.description, "");
-  w("| Property | Values (PARTIAL measurement) | Parent | Ontology | Description |",
-    "|---|---|---|---|---|");
+  w("| Property | Values (PARTIAL measurement) | Parent | What it decides |",
+    "|---|---|---|---|");
   const ordered = userCapability.acquisitionOrder.filter((n) => template.properties.includes(n));
   for (const name of ordered) {
     const p = userCapability.properties[name];
-    w(`| \`${name}\` | ${specOf(p)} | ${parentsOf(name)} | ${p.ontology} | ${brief(p.description)} |`);
+    const d = p.decides.contributesOnly
+      ? `${esc(p.decides.what)} — *with ${p.decides.with.map((x) => `\`${x}\``).join(", ")}*`
+      : esc(p.decides.what);
+    w(`| \`${name}\` | ${specOf(p)} | ${parentsOf(name)} | ${d} |`);
   }
   w("");
 }
 
 w(
+  "### What the model is for",
+  "",
+  "Every property must name a decision some renderer, input handler or content",
+  "selector actually makes. A property that cannot name one is a medical observation",
+  "with a schema around it, and does not belong in a model of *interaction*.",
+  "",
+  "**Most properties do not decide alone.** `contrastSensitivity` sets no palette by",
+  "itself; it does so with the six colour and intensity bands. The table below groups",
+  "properties by the decision they serve, so a system can ask *\"what do I need in",
+  "order to set the palette\"* rather than inspecting properties one at a time and",
+  "guessing which combine.",
+  "",
+  "| Decision | Properties needed |",
+  "|---|---|",
+  ...decisionGroups(userCapability).map(
+    (g) => `| ${esc(g.decision)} | ${g.properties.map((x) => `\`${x}\``).join(", ")} |`),
+  "",
   "### Subject ontologies",
   "",
   "*\"Subject ontologies are disjoint, so individual properties exist in exactly one",

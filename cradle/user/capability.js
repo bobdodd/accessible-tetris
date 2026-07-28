@@ -216,6 +216,30 @@ function normaliseMeasurement(spec, where) {
   return Object.freeze(m);
 }
 
+function normaliseDecides(spec, name) {
+  if (!spec) {
+    throw new CapabilityError(
+      `property ${name} needs \`decides\`: what does a system DO differently knowing ` +
+        `this? If nothing, it is a medical observation and does not belong in a model ` +
+        `of interaction. Use { what, with: [...] } where it only contributes`,
+    );
+  }
+  const what = typeof spec === "string" ? spec : spec.what;
+  const withOthers = typeof spec === "string" ? [] : (spec.with ?? []);
+  if (!what || typeof what !== "string") {
+    throw new CapabilityError(`property ${name}: decides.what must name the decision`);
+  }
+  if (!Array.isArray(withOthers)) {
+    throw new CapabilityError(`property ${name}: decides.with must be a list of properties`);
+  }
+  return Object.freeze({
+    what,
+    with: Object.freeze([...withOthers]),
+    /* A property that needs others is making a weaker and more honest claim. */
+    contributesOnly: withOthers.length > 0,
+  });
+}
+
 /* ---------------------------------------------------------------------------
  * Declaration
  * ------------------------------------------------------------------------- */
@@ -278,11 +302,39 @@ export function defineCapability(spec) {
       );
     }
     if (!p.description) throw new CapabilityError(`property ${name} needs a description`);
+    /* REQUIRED, and it is what stops the model drifting into anatomy.
+     *
+     * This model exists to describe how a person can interact with a system, not
+     * to describe a person. Every property must therefore name a decision that
+     * some renderer, input handler or content selector actually makes. A
+     * property that cannot name one is a medical observation with a schema
+     * around it, and does not belong here however true it is.
+     *
+     * An audit on 2026-07-28 found 41 of 57 properties describing a person
+     * without stating what a system would do about it. Making the field
+     * mandatory is what stops that recurring, because it fails at declaration
+     * rather than being noticed a year later.
+     *
+     * BUT A PROPERTY RARELY DECIDES ALONE, and pretending otherwise would just
+     * produce 57 overstated claims. `contrastSensitivity` decides nothing by
+     * itself; it sets the palette together with the six colour and intensity
+     * bands. `gazeAccuracy` sets no target size until it is read with
+     * `minTargetSize`. So a property may declare either:
+     *
+     *     decides: "the smallest a control may be drawn"
+     *     decides: { what: "the palette", with: ["colorLow", "colorMedium"] }
+     *
+     * The second form says this property CONTRIBUTES to a decision that needs
+     * others to complete. `contributesOnly` then falls out of whether `with` is
+     * populated, and `decisionGroups()` can report which properties must be read
+     * together. */
+    const decides = normaliseDecides(p.decides, name);
 
     built[name] = {
       name,
       ontology: p.ontology,
       description: p.description,
+      decides,
       /* Precedence parents — the paper's "parent" column. Zero, one, or many:
        * "Properties may sometimes appear in multiple precedence trees". */
       precedence: Object.freeze([...(p.precedence ?? [])]),
@@ -292,6 +344,16 @@ export function defineCapability(spec) {
   }
 
   for (const prop of Object.values(built)) {
+    for (const other of prop.decides.with) {
+      if (!propertyNames.has(other)) {
+        throw new CapabilityError(
+          `property ${prop.name} decides with "${other}", which is not declared`,
+        );
+      }
+      if (other === prop.name) {
+        throw new CapabilityError(`property ${prop.name} cannot decide with itself`);
+      }
+    }
     for (const parent of prop.precedence) {
       if (!propertyNames.has(parent)) {
         throw new CapabilityError(
@@ -500,6 +562,27 @@ export function ordinalOf(property, value) {
 /** Is `value` at or above `threshold` on an ordered scale? */
 export function isAtLeast(property, value, threshold) {
   return ordinalOf(property, value) >= ordinalOf(property, threshold);
+}
+
+/**
+ * Which properties must be read together to reach a decision.
+ *
+ * Groups by the decision named in `decides.what`, so a renderer can ask "what do
+ * I need in order to set the palette" rather than inspecting properties one at a
+ * time and guessing which combine.
+ */
+export function decisionGroups(model) {
+  const groups = new Map();
+  for (const [name, p] of Object.entries(model.properties)) {
+    if (!groups.has(p.decides.what)) groups.set(p.decides.what, new Set());
+    groups.get(p.decides.what).add(name);
+    for (const other of p.decides.with) groups.get(p.decides.what).add(other);
+  }
+  return [...groups].map(([what, members]) => ({
+    decision: what,
+    properties: [...members].sort(),
+    joint: members.size > 1,
+  })).sort((a, b) => a.decision.localeCompare(b.decision));
 }
 
 /** Every property in one ontology, in acquisition order. */

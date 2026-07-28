@@ -1034,6 +1034,13 @@ export const switchScanning = defineCapacity(
       activationTiming: { capability: "PARTIAL", measurement: "needs a slow scan" },
       sustainedPress: { capability: "PARTIAL" },
       inputDuration: { capability: "PARTIAL", measurement: 20 },
+      /* Three words a minute. Below about ten, free text entry stops being a
+       * feature and becomes an obstacle — prediction and stored phrases are
+       * not a nicety here, they are the difference between usable and not. */
+      textEntryRate: { capability: "PARTIAL", measurement: 3 },
+      /* One switch, so every interaction is strictly sequential: no modifier
+       * keys, no chords, no multi-touch gesture of any kind. */
+      simultaneousContacts: { capability: "PARTIAL", measurement: 1 },
       /* Dysarthria: speech exists and is not reliable for strangers or machines.
        * Nothing here bears on what he understands. */
       speech: { capability: "PARTIAL" },
@@ -1098,6 +1105,12 @@ export const eyeGazeALS = defineCapacity(
       gazeAccuracy: { capability: "PARTIAL", measurement: 3 },
       dwellTolerance: { capability: "PARTIAL", measurement: 2500 },
       inputDuration: { capability: "PARTIAL", measurement: 15 },
+      /* Dwell selection caps communication at five to ten words a minute, and
+       * this profile sits at the slow end because the dwell is 2500 ms. Note
+       * this is recorded with keyControl at NONE — the rate is a fact about
+       * text entry, not about keys. */
+      textEntryRate: { capability: "PARTIAL", measurement: 6 },
+      simultaneousContacts: { capability: "PARTIAL", measurement: 1 },
       /* Anarthria. Language is entirely intact — this is the distinction that
        * matters most about locked-in and near-locked-in users, and the one most
        * often got wrong. */
@@ -1179,6 +1192,11 @@ export const sipAndPuff = defineCapacity(
        * selection alongside head pointing. */
       breathControl: { capability: "PARTIAL", measurement: 4 },
       inputDuration: { capability: "PARTIAL", measurement: 45 },
+      textEntryRate: { capability: "PARTIAL", measurement: 12 },
+      /* Two, and they are different channels rather than two fingers: head
+       * position and breath can act at the same instant, which is what makes
+       * this pair behave like a mouse rather than like a single switch. */
+      simultaneousContacts: { capability: "PARTIAL", measurement: 2 },
     },
   }),
 );
@@ -1251,6 +1269,13 @@ export const toeTypist = defineCapacity(
     },
     add: {
       minTargetSize: { capability: "PARTIAL", measurement: 15 },
+      /* Thirty words a minute. Recorded because the assumption that a foot is
+       * slower than a hand is exactly the bias this profile exists to catch,
+       * and because it is the number that decides whether to offer text entry
+       * at all — here, obviously yes. */
+      textEntryRate: { capability: "PARTIAL", measurement: 30 },
+      /* Two feet, so modifier-plus-key works; ten-finger chording does not. */
+      simultaneousContacts: { capability: "PARTIAL", measurement: 2 },
     },
   }),
 );
