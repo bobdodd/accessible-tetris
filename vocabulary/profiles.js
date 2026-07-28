@@ -66,6 +66,7 @@
  */
 
 import { defineCapacity, A } from "../cradle/user/capacity.js";
+import { copilotPair } from "../cradle/user/group.js";
 import { userCapability } from "./user-capability.js";
 
 /** "Fred is like Jim except…" — one Instance applied to a base specification.
@@ -1157,6 +1158,59 @@ export const sipAndPuff = defineCapacity(
   }),
 );
 
+/* ---------------------------------------------------------------------------
+ * Playing as a pair
+ *
+ * The alternative-access profiles produced a conclusion that a real-time
+ * falling-block game is structurally closed to a single-switch scanning user.
+ * True of one person playing alone — and Bob's correction is that this is how
+ * the technology frames the problem rather than how severely disabled gamers
+ * actually play: "when different or bespoke controls won't help, they sometimes
+ * share controls with a gamer buddy to cover controls or timing they can't
+ * manage."
+ *
+ * The finding was pessimistic in a specific and instructive way: it assumed the
+ * unit of play is an individual. Usually it is. Not always, and the assumption
+ * was invisible until someone who knows the practice pointed at it.
+ * ------------------------------------------------------------------------- */
+
+/**
+ * A switch-scanning player with a gaming buddy.
+ *
+ * The primary's game. The assistant lends hands and timing, and nothing else.
+ *
+ * WHAT THE PAIR CAN DO THAT NEITHER CAN ALONE. The primary sees, hears and
+ * understands everything and cannot meet a falling piece. The assistant can meet
+ * it. Between them the game is playable in real time, without a single change to
+ * the game, and the model can now say so.
+ *
+ * WHAT THE PAIR STILL CANNOT DO, which is the more important half. Motor
+ * capability delegates cleanly — the game cannot tell whose finger arrived. But
+ * perception does not delegate in real time: a buddy describing a falling piece
+ * is always describing where it *was*. And comprehension must not delegate at
+ * all, because a buddy who decides what to do is not assisting, they are
+ * playing.
+ *
+ * So co-piloting solves motor and timing problems and does not solve perceptual
+ * ones. It rescues `switch-scanning` from a real-time game; it would do nothing
+ * whatever for `deafblind`. Recording that asymmetry is the point of the group
+ * Entity, and a merged profile that blurred the two members together would lose
+ * exactly the fact worth having.
+ */
+export const switchScanningWithBuddy = copilotPair(
+  userCapability,
+  switchScanning,
+  reference,
+  {
+    id: "switch-scanning-with-buddy",
+    description:
+      "Two people playing one game. The primary sees, hears, understands and decides; " +
+      "the assistant supplies hands and timing. Together they meet a falling piece that " +
+      "neither the primary alone nor any control scheme could.",
+    basis: EXEMPLAR + " — a practice, not a person",
+  },
+);
+
 /** Every exemplar, for iteration in tests and demos. */
 export const exemplars = Object.freeze({
   reference,
@@ -1174,4 +1228,5 @@ export const exemplars = Object.freeze({
   switchScanning,
   eyeGazeALS,
   sipAndPuff,
+  switchScanningWithBuddy,
 });

@@ -13,12 +13,15 @@ import { defineCapacity, resolve, groupValues, CapacityError }
   from "../cradle/user/capacity.js";
 import { A, run, MapStore, ActionError, checkEventGenerator, classify }
   from "../cradle/action/action-language.js";
+import { copilotPair, assistantContribution, supersededSettings, DELEGABLE_ONTOLOGIES }
+  from "../cradle/user/group.js";
 import { userCapability } from "../vocabulary/user-capability.js";
 import { exemplars, reference, blindSinceBirth, lowVisionContrast,
          lowVisionColour, keyboardOnly, handTremor,
          deaf, deafenedAsymmetric, multipleSclerosis,
          deafBlind, deafenedNotch, secondLanguage,
-         switchScanning, eyeGazeALS, sipAndPuff } from "../vocabulary/profiles.js";
+         switchScanning, eyeGazeALS, sipAndPuff,
+         switchScanningWithBuddy } from "../vocabulary/profiles.js";
 
 let pass = 0, fail = 0;
 const ok = (label, fn) => {
@@ -235,8 +238,8 @@ throws("a composed collection without a CompositionOrder is refused", Capability
 /* ------------------------------------------------------------------ */
 console.log("\nCapacity Model — a measurement qualifies PARTIAL and nothing else:");
 
-ok("all fifteen exemplars build", () => {
-  eq(Object.keys(exemplars).length, 15, "count");
+ok("all sixteen exemplars build", () => {
+  eq(Object.keys(exemplars).length, 16, "count");
   for (const [name, p] of Object.entries(exemplars)) {
     if (!p.entity.basis.startsWith("exemplar")) throw new Error(`${name} records no basis`);
   }
@@ -736,6 +739,66 @@ ok("minTargetSize needs three parents, one in another ontology", () => {
   eq(p.precedence.join(","), "pointerControl,manualStability,kinaesthesia", "parents");
   eq(userCapability.properties.kinaesthesia.ontology, "haptic", "crosses from motor to haptic");
 });
+
+console.log("\nplaying as a pair — what a co-pilot can and cannot lend:");
+
+ok("a pair is a group Entity, and the paper says group Entities exist", () => {
+  eq(switchScanningWithBuddy.entity.kind, "group", "group");
+  eq(switchScanningWithBuddy.entity.members.join("+"), "switch-scanning+reference", "two members");
+  eq(switchScanningWithBuddy.entity.primary, "switch-scanning", "whose game it is");
+});
+
+ok("motor capability delegates: the assistant supplies hands and timing", () => {
+  const lent = assistantContribution(switchScanningWithBuddy);
+  for (const expected of ["pointerControl", "keyControl", "manualStability"]) {
+    if (!lent.includes(expected)) throw new Error(`assistant should supply ${expected}`);
+  }
+  /* And the pair can now do what the primary alone could not. */
+  eq(switchScanningWithBuddy.settings.keyControl.capability, "FULL", "pair has full key control");
+  eq(switchScanning.settings.keyControl.capability, "PARTIAL", "primary alone does not");
+});
+
+ok("perception does NOT delegate, and language must not", () => {
+  const lent = assistantContribution(switchScanningWithBuddy);
+  const P = userCapability.properties;
+  for (const id of lent) {
+    const ont = P[switchScanningWithBuddy.settings[id].property].ontology;
+    eq(ont, "motor", `${id} is motor — only motor may be lent`);
+  }
+  eq(DELEGABLE_ONTOLOGIES.join(","), "motor", "motor and nothing else");
+});
+
+ok("a co-pilot rescues the switch user and would do NOTHING for DeafBlind", () => {
+  /* The asymmetry is the whole finding. Co-piloting solves motor and timing
+   * problems; it does not solve perceptual ones. */
+  const rescued = copilotPair(userCapability, switchScanning, reference,
+                              { id: "p1", description: "d" });
+  eq(rescued.settings.keyControl.capability, "FULL", "switch user gains real-time input");
+
+  const notRescued = copilotPair(userCapability, deafBlind, reference,
+                                 { id: "p2", description: "d" });
+  eq(notRescued.settings.sight.capability, "NONE", "sight cannot be lent");
+  eq(notRescued.settings.hearing.capability, "NONE", "nor hearing");
+  /* A buddy describing a falling piece is always describing where it WAS. */
+});
+
+ok("settings beneath a lent capability are marked superseded, not silently kept", () => {
+  const gone = supersededSettings(switchScanningWithBuddy).map((s) => s.setting);
+  for (const expected of ["switchSites", "activationTiming"]) {
+    if (!gone.includes(expected)) throw new Error(`${expected} should be superseded`);
+  }
+  /* Unmarked, "needs a slow scan" would survive into the pair and a renderer
+   * would slow everything down for nobody — the pair is not scanning at all. */
+  const mark = switchScanningWithBuddy.provenance.activationTiming;
+  eq(mark.supersededBy, "keyControl", "superseded by the lent parent");
+  /* Marked and kept rather than deleted: it is still true of the primary. */
+  if (!switchScanningWithBuddy.settings.activationTiming) {
+    throw new Error("kept, because it still describes the primary");
+  }
+});
+
+throws("a pair cannot be made from a pair", CapacityError, () =>
+  copilotPair(userCapability, switchScanningWithBuddy, reference, { id: "x", description: "d" }));
 
 console.log("\nalternative access — limitation in output, not in the senses:");
 

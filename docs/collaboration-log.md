@@ -1458,6 +1458,79 @@ retrofitted later.
 
 56 properties, 15 exemplars, 124 tests.
 
+## C10 · correction · The unit of play is not always one person
+
+**2026-07-28.** I concluded from the alternative-access profiles that a real-time
+falling-block game is "structurally closed" to a single-switch scanning user.
+Bob: "I would expect Tetris as currently considered would be blocked for some
+users, though I think we have to consider how severely disabled gamers actually
+play: when different or bespoke controls won't help, they sometimes share
+controls with a gamer buddy to cover controls or timing they can't manage."
+
+**The finding was not wrong so much as narrow, and narrow in a specific way: it
+assumed the unit of play is an individual.** Usually it is. Not always — and the
+assumption was completely invisible to me until someone who knows the practice
+pointed at it. Xbox ships a Copilot mode that makes two controllers act as one,
+for precisely this.
+
+### The paper had the structure; its resolution is the wrong one
+
+The Capacity Model's Entity "is either a user, **or a group of users**", and §8
+describes building one: "the settings of the group Entity are created as
+functionally dependent upon user settings, with a resolution… defined in Actions
+expressing dependence."
+
+But the paper's resolution is "highest common denominator" settings so a group
+sharing one machine all have full access — a classroom, where if one student
+needs 18pt everyone gets 18pt. That is a merge toward the **most accommodating**
+value, and it is right for shared access to a single interface.
+
+Co-pilot play is the opposite. Capability is **divided**, not shared: whatever
+either can do, the pair can do. A union, not an accommodation. Same structure,
+different resolution, and the paper never anticipated this use of its own
+construct.
+
+### The asymmetry that decides everything
+
+Working out what a co-pilot may and may not lend was the substance of this, and
+it is not symmetric:
+
+- **Motor capability delegates cleanly.** A buddy's hands are as good as anyone's
+  for pressing a button on time. The game cannot tell whose finger arrived.
+- **Perceptual capability does not delegate**, at least not in real time. A
+  sighted friend describing a falling piece is always describing where it *was*.
+  In a turn-based game the same description works perfectly — which is a fact
+  about the game, not about the people.
+- **Comprehension must not delegate at all.** A buddy who decides what to do is
+  not assisting, they are playing, and a model that described that as access
+  would be lying.
+
+**So co-piloting rescues the switch-scanning user from a real-time game and would
+do nothing whatever for the DeafBlind one.** There is a test asserting exactly
+that, because it is the sort of claim that would otherwise soften into "assistive
+partnership helps" and stop meaning anything.
+
+### One thing the implementation surfaced
+
+The first merge carried `activationTiming: "needs a slow scan"` into the pair —
+true of the primary, false of the pair, since the assistant is using a keyboard
+and nobody is scanning. Unmarked, a renderer would obediently slow everything
+down for nobody.
+
+Settings beneath a lent capability are now marked `supersededBy` rather than
+deleted, because "he needs a slow scan, and with a buddy he does not have to" is
+more informative than silence. Same reasoning as C7: a FULL parent makes a child
+uninteresting, never forbidden.
+
+*Generalisation worth keeping. Every §6a finding so far has been about what the
+model cannot express. This one was about what I could not imagine — an
+individualist assumption baked so deep into "user profile" that it never
+surfaced as a decision. The model's own Entity said "a user, OR A GROUP OF USERS"
+and I had implemented the validation for it without once asking what a group was
+for.*
+
+56 properties, 16 exemplars, 130 tests.
+
 ## X1 · disagreement · Bob corrected Claude's conclusion, not its facts
 
 **2026-07-27.** After C3, Claude concluded that the working practice should be

@@ -16,6 +16,7 @@
 import { userCapability } from "../../vocabulary/user-capability.js";
 import { exemplars } from "../../vocabulary/profiles.js";
 import { resolve } from "../../cradle/user/capacity.js";
+import { assistantContribution, supersededSettings } from "../../cradle/user/group.js";
 import { isOfInterest } from "../../cradle/user/capability.js";
 
 const out = [];
@@ -244,6 +245,39 @@ for (const [key, profile] of Object.entries(exemplars)) {
     w(`- **Not of interest** (${uninteresting.length}), because no precedence parent is ` +
       `PARTIAL: ` + uninteresting.slice(0, 12).map((n) => `\`${n}\``).join(", ") +
       (uninteresting.length > 12 ? `, and ${uninteresting.length - 12} more` : "") + ".", "");
+  }
+
+  /* A group Entity's whole value is the division of labour, so show it. A
+   * merged profile that hid who supplies what would be less useful than either
+   * member's on its own. */
+  if (profile.entity.kind === "group") {
+    w("#### Who supplies what", "");
+    w(`Members: ${profile.entity.members.map((m) => `\`${m}\``).join(" + ")}. ` +
+      `Primary: \`${profile.entity.primary}\` — whose game it is.`, "");
+    const lent = assistantContribution(profile);
+    if (lent.length) {
+      w("**The assistant lends** (motor capability only — see below):", "");
+      w("| Setting | Pair | Why |", "|---|---|---|");
+      for (const id of lent) {
+        w(`| \`${id}\` | **${profile.settings[id].capability}** | ${profile.provenance[id].reason} |`);
+      }
+      w("");
+    }
+    const gone = supersededSettings(profile);
+    if (gone.length) {
+      w("**Superseded** — true of the primary alone, and a renderer must not act on them",
+        "for the pair, because the assistant supplies the capability they hang beneath:", "");
+      w("| Setting | Superseded by |", "|---|---|");
+      for (const g of gone) w(`| \`${g.setting}\` | \`${g.supersededBy}\` |`);
+      w("");
+    }
+    w("**What a co-pilot cannot lend.** Motor capability delegates cleanly — the game",
+      "cannot tell whose finger arrived. Perception does not, at least not in real time: a",
+      "buddy describing a falling piece is always describing where it *was*. And",
+      "comprehension must not, because a buddy who decides what to do is not assisting,",
+      "they are playing.", "",
+      "So co-piloting rescues this player from a real-time game and would do nothing",
+      "whatever for `deafblind`.", "");
   }
 
   /* Derived settings, with the OOA96 §2.3 citation the model insists on. */
