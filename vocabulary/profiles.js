@@ -637,6 +637,80 @@ export const multipleSclerosis = defineCapacity(
   }),
 );
 
+/**
+ * DeafBlind — Usher syndrome type 1, the shape it usually takes.
+ *
+ * Congenitally Deaf, so ASL is a first language learned in childhood as a
+ * sighted signer; progressive retinitis pigmentosa then narrows and closes the
+ * visual field in adult life. The language never changed. The channel did.
+ *
+ * WHAT THIS FOUND, and it was a bug of mine rather than a gap in the paper.
+ * `signLanguageSet` had been given `sight` as a precedence parent, on the
+ * reasoning that sign is received visually. Under `sight: NONE` the model then
+ * refused to let this person know ASL at all — which is not merely a
+ * technicality, it is the model contradicting the most important fact about
+ * them.
+ *
+ * The paper's own structure had the answer already: `language` has no parents,
+ * while `readFontText` needs sight, `readAudioText` needs hearing, and
+ * `readSignText` needs sight. KNOWING a language and RECEIVING it are separate
+ * properties. So `signLanguageSet` is knowledge and lost its sight parent, and
+ * `readTactileSign` was added as the tactile counterpart of Table 4's
+ * `readSignText`.
+ *
+ * WHY THIS IS THE HARDEST CASE FOR THE DEMONSTRATOR. Every other exemplar can
+ * receive the game through some channel it already has: audio, or visuals, or
+ * both. This person has neither. `touch` is the whole of it, and the model says
+ * so plainly — which means an audio-first demonstrator has nothing to offer here
+ * yet, and that is a finding rather than an embarrassment. It is precisely the
+ * kind of thing §6a exists to keep visible instead of quietly designing around.
+ *
+ * A note on the population, because a single exemplar invites over-reading: most
+ * DeafBlind people are not at this extreme. Residual hearing, residual vision,
+ * or both, are far more common than neither, and the useful design question is
+ * usually "which fragment remains" rather than "what if nothing does". This
+ * profile sits at the end of that range on purpose, to see whether the model
+ * degrades cleanly. It does.
+ */
+export const deafBlind = defineCapacity(
+  userCapability,
+  variation(referenceSpec, {
+    entity: {
+      id: "deafblind",
+      description:
+        "Signs ASL fluently and receives it hand-over-hand. Reads Braille and the " +
+        "two-handed manual alphabet. Full touch, kinaesthesia and motor control. " +
+        "Congenitally Deaf with progressive vision loss in adult life.",
+      basis: EXEMPLAR,
+    },
+    modify: {
+      sight: { capability: "NONE" },
+      hearing: { capability: "NONE" },
+    },
+    add: {
+      /* Knowledge, not channel. This is the setting that the earlier precedence
+       * bug made impossible, and it is the centre of the profile. */
+      signLanguageSet: { capability: "PARTIAL", measurement: ["ASL"] },
+      /* The channel that works. */
+      readTactileSign: { capability: "FULL" },
+      /* The channels that do not — recorded explicitly because "cannot see
+       * sign" is a different fact from "does not sign", and a system that
+       * conflates them will offer an ASL video. */
+      readSignText: { capability: "NONE" },
+      readFontText: { capability: "NONE" },
+      readAudioText: { capability: "NONE" },
+      /* Text arrives by touch, in more than one script. */
+      hapticLanguageSet: {
+        capability: "PARTIAL",
+        measurement: ["Braille", "DeafblindManual", "PrintOnPalm"],
+      },
+      /* Touch is now the entire input and output surface, so its acuity stops
+       * being a detail and becomes the design constraint. */
+      vibrationDetection: { capability: "PARTIAL", measurement: 85 },
+    },
+  }),
+);
+
 /** Every exemplar, for iteration in tests and demos. */
 export const exemplars = Object.freeze({
   reference,
@@ -648,4 +722,5 @@ export const exemplars = Object.freeze({
   deaf,
   deafenedAsymmetric,
   multipleSclerosis,
+  deafBlind,
 });

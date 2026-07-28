@@ -16,7 +16,8 @@ import { A, run, MapStore, ActionError, checkEventGenerator, classify }
 import { userCapability } from "../vocabulary/user-capability.js";
 import { exemplars, reference, blindSinceBirth, lowVisionContrast,
          lowVisionColour, keyboardOnly, handTremor,
-         deaf, deafenedAsymmetric, multipleSclerosis } from "../vocabulary/profiles.js";
+         deaf, deafenedAsymmetric, multipleSclerosis,
+         deafBlind } from "../vocabulary/profiles.js";
 
 let pass = 0, fail = 0;
 const ok = (label, fn) => {
@@ -233,8 +234,8 @@ throws("a composed collection without a CompositionOrder is refused", Capability
 /* ------------------------------------------------------------------ */
 console.log("\nCapacity Model — a measurement qualifies PARTIAL and nothing else:");
 
-ok("all nine exemplars build", () => {
-  eq(Object.keys(exemplars).length, 9, "count");
+ok("all ten exemplars build", () => {
+  eq(Object.keys(exemplars).length, 10, "count");
   for (const [name, p] of Object.entries(exemplars)) {
     if (!p.entity.basis.startsWith("exemplar")) throw new Error(`${name} records no basis`);
   }
@@ -513,6 +514,62 @@ ok("azimuth depends on binaural hearing; elevation deliberately does not", () =>
      "azimuth needs two ears");
   eq(userCapability.properties.elevationResolution.precedence.includes("binauralHearing"), false,
      "elevation is a monaural pinna cue and must survive single-sided loss");
+});
+
+ok("DeafBlind: knowing a language does NOT require the eyes to receive it", () => {
+  /* The bug this profile exposed. signLanguageSet had `sight` as a precedence
+   * parent, so under sight: NONE the model refused to let a DeafBlind signer
+   * know ASL at all — contradicting the most important fact about them. */
+  eq(deafBlind.settings.sight.capability, "NONE", "no usable sight");
+  eq(deafBlind.settings.signLanguageSet.measurement[0], "ASL", "and still knows ASL");
+  eq(userCapability.properties.signLanguageSet.precedence.join(","), "language",
+     "knowledge of a language depends on language, not on a channel");
+});
+
+ok("DeafBlind: same language, different channel", () => {
+  /* readSignText and readTactileSign are the two channels for one language.
+   * Conflating them makes a system offer an ASL video to someone who cannot
+   * see it. */
+  eq(deafBlind.settings.readSignText.capability, "NONE", "cannot see sign");
+  eq(deafBlind.settings.readTactileSign.capability, "FULL", "receives it hand-over-hand");
+  eq(userCapability.properties.readSignText.precedence.join(","), "sight,signLanguageSet",
+     "visual channel");
+  eq(userCapability.properties.readTactileSign.precedence.join(","), "touch,signLanguageSet",
+     "tactile channel");
+});
+
+ok("DeafBlind: text arrives by touch, in more than one script", () => {
+  const scripts = deafBlind.settings.hapticLanguageSet.measurement;
+  if (!scripts.includes("Braille")) throw new Error("expected Braille");
+  if (!scripts.includes("DeafblindManual")) throw new Error("expected the two-handed manual");
+  if (scripts.length < 2) throw new Error("DeafBlind readers commonly use several");
+});
+
+ok("DeafBlind: every visual and auditory channel is closed, touch is the whole surface", () => {
+  for (const closed of ["readFontText", "readAudioText", "readSignText"]) {
+    eq(deafBlind.settings[closed].capability, "NONE", closed);
+  }
+  eq(deafBlind.settings.touch.capability, "FULL", "touch intact");
+  /* The finding, not the embarrassment: an audio-first demonstrator has nothing
+   * to offer this person yet, and the model says so plainly. */
+  if (deafBlind.settings.hearing.capability !== "NONE") throw new Error("hearing");
+});
+
+ok("sign languages are named unambiguously, and codes are flagged as codes", () => {
+  const vals = userCapability.properties.signLanguageSet.measurement.values;
+  /* "ISL" denotes Irish, Indian AND Israeli Sign Language depending on source. */
+  if (vals.includes("ISL")) throw new Error("ISL is ambiguous — name the language");
+  if (!vals.includes("IrishSL")) throw new Error("expected the disambiguated form");
+  /* ASL and LSQ are unrelated languages, not dialects — both matter in Canada. */
+  for (const lang of ["ASL", "LSQ"]) {
+    if (!vals.includes(lang)) throw new Error(`expected ${lang}`);
+  }
+  /* SSE is manually coded English, not a language; the description must say so
+   * because a renderer has to treat it differently. */
+  if (!/not a language|coded form of English/i.test(
+        userCapability.properties.signLanguageSet.description)) {
+    throw new Error("SSE's status as a code, not a language, must be documented");
+  }
 });
 
 ok("MS: touch NONE, but kinaesthesia is a separate property that survives", () => {

@@ -399,28 +399,80 @@ export const userCapability = defineCapability({
     },
     hapticLanguageSet: {
       ontology: "language", precedence: ["language", "touch"],
-      measurement: { type: "discrete", values: ["Braille", "HapticMap"], multiple: true },
+      measurement: {
+        type: "discrete",
+        values: [
+          "Braille",
+          "DeafblindManual",   /* two-handed manual alphabet, spelled on the hand */
+          "PrintOnPalm",       /* block capitals traced on the palm */
+          "BlockAlphabet",
+          "Lorm",              /* positions and strokes on the hand; mainly European */
+          "HapticMap",
+        ],
+        multiple: true,
+      },
       description:
-        "Tactile based languages understood by the user. Table 4 gives the parent as " +
-        "Language; MY CHOICE adds touch, since a tactile language depends on touch.",
+        "Tactile scripts and codes the user reads by touch. Table 4 gives the parent as " +
+        "Language; MY CHOICE adds touch, since a tactile script depends on it, and MY " +
+        "CHOICE expands the values well past Braille — the two-handed deafblind manual " +
+        "alphabet, print-on-palm and Lorm are how a great many DeafBlind people actually " +
+        "receive text. Note these are SCRIPTS AND CODES, not languages: a signed " +
+        "language received by touch is signLanguageSet plus readTactileSign, because " +
+        "the language is the same one either way and only the channel changes.",
     },
     /* MY CHOICE, supplying the second parent Table 4 names but does not define.
      * Table 4 gives readSignText the parent "sight + signLanguageSet", so the
      * fragment assumes a signLanguageSet property exists; this is it. Added
      * because a Deaf profile without sign language is not a Deaf profile, and
      * because the model's own table already reached for it. */
+    /* CORRECTED. An earlier draft parented this on sight as well as language,
+     * reasoning that sign is received visually. That is wrong, and the DeafBlind
+     * case is what exposed it: under `sight: NONE` the model then refused to let
+     * a person know ASL at all, when in fact many DeafBlind signers have ASL as
+     * a first language and simply receive it hand-over-hand.
+     *
+     * The paper's own structure already draws the distinction: `language` has no
+     * parents at all, while `readFontText` needs sight, `readAudioText` needs
+     * hearing, and `readSignText` needs sight. KNOWING a language and RECEIVING
+     * it in a modality are separate properties. This one is knowledge; the
+     * read* properties are channels. */
     signLanguageSet: {
-      ontology: "language", precedence: ["language", "sight"],
+      ontology: "language", precedence: ["language"],
       measurement: {
         type: "discrete",
-        values: ["ASL", "LSQ", "BSL", "Auslan", "ISL", "SSE"],
+        values: [
+          "ASL",        /* American Sign Language */
+          "LSQ",        /* Langue des signes québécoise */
+          "BSL",        /* British Sign Language */
+          "Auslan",     /* Australian Sign Language */
+          "LSF",        /* Langue des signes française */
+          "DGS",        /* Deutsche Gebärdensprache */
+          "IrishSL",    /* disambiguated: "ISL" is used for Irish, Indian AND Israeli */
+          "MaritimeSL", /* historical, Atlantic Canada */
+          "SSE",        /* NOT a language — see below */
+        ],
         multiple: true,
       },
       description:
         "MY CHOICE (supplying a parent Table 4 names but does not define). Signed " +
-        "languages the user knows. Parented on sight as well as language, because a " +
-        "signed language is received visually — which is exactly why Table 4 gives " +
-        "readSignText two parents in two different ontologies.",
+        "languages the user knows, independent of how they receive them. ASL and LSQ " +
+        "are the two in common Canadian use and are unrelated languages, not dialects. " +
+        "\"ISL\" is deliberately not used: it denotes Irish, Indian and Israeli Sign " +
+        "Language in different sources. SSE (Sign Supported English) is included but " +
+        "is a manually coded form of English rather than a language in its own right, " +
+        "which a renderer must treat differently — English word order with signs " +
+        "borrowed, not ASL grammar.",
+    },
+    /* MY CHOICE, and the DeafBlind profile is what demanded it. Table 4 gives
+     * readSignText for the visual channel; there was no tactile equivalent, so a
+     * hands-on signer was inexpressible. Same language, different channel — which
+     * is precisely why signLanguageSet had to stop depending on sight. */
+    readTactileSign: {
+      ontology: "language", precedence: ["touch", "signLanguageSet"],
+      description:
+        "MY CHOICE. Can the user receive sign hand-over-hand? The tactile counterpart " +
+        "of Table 4's readSignText, and the primary channel for many DeafBlind signers. " +
+        "The language is whatever signLanguageSet says; only the modality differs.",
     },
     /* Table 4 verbatim, including its parent list. This row was skipped in the
      * first transcription precisely because signLanguageSet was undefined; with
@@ -548,8 +600,8 @@ export const userCapability = defineCapability({
     reading: {
       description: "Table 4 — language-based properties.",
       properties: [
-        "language", "hapticLanguageSet", "signLanguageSet", "readSignText",
-        "readFontText", "readAudioText",
+        "language", "hapticLanguageSet", "signLanguageSet",
+        "readSignText", "readTactileSign", "readFontText", "readAudioText",
         "minReadFontSizeForFont", "minInterWordGap", "intelligibleVoicePitch",
         "writeFontSet",
       ],

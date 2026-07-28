@@ -1037,6 +1037,82 @@ and fatigue — where an intelligibility test measures *recognition over minutes
 The first is ecologically valid and the second is controlled, and for deciding
 what a system should do, the first was more useful.
 
+## C8 · correction · Knowing a language is not the same as receiving it
+
+**2026-07-28.** Bob: "Do we record which sign languages a person knows? American?
+British? Quebec? What about two handed manual as used by deafblind people? And
+that reminds me, we do need a deafblind profile."
+
+Three things, and the second exposed a bug I had introduced two commits earlier.
+
+### The bug: signLanguageSet must not depend on sight
+
+I had given `signLanguageSet` the precedence parents `[language, sight]`,
+reasoning that sign is received visually. Under `sight: NONE` the model then
+**refused to let a DeafBlind person know ASL at all**. That is not a technicality;
+it is the model contradicting the most important fact about them. Many DeafBlind
+signers have ASL as a first language, learned in childhood as a sighted signer,
+and simply receive it hand-over-hand now.
+
+**The paper's own structure had the answer and I had not read it closely
+enough.** `language` has no parents at all, while `readFontText` needs sight,
+`readAudioText` needs hearing, and `readSignText` needs sight. The model already
+separates **knowing** a language from **receiving** it in a modality. I collapsed
+the two.
+
+Fixed: `signLanguageSet` is knowledge and depends only on `language`. Added
+`readTactileSign` (parents `touch`, `signLanguageSet`) as the tactile counterpart
+of Table 4's `readSignText`. Same language, different channel — which is exactly
+why the knowledge property could not carry a channel dependency.
+
+*This is a third instance of the same failure mode as C7 and the deafened
+profile: over-constraining. Each time I added a restriction that felt
+conservative and turned out to make a real person inexpressible. "Sign needs
+eyes" sounds obviously true right up to the moment it erases DeafBlind signers.*
+
+### Naming: the enum was sloppy
+
+- **`ISL` removed.** It denotes Irish, Indian AND Israeli Sign Language depending
+  on the source. Replaced with `IrishSL`.
+- **ASL and LSQ are unrelated languages**, not dialects, and both are in common
+  Canadian use. Added `LSF`, `DGS`, `Auslan`, `MaritimeSL`.
+- **`SSE` is not a language.** Sign Supported English is manually coded English —
+  English word order with signs borrowed — and a renderer must treat it
+  differently from ASL grammar. Kept as a value with its status documented,
+  because pretending it is a language and pretending it does not exist are both
+  wrong.
+
+### hapticLanguageSet was Braille-shaped
+
+It held `["Braille", "HapticMap"]`, which is how a sighted person imagines
+tactile reading. Added the two-handed **DeafblindManual** alphabet,
+**PrintOnPalm**, **BlockAlphabet** and **Lorm** — which is how a great many
+DeafBlind people actually receive text.
+
+The distinction now documented on the property: these are **scripts and codes**,
+not languages. A signed language received by touch is `signLanguageSet` plus
+`readTactileSign`, because the language is the same one either way.
+
+### The DeafBlind profile, and what it says about the demonstrator
+
+Modelled on Usher syndrome type 1: congenitally Deaf, ASL as a first language,
+progressive vision loss in adult life.
+
+Every other exemplar can receive the game through some channel it already has —
+audio, or visuals, or both. **This one has neither.** Touch is the whole surface,
+and the model states it plainly rather than letting it be discovered late. An
+audio-first demonstrator has nothing to offer this person yet, and that is a
+finding rather than an embarrassment: precisely what §6a exists to keep visible
+instead of quietly designing around.
+
+Recorded on the profile, because one exemplar invites over-reading: most
+DeafBlind people are not at this extreme. Residual hearing, residual vision, or
+both, are far more common than neither, and the real design question is usually
+"which fragment remains". This profile sits at the end of the range on purpose,
+to see whether the model degrades cleanly. It does.
+
+42 properties, 10 exemplars, 91 tests.
+
 ## X1 · disagreement · Bob corrected Claude's conclusion, not its facts
 
 **2026-07-27.** After C3, Claude concluded that the working practice should be
