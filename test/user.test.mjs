@@ -472,6 +472,33 @@ ok("deafened: binaural hearing is a BAND, not a percentage", () => {
   if (bin.to > usable.to) throw new Error("cannot combine ears where he cannot hear");
 });
 
+ok("deafened: the voice pitch that WORKS is recorded, and the reason is not", () => {
+  /* From Bob's CNIB Library borrowing data: older men chose female narrators.
+   * The model records the band that works and stays silent on mechanism —
+   * whether the lower register is reduced or so well preserved that it masks
+   * upward, the renderer does the same thing either way: pick a higher voice. */
+  const band = deafenedAsymmetric.settings.intelligibleVoicePitch.measurement;
+  eq(band.from, 165, "female-range fundamentals work");
+  if (band.from < 120) throw new Error("a male-range fundamental would not be the finding");
+  /* Directly actionable: this selects a synthetic voice. */
+  const spec = userCapability.properties.intelligibleVoicePitch.measurement;
+  eq(spec.unit, "Hz", "a talker fundamental, not a percentage of anything");
+  eq(userCapability.properties.intelligibleVoicePitch.precedence.join(","), "readAudioText",
+     "only of interest if he understands speech at all");
+});
+
+ok("every profile records capability, never a deficit, in its prose too", () => {
+  /* Bob's rule: we record what a person can hear, not what they cannot. The
+   * measurements were always positive; this guards the descriptions, which are
+   * what a reader actually remembers. */
+  const banned = /\b(suffers|afflicted|victim|impaired by|crippl|wheelchair.bound|normal (?:user|person))\b/i;
+  for (const [name, p] of Object.entries(exemplars)) {
+    if (banned.test(p.entity.description)) {
+      throw new Error(`${name} description uses deficit language: "${p.entity.description}"`);
+    }
+  }
+});
+
 ok("deafened: azimuth degrades but does not collapse; elevation is untouched", () => {
   const az = deafenedAsymmetric.settings.azimuthResolution.measurement;
   const el = deafenedAsymmetric.settings.elevationResolution.measurement;

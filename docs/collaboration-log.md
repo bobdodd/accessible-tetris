@@ -979,11 +979,63 @@ capability each made the man more impaired than he is. That is a specific bias,
 not random noise, and it is the one to watch for in profile work — a model that
 overstates impairment produces adaptations nobody asked for.
 
-### One thing to check with Bob
+### Bob's answer, and a framing correction that reaches the whole file
 
-Noise-induced and age-related hearing loss are classically **high**-frequency —
-the 4 kHz notch. The brief specified the lower register, and it is built as
-specified. Flagged rather than silently altered.
+I flagged that noise-induced and age-related loss are classically high-frequency
+— the 4 kHz notch — and asked whether the lower-register brief was intended.
+
+**His reply questioned the research, and the question is a good one:** "I wonder
+what the environment of the male test subject had been. I come from a world of
+heavy thumping machinery in factories, not the high pitch whine of modern
+machines." The 4 kHz notch comes from studies of broadband continuous industrial
+noise. Heavy low-frequency impact noise is a different exposure and impulse noise
+damages differently from continuous, so "older blue-collar worker" in 1970 and in
+2020 do not describe the same acoustic history. The literature I cited does not
+control for that.
+
+**Then the part that mattered more:** "it really doesn't matter, we are recording
+what people can do… Note we will be recording what they can hear, not what they
+can't. This is capability not disability."
+
+That is a correction to *me*, and it lands on prose rather than data. The
+measurements were always positive — `usableFrequencyRange` is the range that
+works, `binauralHearing` the band where the ears do combine. The descriptions
+were not. I had written "lost the lower register", "worse in one ear",
+"impairment", "no usable sight". **Table 1 vocabulary wearing Table 2 clothes.**
+
+A model can be structurally correct and still teach the reader to think in
+deficits, because the reader remembers the prose and not the schema. Every
+profile description is rewritten to lead with what the person does. The deafened
+man now reads: *"Hears across the full range with one ear and the upper register
+with both. Follows two concurrent streams, places sound coarsely left and right,
+and understands speech best from higher-pitched voices."* Same data, and it
+describes a person rather than a casualty. A regression test now rejects deficit
+vocabulary in any profile description.
+
+### The CNIB observation, and a property it forced
+
+Bob, from CNIB Library borrowing statistics: **older men consistently chose
+female narrators for audiobooks.** A whole population of legally blind heavy
+listeners, measured over hours of real listening, with no audiogram involved.
+
+The published intelligibility work does not support the obvious reading —
+[Ferguson found male and female talkers about equally intelligible](https://acoustics.org/does-increasing-the-playback-speed-of-mens-and-womens-voices-reduce-their-intelligibility-by-the-same-amount-eric-m-johnson-sarah-hargus-ferguson/)
+for older adults with hearing loss, and anecdotally older adults report women's
+voices as *harder*. Two mechanisms fit the borrowing data and they are opposites:
+either the lower register is reduced and the upper is what remains, or the lower
+register is well **preserved** and masks upward into the consonant range, so a
+higher-pitched talker escapes it.
+
+**The model does not have to choose, and that is exactly the paper's point.**
+Added `intelligibleVoicePitch` (parent `readAudioText`, a frequency range in Hz):
+the band of talker fundamental that works. It is silent on mechanism and
+directly actionable, because it selects a synthetic voice.
+
+Worth marking for the experience report: this is field data outperforming
+literature. Borrowing statistics measure *choice over hours* — listening effort
+and fatigue — where an intelligibility test measures *recognition over minutes*.
+The first is ecologically valid and the second is controlled, and for deciding
+what a system should do, the first was more useful.
 
 ## X1 · disagreement · Bob corrected Claude's conclusion, not its facts
 

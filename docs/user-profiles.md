@@ -127,6 +127,7 @@ Table 4 — language-based properties.
 | `language` | — | None | language | Can the user understand language (in any medium)? |
 | `hapticLanguageSet` | Braille, HapticMap (one or more) | language, touch | language | Tactile based languages understood by the user. Table 4 gives the parent as Language; MY CHOICE adds touch, since a tactile language depends on touch. |
 | `readAudioText` | — | hearing, language | language | MY CHOICE (supplying a parent Table 4 names but does not define). Can the user understand spoken text? |
+| `intelligibleVoicePitch` | range in Hz | readAudioText | language | The range of talker fundamental frequency the user understands well. FULL means any voice works. |
 | `minInterWordGap` | 1–2000 ms | readAudioText | language | Minimum required gap in milliseconds between words required for the user to understand the spoken word. |
 | `readFontText` | — | sight, language | language | MY CHOICE (supplying a parent Table 4 names but does not define). |
 | `minReadFontSizeForFont` | size: 4–96 pt + font: text | readFontText, manualStability | language | Minimum readable font size for user, in points and per font, when presented on a 1024x768 pixel 15" screen. |
@@ -157,7 +158,7 @@ with *"sight + signLanguageSet"*.
 | sonic | yes | 7 |
 | haptic | yes | 3 |
 | motor | no | 6 |
-| language | no | 9 |
+| language | no | 10 |
 
 ---
 
@@ -165,7 +166,7 @@ with *"sight + signLanguageSet"*.
 
 ### reference
 
-*Baseline with no reported limitation. Exists to be differenced against.*
+*Full capability across every ontology. Exists to be differenced against, and named `reference` rather than `default` on purpose: a default is what you get if you do not choose.*
 
 **Basis:** exemplar — not derived from any person  
 **Entity kind:** user · **Settings recorded:** 7
@@ -180,9 +181,9 @@ with *"sight + signLanguageSet"*.
 | — | `manualStability` | **FULL** | — | None |
 | — | `pointerControl` | **FULL** | — | None |
 
-**Not recorded: 33 of 40 properties.**
+**Not recorded: 34 of 41 properties.**
 
-- **Not of interest** (33), because no precedence parent is PARTIAL: `stereo`, `focus`, `focusDuration`, `tracking`, `trackingDuration`, `viewRectangle`, `nonViewRectangle`, `colorLow`, `colorMedium`, `colorHigh`, `intensityLow`, `intensityMedium`, and 21 more.
+- **Not of interest** (34), because no precedence parent is PARTIAL: `stereo`, `focus`, `focusDuration`, `tracking`, `trackingDuration`, `viewRectangle`, `nonViewRectangle`, `colorLow`, `colorMedium`, `colorHigh`, `intensityLow`, `intensityMedium`, and 22 more.
 
 #### Setting groups (contexts)
 
@@ -194,7 +195,7 @@ with *"sight + signLanguageSet"*.
 
 ### blind-since-birth
 
-*No usable sight from birth. No other reported limitation.*
+*Reads Braille, listens closely, and follows more concurrent audio than most. Full hearing, touch, language and motor control. No usable sight from birth.*
 
 **Basis:** exemplar — stands in for lived experience, not derived from any person  
 **Entity kind:** user · **Settings recorded:** 9
@@ -211,11 +212,11 @@ with *"sight + signLanguageSet"*.
 | — | `readFontText` | **NONE** | — | sight, language |
 | — | `pointerControl` | **FULL** | — | None |
 
-**Not recorded: 31 of 40 properties.**
+**Not recorded: 32 of 41 properties.**
 
 - **Cannot exist** (14), because a precedence parent is NONE: `stereo`, `focus`, `viewRectangle`, `nonViewRectangle`, `colorLow`, `colorMedium`, `colorHigh`, `intensityLow`, `intensityMedium`, `intensityHigh`, `contrastSensitivity`, `signLanguageSet`, `readSignText`, `minReadFontSizeForFont`.
 
-- **Not of interest** (17), because no precedence parent is PARTIAL: `focusDuration`, `tracking`, `trackingDuration`, `usableFrequencyRange`, `binauralHearing`, `azimuthResolution`, `elevationResolution`, `concurrentStreams`, `listeningDuration`, `vibrationDetection`, `kinaesthesia`, `minTargetSize`, and 5 more.
+- **Not of interest** (18), because no precedence parent is PARTIAL: `focusDuration`, `tracking`, `trackingDuration`, `usableFrequencyRange`, `binauralHearing`, `azimuthResolution`, `elevationResolution`, `concurrentStreams`, `listeningDuration`, `vibrationDetection`, `kinaesthesia`, `minTargetSize`, and 6 more.
 
 #### Setting groups (contexts)
 
@@ -227,7 +228,7 @@ with *"sight + signLanguageSet"*.
 
 ### low-vision-contrast
 
-*Partial sight limited by contrast discrimination. Colour perception intact.*
+*Sees colour fully and reads at 18pt. Distinguishes tones that differ strongly; focuses and tracks for short periods.*
 
 **Basis:** exemplar — stands in for lived experience, not derived from any person  
 **Entity kind:** user · **Settings recorded:** 20
@@ -255,9 +256,9 @@ with *"sight + signLanguageSet"*.
 | — | `tracking` | **PARTIAL** | — | focus |
 | — | `trackingDuration` | **PARTIAL** | 12 min | tracking |
 
-**Not recorded: 20 of 40 properties.**
+**Not recorded: 21 of 41 properties.**
 
-- **Not of interest** (20), because no precedence parent is PARTIAL: `stereo`, `viewRectangle`, `nonViewRectangle`, `usableFrequencyRange`, `binauralHearing`, `azimuthResolution`, `elevationResolution`, `concurrentStreams`, `listeningDuration`, `vibrationDetection`, `kinaesthesia`, `minTargetSize`, and 8 more.
+- **Not of interest** (21), because no precedence parent is PARTIAL: `stereo`, `viewRectangle`, `nonViewRectangle`, `usableFrequencyRange`, `binauralHearing`, `azimuthResolution`, `elevationResolution`, `concurrentStreams`, `listeningDuration`, `vibrationDetection`, `kinaesthesia`, `minTargetSize`, and 9 more.
 
 #### Setting groups (contexts)
 
@@ -289,9 +290,9 @@ with *"sight + signLanguageSet"*.
 | — | `manualStability` | **FULL** | — | None |
 | — | `pointerControl` | **FULL** | — | None |
 
-**Not recorded: 28 of 40 properties.**
+**Not recorded: 29 of 41 properties.**
 
-- **Not of interest** (28), because no precedence parent is PARTIAL: `stereo`, `focus`, `focusDuration`, `tracking`, `trackingDuration`, `viewRectangle`, `nonViewRectangle`, `intensityLow`, `intensityHigh`, `usableFrequencyRange`, `binauralHearing`, `azimuthResolution`, and 16 more.
+- **Not of interest** (29), because no precedence parent is PARTIAL: `stereo`, `focus`, `focusDuration`, `tracking`, `trackingDuration`, `viewRectangle`, `nonViewRectangle`, `intensityLow`, `intensityHigh`, `usableFrequencyRange`, `binauralHearing`, `azimuthResolution`, and 17 more.
 
 #### Setting groups (contexts)
 
@@ -303,7 +304,7 @@ with *"sight + signLanguageSet"*.
 
 ### keyboard-only
 
-*No usable continuous pointing device. Discrete key control intact.*
+*Full discrete key control, and writes by selection — keyboard, scanning or eye tracking. Does not use a continuous pointing device.*
 
 **Basis:** exemplar — stands in for lived experience, not derived from any person  
 **Entity kind:** user · **Settings recorded:** 8
@@ -319,11 +320,11 @@ with *"sight + signLanguageSet"*.
 | — | `pointerControl` | **NONE** | — | None |
 | — | `writeFontSet` | **PARTIAL** | SELECT | language, keyControl |
 
-**Not recorded: 32 of 40 properties.**
+**Not recorded: 33 of 41 properties.**
 
 - **Cannot exist** (1), because a precedence parent is NONE: `minTargetSize`.
 
-- **Not of interest** (31), because no precedence parent is PARTIAL: `stereo`, `focus`, `focusDuration`, `tracking`, `trackingDuration`, `viewRectangle`, `nonViewRectangle`, `colorLow`, `colorMedium`, `colorHigh`, `intensityLow`, `intensityMedium`, and 19 more.
+- **Not of interest** (32), because no precedence parent is PARTIAL: `stereo`, `focus`, `focusDuration`, `tracking`, `trackingDuration`, `viewRectangle`, `nonViewRectangle`, `colorLow`, `colorMedium`, `colorHigh`, `intensityLow`, `intensityMedium`, and 20 more.
 
 #### Setting groups (contexts)
 
@@ -335,7 +336,7 @@ with *"sight + signLanguageSet"*.
 
 ### hand-tremor
 
-*Tremor under load. Sight and hearing unimpaired; the limitation is stability, and it reaches into reading whenever the display is not mounted.*
+*Full sight, hearing and language. Holds a hand steady to about a third of typical, which sets his target size, key delay, and — whenever the display is hand-held rather than mounted — the size of type he can read.*
 
 **Basis:** exemplar — stands in for lived experience, not derived from any person  
 **Entity kind:** user · **Settings recorded:** 12
@@ -355,9 +356,9 @@ with *"sight + signLanguageSet"*.
 | — | `minTargetSize` | **PARTIAL** | 18 mm | pointerControl, manualStability, kinaesthesia |
 | — | `sustainedPress` | **PARTIAL** | — | keyControl |
 
-**Not recorded: 29 of 40 properties.**
+**Not recorded: 30 of 41 properties.**
 
-- **Not of interest** (29), because no precedence parent is PARTIAL: `stereo`, `focus`, `focusDuration`, `tracking`, `trackingDuration`, `viewRectangle`, `nonViewRectangle`, `colorLow`, `colorMedium`, `colorHigh`, `intensityLow`, `intensityMedium`, and 17 more.
+- **Not of interest** (30), because no precedence parent is PARTIAL: `stereo`, `focus`, `focusDuration`, `tracking`, `trackingDuration`, `viewRectangle`, `nonViewRectangle`, `colorLow`, `colorMedium`, `colorHigh`, `intensityLow`, `intensityMedium`, and 18 more.
 
 #### Functionally dependent settings
 
@@ -390,7 +391,7 @@ criticises.
 
 ### deaf
 
-*No usable hearing. Signs fluently. No other reported limitation. The hardest case for an audio-first demonstrator, which is why it is here.*
+*Signs fluently in ASL, reads print and sign, and has full sight, touch and motor control. No usable hearing — the hardest case for an audio-first demonstrator, which is why it is here.*
 
 **Basis:** exemplar — stands in for lived experience, not derived from any person  
 **Entity kind:** user · **Settings recorded:** 10
@@ -401,16 +402,16 @@ criticises.
 | — | `sight` | **FULL** | — | None |
 | — | `language` | **FULL** | — | None |
 | — | `touch` | **FULL** | — | None |
+| — | `readAudioText` | **NONE** | — | hearing, language |
 | — | `keyControl` | **FULL** | — | None |
 | — | `manualStability` | **FULL** | — | None |
-| — | `readAudioText` | **NONE** | — | hearing, language |
 | — | `pointerControl` | **FULL** | — | None |
 | — | `signLanguageSet` | **PARTIAL** | ASL | language, sight |
 | — | `readSignText` | **FULL** | — | sight, signLanguageSet |
 
-**Not recorded: 30 of 40 properties.**
+**Not recorded: 31 of 41 properties.**
 
-- **Cannot exist** (7), because a precedence parent is NONE: `usableFrequencyRange`, `binauralHearing`, `azimuthResolution`, `elevationResolution`, `concurrentStreams`, `listeningDuration`, `minInterWordGap`.
+- **Cannot exist** (8), because a precedence parent is NONE: `usableFrequencyRange`, `binauralHearing`, `azimuthResolution`, `elevationResolution`, `concurrentStreams`, `listeningDuration`, `intelligibleVoicePitch`, `minInterWordGap`.
 
 - **Not of interest** (23), because no precedence parent is PARTIAL: `stereo`, `focus`, `focusDuration`, `tracking`, `trackingDuration`, `viewRectangle`, `nonViewRectangle`, `colorLow`, `colorMedium`, `colorHigh`, `intensityLow`, `intensityMedium`, and 11 more.
 
@@ -424,10 +425,10 @@ criticises.
 
 ### deafened-asymmetric
 
-*Acquired hearing loss in later life after years in a noisy workplace. Worse in one ear, and worst in the lower register. Speaks and expects speech; does not sign.*
+*Hears across the full range with one ear and the upper register with both. Follows two concurrent streams, places sound coarsely left and right, and understands speech best from higher-pitched voices. Speaks and expects speech; does not sign.*
 
 **Basis:** exemplar — stands in for lived experience, not derived from any person  
-**Entity kind:** user · **Settings recorded:** 15
+**Entity kind:** user · **Settings recorded:** 16
 
 | Setting | Property | Capability | Measurement | Parent |
 |---|---|---|---|---|
@@ -439,15 +440,16 @@ criticises.
 | — | `elevationResolution` | **PARTIAL** | 40 deg | hearing |
 | — | `language` | **FULL** | — | None |
 | — | `touch` | **FULL** | — | None |
+| — | `readAudioText` | **PARTIAL** | — | hearing, language |
+| — | `intelligibleVoicePitch` | **PARTIAL** | 165–300 | readAudioText |
 | — | `keyControl` | **FULL** | — | None |
 | — | `listeningDuration` | **PARTIAL** | 20 min | hearing |
 | — | `manualStability` | **FULL** | — | None |
-| — | `readAudioText` | **PARTIAL** | — | hearing, language |
 | — | `minInterWordGap` | **PARTIAL** | 220 ms | readAudioText |
 | — | `pointerControl` | **FULL** | — | None |
 | — | `usableFrequencyRange` | **PARTIAL** | 20–8000 | hearing |
 
-**Not recorded: 25 of 40 properties.**
+**Not recorded: 25 of 41 properties.**
 
 - **Not of interest** (25), because no precedence parent is PARTIAL: `stereo`, `focus`, `focusDuration`, `tracking`, `trackingDuration`, `viewRectangle`, `nonViewRectangle`, `colorLow`, `colorMedium`, `colorHigh`, `intensityLow`, `intensityMedium`, and 13 more.
 
@@ -461,7 +463,7 @@ criticises.
 
 ### multiple-sclerosis
 
-*Double vision, absent touch, tremor, poor proprioception, and fatigue that cuts across all of it. A spiky profile: the paper's own example of what stereotype templates handle worst.*
+*Hears fully, reads at 20pt in short spells, and works with large targets and long key delays. Sees with one eye at a time; locates a hand to within a quarter of its usual accuracy. A spiky profile across four ontologies: the paper's own example of what stereotype templates handle worst.*
 
 **Basis:** exemplar — stands in for lived experience, not derived from any person  
 **Entity kind:** user · **Settings recorded:** 19
@@ -488,11 +490,11 @@ criticises.
 | — | `tracking` | **PARTIAL** | — | focus |
 | — | `trackingDuration` | **PARTIAL** | 4 min | tracking |
 
-**Not recorded: 21 of 40 properties.**
+**Not recorded: 22 of 41 properties.**
 
 - **Cannot exist** (2), because a precedence parent is NONE: `vibrationDetection`, `hapticLanguageSet`.
 
-- **Not of interest** (19), because no precedence parent is PARTIAL: `viewRectangle`, `nonViewRectangle`, `colorLow`, `colorMedium`, `colorHigh`, `intensityLow`, `intensityMedium`, `intensityHigh`, `contrastSensitivity`, `usableFrequencyRange`, `binauralHearing`, `azimuthResolution`, and 7 more.
+- **Not of interest** (20), because no precedence parent is PARTIAL: `viewRectangle`, `nonViewRectangle`, `colorLow`, `colorMedium`, `colorHigh`, `intensityLow`, `intensityMedium`, `intensityHigh`, `contrastSensitivity`, `usableFrequencyRange`, `binauralHearing`, `azimuthResolution`, and 8 more.
 
 #### Setting groups (contexts)
 
@@ -527,6 +529,8 @@ NONE, or because no parent is PARTIAL and so the question does not arise.
 | `language` | FULL | FULL | FULL | FULL | FULL | FULL | FULL | FULL | FULL |
 | `touch` | FULL | FULL | FULL | FULL | FULL | FULL | FULL | FULL | NONE |
 | `hapticLanguageSet` |  | PARTIAL Braille |  |  |  |  |  |  |  |
+| `readAudioText` |  |  |  |  |  |  | NONE | PARTIAL |  |
+| `intelligibleVoicePitch` |  |  |  |  |  |  |  | PARTIAL 165–300 |  |
 | `intensityHigh` |  |  | PARTIAL 45 % |  |  |  |  |  |  |
 | `intensityLow` |  |  | PARTIAL 45 % |  |  |  |  |  |  |
 | `intensityMedium` |  |  | PARTIAL 45 % | PARTIAL 70 % |  |  |  |  |  |
@@ -534,7 +538,6 @@ NONE, or because no parent is PARTIAL and so the question does not arise.
 | `kinaesthesia` |  |  |  |  |  |  |  |  | PARTIAL 25 % |
 | `listeningDuration` |  |  |  |  |  |  |  | PARTIAL 20 min | PARTIAL 15 min |
 | `manualStability` | FULL | FULL | FULL | FULL | FULL | PARTIAL 35 % | FULL | FULL | PARTIAL 30 % |
-| `readAudioText` |  |  |  |  |  |  | NONE | PARTIAL |  |
 | `minInterWordGap` |  |  |  |  |  |  |  | PARTIAL 220 ms |  |
 | `minKeyRepeatDelay` |  |  |  |  |  | PARTIAL 900 ms |  |  | PARTIAL 1200 ms |
 | `readFontText` |  | NONE | PARTIAL |  |  |  |  |  | PARTIAL |

@@ -14,6 +14,25 @@
  * and nothing else, which is the paper's own argument: "It is what the user can
  * do, not why she cannot."
  *
+ * RECORD WHAT THEY CAN DO
+ *
+ * Bob's rule, and it governs the prose here as much as the data: **we record
+ * what a person can hear, not what they cannot. This is capability, not
+ * disability.**
+ *
+ * The measurements were always positive — `usableFrequencyRange` is the range
+ * that works, `binauralHearing` the band where the ears do combine,
+ * `concurrentStreams` how many a listener can follow. The descriptions were
+ * not: an earlier draft of these profiles was written in the language of loss —
+ * "lost the lower register", "worse in one ear", "no usable sight" — which is
+ * Table 1 vocabulary wearing Table 2 clothes. A model can be structurally
+ * correct and still tell the reader to think in deficits, and the reader
+ * remembers the prose.
+ *
+ * So each profile below leads with what the person does. Where a capability is
+ * genuinely absent the model says NONE and that is a fact, not a verdict; it is
+ * never elaborated into a description of what they are missing.
+ *
  * READING A PROFILE
  *
  * Every Setting is FULL, PARTIAL or NONE, and a measurement appears only
@@ -123,7 +142,10 @@ export const referenceSpec = {
   entity: {
     id: "reference",
     kind: "user",
-    description: "Baseline with no reported limitation. Exists to be differenced against.",
+    description:
+      "Full capability across every ontology. Exists to be differenced against, and " +
+      "named `reference` rather than `default` on purpose: a default is what you get " +
+      "if you do not choose.",
     basis: "exemplar — not derived from any person",
   },
   influences,
@@ -187,7 +209,9 @@ export const blindSinceBirth = defineCapacity(
   variation(referenceSpec, {
     entity: {
       id: "blind-since-birth",
-      description: "No usable sight from birth. No other reported limitation.",
+      description:
+        "Reads Braille, listens closely, and follows more concurrent audio than most. " +
+        "Full hearing, touch, language and motor control. No usable sight from birth.",
       basis: EXEMPLAR,
     },
     modify: { sight: { capability: "NONE" } },
@@ -211,7 +235,9 @@ export const lowVisionContrast = defineCapacity(
   variation(referenceSpec, {
     entity: {
       id: "low-vision-contrast",
-      description: "Partial sight limited by contrast discrimination. Colour perception intact.",
+      description:
+        "Sees colour fully and reads at 18pt. Distinguishes tones that differ strongly; " +
+        "focuses and tracks for short periods.",
       basis: EXEMPLAR,
     },
     modify: { sight: { capability: "PARTIAL" } },
@@ -284,7 +310,9 @@ export const keyboardOnly = defineCapacity(
   variation(referenceSpec, {
     entity: {
       id: "keyboard-only",
-      description: "No usable continuous pointing device. Discrete key control intact.",
+      description:
+        "Full discrete key control, and writes by selection — keyboard, scanning or eye " +
+        "tracking. Does not use a continuous pointing device.",
       basis: EXEMPLAR,
     },
     modify: { pointerControl: { capability: "NONE" } },
@@ -324,8 +352,9 @@ export const handTremor = defineCapacity(
     entity: {
       id: "hand-tremor",
       description:
-        "Tremor under load. Sight and hearing unimpaired; the limitation is stability, " +
-        "and it reaches into reading whenever the display is not mounted.",
+        "Full sight, hearing and language. Holds a hand steady to about a third of " +
+        "typical, which sets his target size, key delay, and — whenever the display " +
+        "is hand-held rather than mounted — the size of type he can read.",
       basis: EXEMPLAR,
     },
     modify: {
@@ -420,8 +449,9 @@ export const deaf = defineCapacity(
     entity: {
       id: "deaf",
       description:
-        "No usable hearing. Signs fluently. No other reported limitation. The hardest " +
-        "case for an audio-first demonstrator, which is why it is here.",
+        "Signs fluently in ASL, reads print and sign, and has full sight, touch and " +
+        "motor control. No usable hearing — the hardest case for an audio-first " +
+        "demonstrator, which is why it is here.",
       basis: EXEMPLAR,
     },
     modify: { hearing: { capability: "NONE" } },
@@ -451,18 +481,22 @@ export const deaf = defineCapacity(
  * Table 2 rejects: "It is what the user can do, not why she cannot." The
  * functional consequence is what a renderer needs, and it is expressible.
  *
- * THE LOSS IS FREQUENCY DEPENDENT, AND SO IS EVERYTHING THAT FOLLOWS. He lost
- * the lower register in one ear and kept the higher one, so:
+ * WHAT HE HEARS IS FREQUENCY DEPENDENT, AND SO IS EVERYTHING THAT FOLLOWS. He
+ * hears the full range with one ear and the upper register with both, so:
  *
- *   - He still HEARS low frequencies — with the good ear. `usableFrequencyRange`
- *     is therefore wide, not truncated. An earlier draft started it at 400 Hz,
- *     which asserted he cannot hear bass at all. He can; he just cannot place it.
- *   - The two ears go on combining ABOVE the crossover and stop below it, which
- *     is why `binauralHearing` carries a frequency band rather than a percentage.
- *   - Localisation degrades in a specific way. Low frequencies are localised by
+ *   - He HEARS low frequencies, using the good ear. `usableFrequencyRange` is
+ *     therefore wide. An earlier draft started it at 400 Hz, which asserted he
+ *     cannot hear bass at all. He can; what he cannot do is place it.
+ *   - The two ears combine ABOVE the crossover, which is why `binauralHearing`
+ *     carries a frequency band rather than a percentage. PARTIAL here means
+ *     "binaural from 800 Hz up", a statement a renderer can act on.
+ *   - Localisation survives in a specific band. Low frequencies are placed by
  *     interaural TIME difference and high by interaural LEVEL difference, so
- *     losing the lows in one ear takes out ITD localisation and leaves ILD.
- *     Spatial hearing is impaired, not absent, and impaired unevenly.
+ *     ILD localisation keeps working above the crossover. Spatial hearing is
+ *     coarse rather than absent, and coarse unevenly.
+ *   - Speech is clearest from higher-pitched voices — recorded as
+ *     `intelligibleVoicePitch`, from Bob's CNIB Library borrowing data. The
+ *     mechanism is unsettled and the model does not need it.
  *
  * `elevationResolution` deliberately does NOT depend on binaural hearing at all:
  * elevation cues are monaural, filtered by the pinna, so that axis survives
@@ -481,9 +515,10 @@ export const deafenedAsymmetric = defineCapacity(
     entity: {
       id: "deafened-asymmetric",
       description:
-        "Acquired hearing loss in later life after years in a noisy workplace. Worse " +
-        "in one ear, and worst in the lower register. Speaks and expects speech; does " +
-        "not sign.",
+        "Hears across the full range with one ear and the upper register with both. " +
+        "Follows two concurrent streams, places sound coarsely left and right, and " +
+        "understands speech best from higher-pitched voices. Speaks and expects " +
+        "speech; does not sign.",
       basis: EXEMPLAR,
     },
     modify: { hearing: { capability: "PARTIAL" } },
@@ -519,6 +554,14 @@ export const deafenedAsymmetric = defineCapacity(
       listeningDuration: { capability: "PARTIAL", measurement: 20 },
       readAudioText: { capability: "PARTIAL" },
       minInterWordGap: { capability: "PARTIAL", measurement: 220 },
+      /* Bob's CNIB Library observation, made expressible: older men consistently
+       * chose female narrators. Recorded as the band of talker pitch that WORKS,
+       * which is a capability a renderer can act on by picking a voice — not as
+       * a statement about what he cannot hear, and deliberately silent on why. */
+      intelligibleVoicePitch: {
+        capability: "PARTIAL",
+        measurement: { from: 165, to: 300 },
+      },
     },
   }),
 );
@@ -556,9 +599,10 @@ export const multipleSclerosis = defineCapacity(
     entity: {
       id: "multiple-sclerosis",
       description:
-        "Double vision, absent touch, tremor, poor proprioception, and fatigue that " +
-        "cuts across all of it. A spiky profile: the paper's own example of what " +
-        "stereotype templates handle worst.",
+        "Hears fully, reads at 20pt in short spells, and works with large targets and " +
+        "long key delays. Sees with one eye at a time; locates a hand to within a " +
+        "quarter of its usual accuracy. A spiky profile across four ontologies: the " +
+        "paper's own example of what stereotype templates handle worst.",
       basis: EXEMPLAR,
     },
     modify: {

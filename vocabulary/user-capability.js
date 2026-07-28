@@ -462,6 +462,36 @@ export const userCapability = defineCapability({
         "parent, because the paper's own example makes the readable size depend on whether " +
         "the display is mounted or held.",
     },
+    /* MY CHOICE, and the model had no way to say this at all.
+     *
+     * Prompted by Bob's observation from CNIB Library borrowing statistics:
+     * older men consistently chose female narrators for audiobooks. That is
+     * behavioural evidence of a capability, gathered across a whole population
+     * of heavy listeners over hours of listening — which is a better measure of
+     * what works than a word-recognition test over minutes, and it was obtained
+     * without a single audiogram.
+     *
+     * The mechanism is genuinely unsettled. Presbycusis is a sloping HIGH
+     * frequency loss, and published intelligibility studies find male and female
+     * talkers about equally intelligible for older adults with hearing loss. Two
+     * readings fit the borrowing data: either the lower register is reduced, so
+     * the upper is what remains; or the lower register is well PRESERVED and
+     * masks upward into the consonant range, so a higher-pitched talker escapes
+     * it. Same preference, opposite cause.
+     *
+     * The model does not have to choose, and that is the point: "It is what the
+     * user can do, not why she cannot." What a renderer needs is the band of
+     * talker pitch that works, and it can act on that immediately by choosing a
+     * synthetic voice. */
+    intelligibleVoicePitch: {
+      ontology: "language", precedence: ["readAudioText"],
+      measurement: { type: "numericRange", unit: "Hz", min: 50, max: 500 },
+      description:
+        "The range of talker fundamental frequency the user understands well. FULL " +
+        "means any voice works. PARTIAL carries the band that does — for reference, " +
+        "adult male speech centres around 85-180 Hz and adult female around 165-255 Hz. " +
+        "Directly actionable: it selects a synthetic voice.",
+    },
     minInterWordGap: {
       ontology: "language", precedence: ["readAudioText"],
       measurement: { type: "numeric", min: 1, max: 2000, unit: "ms" },
@@ -520,7 +550,8 @@ export const userCapability = defineCapability({
       properties: [
         "language", "hapticLanguageSet", "signLanguageSet", "readSignText",
         "readFontText", "readAudioText",
-        "minReadFontSizeForFont", "minInterWordGap", "writeFontSet",
+        "minReadFontSizeForFont", "minInterWordGap", "intelligibleVoicePitch",
+        "writeFontSet",
       ],
     },
     touchSense: {
