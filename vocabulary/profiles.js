@@ -471,6 +471,30 @@ export const deaf = defineCapacity(
       /* Receives AND delivers, which is the ordinary case and worth recording
        * explicitly so that the DeafBlind profile's difference is visible. */
       writeSignSet: { capability: "PARTIAL", measurement: ["Visual"] },
+
+      /* English, held asymmetrically — which is the whole reason knownLanguages
+       * rates four skills separately. Full literacy, no listening at all, and
+       * speech that exists but is not the primary channel.
+       *
+       * A necessary caution: whether a Deaf person speaks is as much personal
+       * and cultural as it is capability, and many fluent signers choose not to.
+       * This profile speaks a little; another Deaf profile might have
+       * `speech: NONE` and be no less complete. Nothing here should be read as
+       * what a Deaf person is like. */
+      knownLanguages: {
+        capability: "PARTIAL",
+        measurement: [
+          { tag: "en-CA", listening: "none", speaking: "basic",
+            reading: "fluent", writing: "fluent" },
+        ],
+      },
+      speech: { capability: "PARTIAL" },
+      speechIntelligibility: { capability: "PARTIAL", measurement: "familiar listeners" },
+      /* The combination that matters, and the reason the two properties are
+       * separate: people who know him understand him, and automatic speech
+       * recognition does not work at all. A system that infers one from the
+       * other will offer voice control and strand him. */
+      speechRecognisedByMachine: { capability: "NONE" },
     },
   }),
 );
@@ -860,6 +884,73 @@ export const deafenedNotch = defineCapacity(
   }),
 );
 
+/**
+ * English as an additional language.
+ *
+ * No sensory or motor limitation whatever, and that is the point. This model is
+ * capability, not disability, and a capability model that only ever describes
+ * disabled people has quietly become a disability model with better manners.
+ * Language proficiency is an ordinary human variation that changes what an
+ * interface should do — plain wording, no idiom, longer to read, a second
+ * language offered where one exists — and it belongs in the same structure as
+ * everything else.
+ *
+ * WHAT THIS EXERCISES. `knownLanguages` rates listening, speaking, reading and
+ * writing separately, because for this speaker they genuinely differ:
+ * comprehension runs ahead of production, which is the normal shape of second
+ * language acquisition and is invisible to any model that records only "speaks
+ * English".
+ *
+ * AND THE PART THAT SURPRISES SYSTEM DESIGNERS. `speech` is FULL — nothing is
+ * wrong with this person's voice — while `speechIntelligibility` and
+ * `speechRecognisedByMachine` are both PARTIAL. Accent is not a speech
+ * impairment. But automatic speech recognition is trained on a narrow band of
+ * voices, so the machine struggles where people do not, and a system that
+ * assumes "clear voice therefore voice input works" is wrong in a way it will
+ * never be told about.
+ *
+ * Note also that `speechIntelligibility` sits under a FULL parent and is
+ * recorded anyway. That is legitimate — FULL makes a child uninteresting by
+ * default, never forbidden — and this is the second profile to need it.
+ */
+export const secondLanguage = defineCapacity(
+  userCapability,
+  variation(referenceSpec, {
+    entity: {
+      id: "second-language",
+      description:
+        "Native Punjabi speaker, fluent listener and reader of English, conversational " +
+        "in speaking and writing it. Full sight, hearing, touch and motor control. " +
+        "Understood by most listeners; understood by machines less reliably.",
+      basis: EXEMPLAR,
+    },
+    add: {
+      knownLanguages: {
+        capability: "PARTIAL",
+        measurement: [
+          { tag: "pa", listening: "native", speaking: "native",
+            reading: "fluent", writing: "conversational" },
+          { tag: "en-CA", listening: "fluent", speaking: "conversational",
+            reading: "fluent", writing: "conversational" },
+        ],
+      },
+      /* Nothing wrong with the voice. Accent is not a speech impairment, and
+       * modelling it as one would be exactly the category error this model
+       * exists to avoid. */
+      speech: { capability: "FULL" },
+      speechIntelligibility: { capability: "PARTIAL", measurement: "most listeners" },
+      speechRecognisedByMachine: {
+        capability: "PARTIAL",
+        measurement: "with frequent corrections",
+      },
+      /* Reading English is fluent but not native, so text takes longer even
+       * though the eyes are fine. A duration property, not a font-size one —
+       * the constraint is comprehension, not legibility. */
+      readFontText: { capability: "PARTIAL" },
+    },
+  }),
+);
+
 /** Every exemplar, for iteration in tests and demos. */
 export const exemplars = Object.freeze({
   reference,
@@ -873,4 +964,5 @@ export const exemplars = Object.freeze({
   multipleSclerosis,
   deafBlind,
   deafenedNotch,
+  secondLanguage,
 });

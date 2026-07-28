@@ -50,6 +50,8 @@ import { defineCapability } from "../cradle/user/capability.js";
 const percent = { type: "numeric", min: 1, max: 99, unit: "%" };
 const minutes = (max = 480) => ({ type: "numeric", min: 1, max, unit: "min" });
 
+const FLUENCY = ["none", "basic", "conversational", "fluent", "native"];
+
 export const userCapability = defineCapability({
   id: "cisna.user-capability",
   version: "0.3.0",
@@ -404,6 +406,18 @@ export const userCapability = defineCapability({
         "MY CHOICE. Can the user hold a key down, or chord two keys? NONE is the " +
         "capability that sticky-keys exists to answer.",
     },
+    /* MY CHOICE. Speech had no representation anywhere in the model: sign
+     * production was added, written production was in Table 4, and the voice was
+     * simply absent. It belongs in `motor` rather than a design space because
+     * this ontology is "what the user can DO to a device", and talking to one
+     * qualifies. */
+    speech: {
+      ontology: "motor", precedence: [],
+      description:
+        "MY CHOICE. Can the user produce spoken output at all? Independent of whether " +
+        "anyone or anything understands it, which is speechIntelligibility and " +
+        "speechRecognisedByMachine.",
+    },
     minKeyRepeatDelay: {
       ontology: "motor", precedence: ["keyControl", "manualStability"],
       measurement: { type: "numeric", min: 1, max: 2000, unit: "ms" },
@@ -417,6 +431,114 @@ export const userCapability = defineCapability({
     language: {
       ontology: "language", precedence: [],
       description: "Can the user understand language (in any medium)?",
+    },
+
+    /* MY CHOICE, and it closes an asymmetry that should have been obvious: the
+     * model recorded WHICH signed languages a person knows and never asked which
+     * spoken or written ones. `language` answers only "understands language at
+     * all", which cannot distinguish a fluent English speaker from someone
+     * managing their third language.
+     *
+     * The four parts are the standard skills of any language assessment —
+     * listening, speaking, reading, writing — chosen because they are what an
+     * interviewer actually asks and because the four genuinely dissociate. Two
+     * cases in this project need exactly that dissociation:
+     *
+     *   ESL      listening ahead of speaking; comprehension usually outruns
+     *            production, which is why "speaks English" is too coarse a fact.
+     *   Deaf     reading and writing English fluently with no listening at all,
+     *            and speaking that varies enormously between individuals.
+     *
+     * `tag` is a BCP 47 language tag, which carries regional variety for free:
+     * en-CA and en-GB are different tags, so dialect needs no separate property.
+     * Accent deliberately has none — accent is a description of how someone
+     * sounds, and the capability that matters is whether they are understood,
+     * which is speechIntelligibility. Recording accent would be recording
+     * mechanism, which is what Table 1 does and Table 2 rejects. */
+    knownLanguages: {
+      ontology: "language", precedence: ["language"],
+      measurement: {
+        type: "composite",
+        of: {
+          type: "composite",
+          parts: [
+            { name: "tag", type: "text", maxLength: 32 },
+            { name: "listening", type: "discrete", ordered: true, values: FLUENCY },
+            { name: "speaking", type: "discrete", ordered: true, values: FLUENCY },
+            { name: "reading", type: "discrete", ordered: true, values: FLUENCY },
+            { name: "writing", type: "discrete", ordered: true, values: FLUENCY },
+          ],
+        },
+        order: "asDeclared",
+      },
+      description:
+        "The spoken and written languages the user knows, each with the four standard " +
+        "skills rated separately. Tags are BCP 47, so regional variety (en-CA vs en-GB) " +
+        "is carried without a separate dialect property. Signed languages are recorded " +
+        "in signLanguageSet, not here.",
+    },
+
+    /* MY CHOICE. How readily a person's speech is understood BY PEOPLE — which
+     * is a different question from what language they speak and from whether a
+     * machine can transcribe them.
+     *
+     * This is the property that carries what is colloquially called Deaf voice,
+     * and also a strong second-language accent, dysarthria, and a laryngectomy
+     * speaking with an electrolarynx. Deliberately ONE property covering all of
+     * them, because the design consequence is identical — allow more time,
+     * confirm rather than assume, never make speech the only route — and because
+     * naming the cause would be recording mechanism.
+     *
+     * The scale is ordered least to most capable, and its points are things an
+     * interviewer can ask and a person can answer without a clinician. */
+    speechIntelligibility: {
+      ontology: "language", precedence: ["speech"],
+      measurement: {
+        type: "discrete",
+        ordered: true,
+        values: [
+          "familiar listeners, with effort",
+          "familiar listeners",
+          "most listeners",
+          "any listener",
+        ],
+      },
+      description:
+        "How readily the user's speech is understood by other people. Ordered least to " +
+        "most capable. Carries the functional consequence of Deaf voice, strong accent " +
+        "and dysarthria alike, without naming which — because the design response is " +
+        "the same for all three.",
+    },
+
+    /* MY CHOICE, and separate from the above on purpose: the two dissociate
+     * sharply and the split is the actionable part.
+     *
+     * Automatic speech recognition is trained overwhelmingly on typical adult
+     * speech in a handful of accents. A person whose family understands them
+     * perfectly may be unusable by voice control, and that is precisely the
+     * combination — high human intelligibility, low machine intelligibility —
+     * that a system offering "just talk to it" gets wrong. Recording only the
+     * human figure would hide it. */
+    speechRecognisedByMachine: {
+      ontology: "language", precedence: ["speech"],
+      measurement: {
+        type: "discrete",
+        ordered: true,
+        /* "not usable at all" is NONE at the property level, so it is not a
+         * point on the scale — a scale point that duplicates the capability
+         * value is how you end up with two ways to say the same thing. */
+        values: [
+          "only after training on this voice",
+          "with frequent corrections",
+          "with occasional corrections",
+          "reliably",
+        ],
+      },
+      description:
+        "MY CHOICE. Whether automatic speech recognition can transcribe this user. " +
+        "Deliberately separate from speechIntelligibility, because ASR is trained on a " +
+        "narrow range of voices and fails on many that people understand easily — so a " +
+        "system may not infer one from the other before offering voice input.",
     },
     hapticLanguageSet: {
       ontology: "language", precedence: ["language", "touch"],
@@ -677,7 +799,7 @@ export const userCapability = defineCapability({
       description: "MY CHOICE. Motor capability: what the user can do to the device.",
       properties: [
         "pointerControl", "keyControl", "manualStability", "minTargetSize",
-        "sustainedPress", "minKeyRepeatDelay", "kinaesthesia",
+        "sustainedPress", "minKeyRepeatDelay", "kinaesthesia", "speech",
       ],
     },
     reading: {
@@ -687,6 +809,7 @@ export const userCapability = defineCapability({
         "readSignText", "readTactileSign", "readFontText", "readAudioText",
         "minReadFontSizeForFont", "minInterWordGap", "intelligibleVoicePitch",
         "writeFontSet", "writeSignSet", "writeTactileSet",
+        "knownLanguages", "speechIntelligibility", "speechRecognisedByMachine",
       ],
     },
     touchSense: {

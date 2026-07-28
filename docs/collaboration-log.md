@@ -1309,6 +1309,75 @@ supplied a functional dependency that is cleaner than the published one.*
 
 44 properties, 11 exemplars, 107 tests.
 
+## C9 · correction · Speech was absent from the model entirely
+
+**2026-07-28.** Bob: "We may not yet have covered speech fully - Do we have
+anything for speaking? Language, dialect, accent? I'm trying to catch english as
+a second language and Deaf Voice here."
+
+We did not. **The model had no speech production of any kind**, and an asymmetry
+that should have been embarrassing: it recorded which SIGNED languages a person
+knows and never asked which spoken or written ones. `language` answered only
+"understands language at all", which cannot tell a fluent English speaker from
+someone managing their third.
+
+### The four skills
+
+`knownLanguages` now holds a collection of languages, each rated on **listening,
+speaking, reading, writing** — the standard skills of any language assessment,
+chosen because they are what an interviewer actually asks and because they
+genuinely dissociate. Bob's two cases are precisely the dissociations:
+
+| | listening | speaking | reading | writing |
+|---|---|---|---|---|
+| ESL, en-CA | fluent | conversational | fluent | conversational |
+| Deaf, en-CA | **none** | basic | **fluent** | **fluent** |
+
+"Knows English" is true of both and useless about either. Tags are BCP 47, so
+dialect (en-CA vs en-GB) needs no separate property.
+
+**Accent deliberately has no property.** Accent describes how someone sounds; the
+capability is whether they are understood, which is `speechIntelligibility`.
+Recording accent would be recording mechanism — Table 1 rather than Table 2.
+
+### The split that matters most
+
+`speechIntelligibility` (understood by people) and `speechRecognisedByMachine`
+(understood by ASR) are separate properties, and the separation is the actionable
+part:
+
+- **Deaf**: understood by familiar listeners; ASR `NONE`.
+- **ESL**: `speech: FULL` — nothing wrong with the voice — understood by most
+  listeners, ASR "with frequent corrections".
+
+Automatic speech recognition is trained on a narrow band of voices. A person
+their family understands perfectly may be unusable by voice control, and a system
+that infers the machine figure from the human one will offer "just talk to it"
+and strand them. Recording only one number hides exactly the case that breaks.
+
+Note also that **accent is not a speech impairment**: the ESL speaker's `speech`
+is FULL and their intelligibility is still PARTIAL. Collapsing those would have
+been the category error the model exists to prevent.
+
+### Why the ESL profile earns its place
+
+It has no sensory or motor limitation whatever, and that is the argument for
+including it. **A capability model that only ever describes disabled people has
+quietly become a disability model with better manners.** Language proficiency is
+ordinary human variation that changes what an interface should do — plain
+wording, no idiom, more reading time, a second language where one exists — and it
+belongs in the same structure as everything else. There is a test asserting that
+this profile's roots are all FULL and that it still carries real information.
+
+### One caution written into the code
+
+Whether a Deaf person speaks is as much personal and cultural as it is
+capability, and many fluent signers choose not to. The `deaf` profile speaks a
+little; another Deaf profile with `speech: NONE` would be no less complete.
+Recorded on the profile so nothing there reads as what a Deaf person is like.
+
+48 properties, 12 exemplars, 114 tests.
+
 ## X1 · disagreement · Bob corrected Claude's conclusion, not its facts
 
 **2026-07-27.** After C3, Claude concluded that the working practice should be

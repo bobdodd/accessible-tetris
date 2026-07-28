@@ -17,7 +17,7 @@ import { userCapability } from "../vocabulary/user-capability.js";
 import { exemplars, reference, blindSinceBirth, lowVisionContrast,
          lowVisionColour, keyboardOnly, handTremor,
          deaf, deafenedAsymmetric, multipleSclerosis,
-         deafBlind, deafenedNotch } from "../vocabulary/profiles.js";
+         deafBlind, deafenedNotch, secondLanguage } from "../vocabulary/profiles.js";
 
 let pass = 0, fail = 0;
 const ok = (label, fn) => {
@@ -234,8 +234,8 @@ throws("a composed collection without a CompositionOrder is refused", Capability
 /* ------------------------------------------------------------------ */
 console.log("\nCapacity Model — a measurement qualifies PARTIAL and nothing else:");
 
-ok("all eleven exemplars build", () => {
-  eq(Object.keys(exemplars).length, 11, "count");
+ok("all twelve exemplars build", () => {
+  eq(Object.keys(exemplars).length, 12, "count");
   for (const [name, p] of Object.entries(exemplars)) {
     if (!p.entity.basis.startsWith("exemplar")) throw new Error(`${name} records no basis`);
   }
@@ -734,6 +734,90 @@ ok("minTargetSize needs three parents, one in another ontology", () => {
   const p = userCapability.properties.minTargetSize;
   eq(p.precedence.join(","), "pointerControl,manualStability,kinaesthesia", "parents");
   eq(userCapability.properties.kinaesthesia.ontology, "haptic", "crosses from motor to haptic");
+});
+
+console.log("\nspeech — four skills, rated separately:");
+
+ok("knownLanguages rates listening, speaking, reading and writing apart", () => {
+  const P = userCapability.properties.knownLanguages;
+  const parts = P.measurement.of.parts.map((p) => p.name);
+  eq(parts.join(","), "tag,listening,speaking,reading,writing", "the four standard skills");
+  /* Each is an ordered fluency scale, not a percentage — issue #8's principle
+   * applied at the point of design rather than retrofitted. */
+  for (const skill of ["listening", "speaking", "reading", "writing"]) {
+    const spec = P.measurement.of.parts.find((p) => p.name === skill);
+    eq(spec.type, "discrete", `${skill} is a scale`);
+    eq(spec.ordered, true, `${skill} is ordered`);
+  }
+});
+
+ok("ESL: comprehension runs ahead of production", () => {
+  const en = secondLanguage.settings.knownLanguages.measurement
+    .find((l) => l.tag === "en-CA");
+  const scale = userCapability.properties.knownLanguages.measurement.of.parts
+    .find((p) => p.name === "listening");
+  const rank = (v) => scale.values.indexOf(v);
+  if (rank(en.listening) <= rank(en.speaking)) {
+    throw new Error("second-language acquisition normally understands before it produces");
+  }
+  eq(en.listening, "fluent", "understands");
+  eq(en.speaking, "conversational", "speaks less well");
+  /* And the first language is still there, which "speaks English" erases. */
+  const pa = secondLanguage.settings.knownLanguages.measurement.find((l) => l.tag === "pa");
+  eq(pa.speaking, "native", "native in Punjabi");
+});
+
+ok("Deaf: full literacy, no listening — the asymmetry a single fact cannot hold", () => {
+  const en = deaf.settings.knownLanguages.measurement.find((l) => l.tag === "en-CA");
+  eq(en.reading, "fluent", "reads English fluently");
+  eq(en.writing, "fluent", "writes it fluently");
+  eq(en.listening, "none", "does not receive it aurally");
+  /* "Knows English" would be true and useless. The four skills are what make
+   * it actionable. */
+});
+
+ok("accent is not a speech impairment", () => {
+  /* The ESL speaker's voice is fine. Modelling accent as impairment would be
+   * the category error the whole model exists to avoid. */
+  eq(secondLanguage.settings.speech.capability, "FULL", "nothing wrong with the voice");
+  eq(secondLanguage.settings.speechIntelligibility.measurement, "most listeners",
+     "and still not understood by everyone");
+});
+
+ok("machines and people are separate judges, and that is the point", () => {
+  /* Deaf: understood by people who know him, not by ASR at all. */
+  eq(deaf.settings.speechIntelligibility.measurement, "familiar listeners", "people manage");
+  eq(deaf.settings.speechRecognisedByMachine.capability, "NONE", "machines do not");
+  /* ESL: understood by most people, machines struggle. Same direction, and in
+   * both cases a system that infers the machine figure from the human one
+   * offers voice control and strands the user. */
+  eq(secondLanguage.settings.speechRecognisedByMachine.measurement,
+     "with frequent corrections", "machines struggle here too");
+  const P = userCapability.properties;
+  eq(P.speechIntelligibility.precedence.join(","), "speech", "both hang off speech");
+  eq(P.speechRecognisedByMachine.precedence.join(","), "speech", "and neither off the other");
+});
+
+ok("the ASR scale has no point that duplicates NONE", () => {
+  const vals = userCapability.properties.speechRecognisedByMachine.measurement.values;
+  for (const v of vals) {
+    if (/^not usable$|^none$/i.test(v)) {
+      throw new Error(`"${v}" duplicates the NONE capability — two ways to say one thing`);
+    }
+  }
+  eq(vals[vals.length - 1], "reliably", "ordered least to most capable");
+});
+
+ok("a capability model that only describes disabled people is not one", () => {
+  /* second-language has no sensory or motor limitation at all. Its presence is
+   * the claim that this is capability modelling rather than disability
+   * modelling with better manners. */
+  for (const root of ["sight", "hearing", "touch", "pointerControl", "keyControl"]) {
+    eq(secondLanguage.settings[root].capability, "FULL", root);
+  }
+  if (Object.keys(secondLanguage.settings).length < 8) {
+    throw new Error("and it still carries real, actionable capability information");
+  }
 });
 
 console.log("\nthe 4 kHz notch — a GAP, which is why Composite Property exists:");
