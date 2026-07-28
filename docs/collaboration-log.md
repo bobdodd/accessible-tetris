@@ -843,6 +843,102 @@ is **one changed line**. That compression is the clearest evidence the shape is
 now right: under the previous misreading the reference profile needed
 thirty-odd values, because every property demanded one.
 
+## D14 · decision · Stress-testing the profile model, and the three gaps it found
+
+**2026-07-28.** Bob: "we should 'stress test' the profiling mechanism" — one
+fully Deaf user, one deafened man with asymmetric low-register loss in one ear
+("typical older blue collar worker in a noisy factory"), and one person with MS:
+"double vision, no sense of touch, hand tremors, gets tired easily, poor
+kinaesthetics".
+
+The first five exemplars were built to *populate* the model. These three were
+built to *break* it, and each found something. Recorded here because a stress
+test whose findings get quietly fixed and forgotten has told you nothing.
+
+### 1. Sign language was missing (Deaf)
+
+Table 4 gives `readSignText` the parent **"sight + signLanguageSet"** and then
+never defines `signLanguageSet` — it is "a small edited fragment". The first
+transcription therefore skipped the whole row. A Deaf profile with no signed
+language is not a Deaf profile, so `signLanguageSet` was supplied and
+`readSignText` went in exactly as the paper writes it.
+
+It is now the clearest demonstration in the model that **precedence crosses
+ontology boundaries while ontology membership stays disjoint**: one parent in
+`visual`, one in `language`, and the property itself in `language`. The paper
+reached for this and stopped short; it took an exemplar to make the gap visible.
+
+### 2. Laterality is absent — and that is arguably correct
+
+The model has no per-ear or per-eye property anywhere, which at first looked
+fatal for asymmetric hearing loss. Working out why it is not was the most useful
+thing in the exercise.
+
+**Which ear is damaged is mechanism**, and mechanism is what Table 1 does and
+Table 2 rejects: "It is what the user can do, not why she cannot." What a
+renderer needs is the functional consequence, and that IS expressible. Added
+`binauralHearing` — can the two ears combine? — which is the capability that
+decides whether a soundscape may rely on stereo separation at all.
+
+The genuinely interesting part is the asymmetry it forced:
+
+- `azimuthResolution` **does** depend on `binauralHearing`. Left-right
+  localisation is built from interaural time and level differences and collapses
+  without two working ears.
+- `elevationResolution` **deliberately does not**. Elevation cues are monaural,
+  filtered by the pinna, so one axis of spatial hearing survives while the other
+  does not.
+
+Modelling both as lost would have been easier and wrong, and for a spatialised
+audio demonstrator the difference is the whole design.
+
+**The real limit, recorded not hidden:** the model cannot say "put the important
+channel on his good side". That needs laterality and laterality is not here.
+
+### 3. Kinaesthesia was missing (MS)
+
+The haptic ontology modelled only the tactile half. Haptics proper is tactile
+sensing **and** kinaesthesia — limb position sensed from muscle and joint — and
+the two dissociate in both directions. A user with absent touch and partial
+proprioception was inexpressible, which is a common MS presentation and matters
+far more for input than tactile loss does: not feeling the key is survivable,
+not knowing where your hand is without looking is not.
+
+Added as a sibling of `touch`, not a child, because the dissociation runs both
+ways. It is now a third parent of `minTargetSize` — acquiring a target needs a
+pointing device, a steady hand, *and* knowing where your hand is, and the third
+is the one usually forgotten because most people have it and never notice using
+it.
+
+### What the model got right without being told
+
+`hapticLanguageSet` is now correctly refused for the MS profile, because its
+parent `touch` is NONE and a capability cannot exist beneath one that does not.
+Nobody encoded "a person with no tactile sense cannot read Braille" — it fell
+out of the precedence hierarchy. That is the hierarchy doing real work.
+
+### MS also settled an earlier argument
+
+C7 records two errors: reading the Values column as a per-property data type,
+and then over-correcting into a hard ceiling where a child may not exceed its
+parent. This profile is why the second correction was necessary. **Hearing is
+FULL and `listeningDuration` is PARTIAL at 15 minutes** — MS fatigue is central,
+not sensory. Under the ceiling rule that would have been rejected as incoherent.
+It is not incoherent, it is the condition. FULL parents make a child
+uninteresting by default, never forbidden.
+
+The paper anticipated exactly this: §8 names "users with spiky profiles, such as
+users with Multiple Sclerosis who experience varied and multiple impairments" as
+the case stereotype templates handle worst, and Table 3's set is "based upon the
+real-life experiences of a person with Multiple Sclerosis". This exemplar is
+less a stress test than the model's own motivating example, finally populated.
+
+### One thing to check with Bob
+
+Noise-induced and age-related hearing loss are classically **high**-frequency —
+the 4 kHz notch. The brief specified the lower register, and it is built as
+specified. Flagged rather than silently altered.
+
 ## X1 · disagreement · Bob corrected Claude's conclusion, not its facts
 
 **2026-07-27.** After C3, Claude concluded that the working practice should be

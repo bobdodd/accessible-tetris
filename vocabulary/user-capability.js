@@ -52,7 +52,7 @@ const minutes = (max = 480) => ({ type: "numeric", min: 1, max, unit: "min" });
 
 export const userCapability = defineCapability({
   id: "cisna.user-capability",
-  version: "0.2.0",
+  version: "0.3.0",
 
   ontologies: {
     visual: {
@@ -231,14 +231,46 @@ export const userCapability = defineCapability({
         "usable frequency ranges from lowest to highest'. Notched loss is expressible; a " +
         "single min and max could not express it.",
     },
-    azimuthResolution: {
+    /* MY CHOICE, and added because the stress-test profiles demanded it. The
+     * model has no laterality anywhere: no per-ear or per-eye properties. For a
+     * user with asymmetric hearing loss that looked at first like a fatal gap.
+     *
+     * It is not, and the reason is the paper's own principle — "It is what the
+     * user can do, not why she cannot." WHICH ear is damaged is mechanism, and
+     * mechanism is what Table 1 does and Table 2 rejects. What a renderer
+     * actually needs to know is the functional consequence: can this listener
+     * use two ears together? That drives whether a soundscape may rely on
+     * stereo separation at all, or must fold to mono and carry meaning some
+     * other way.
+     *
+     * So laterality stays out and its consequence comes in. That is a real
+     * limit — the model cannot say "put the important channel on his left" —
+     * and it is recorded here rather than hidden. */
+    binauralHearing: {
       ontology: "sonic", precedence: ["hearing"],
+      description:
+        "MY CHOICE. Can the user hear with both ears together? NONE means " +
+        "effectively monaural listening — the two ears do not combine, whether " +
+        "through single-sided deafness or asymmetric loss severe enough that " +
+        "binaural cues stop working. This is the capability that decides whether a " +
+        "spatialised soundscape can carry meaning in stereo at all.",
+    },
+    azimuthResolution: {
+      ontology: "sonic", precedence: ["hearing", "binauralHearing"],
       measurement: { type: "numeric", min: 1, max: 180, unit: "deg" },
       description:
         "MY CHOICE. Smallest left-right angular difference the user can reliably " +
-        "distinguish. Directly bounds how many positions a spatialised soundscape can use.",
+        "distinguish. Directly bounds how many positions a spatialised soundscape can " +
+        "use. Depends on binauralHearing: left-right localisation is built from " +
+        "interaural time and level differences, so it collapses without two working ears.",
     },
     elevationResolution: {
+      /* Deliberately NOT dependent on binauralHearing. Elevation cues are
+       * monaural — the pinna filters incoming sound differently by angle — so a
+       * listener with one working ear keeps whatever elevation discrimination
+       * they had, while losing azimuth almost entirely. Getting this wrong
+       * would model a monaural listener as having no spatial hearing at all,
+       * when in fact one axis survives and the other does not. */
       ontology: "sonic", precedence: ["hearing"],
       measurement: { type: "numeric", min: 1, max: 180, unit: "deg" },
       description:
@@ -264,11 +296,33 @@ export const userCapability = defineCapability({
 
     touch: {
       ontology: "haptic", precedence: [],
-      description: "MY CHOICE. Top-level property for touch perception.",
+      description:
+        "MY CHOICE. Tactile perception: can the user feel contact on the skin? " +
+        "Deliberately narrower than the haptic design space as a whole — see " +
+        "kinaesthesia.",
     },
     vibrationDetection: {
       ontology: "haptic", precedence: ["touch"], measurement: percent,
       description: "MY CHOICE. Effective detection of device vibration.",
+    },
+    /* MY CHOICE, added for the MS profile. Haptics is conventionally BOTH
+     * tactile sensing (contact on skin) and kinaesthesia (limb position and
+     * movement, sensed from muscle and joint). The first draft of this ontology
+     * modelled only the tactile half, which meant a user with intact touch but
+     * absent proprioception was inexpressible — and that combination is common
+     * in MS and in peripheral neuropathy, and it matters enormously for input.
+     *
+     * It is a separate property and not a sub-type of touch because the two
+     * genuinely dissociate in both directions: touch can be lost with
+     * proprioception intact, and proprioception lost with touch intact. */
+    kinaesthesia: {
+      ontology: "haptic", precedence: [], measurement: percent,
+      description:
+        "MY CHOICE. Can the user tell where their hand is without looking at it? " +
+        "The other half of the haptic design space: limb position and movement " +
+        "sensed from muscle and joint rather than from skin. NONE means every " +
+        "positioning action needs visual confirmation, which is why it ends up " +
+        "constraining input far more than tactile loss does.",
     },
 
     /* --- motor: MY CHOICE, on a licensed extension point ------------------ */
@@ -295,7 +349,12 @@ export const userCapability = defineCapability({
         "whether the screen is placed on a Table, or is held in their hand'.",
     },
     minTargetSize: {
-      ontology: "motor", precedence: ["pointerControl", "manualStability"],
+      ontology: "motor",
+      /* Three parents, one of them in another ontology. Acquiring a target
+       * needs a pointing device, a steady hand, AND knowing where your hand is
+       * — and the third is the one usually forgotten, because most people have
+       * it and never notice using it. */
+      precedence: ["pointerControl", "manualStability", "kinaesthesia"],
       measurement: { type: "numeric", min: 1, max: 40, unit: "mm" },
       description:
         "MY CHOICE. Smallest target the user can reliably acquire with a pointing device.",
@@ -326,6 +385,33 @@ export const userCapability = defineCapability({
       description:
         "Tactile based languages understood by the user. Table 4 gives the parent as " +
         "Language; MY CHOICE adds touch, since a tactile language depends on touch.",
+    },
+    /* MY CHOICE, supplying the second parent Table 4 names but does not define.
+     * Table 4 gives readSignText the parent "sight + signLanguageSet", so the
+     * fragment assumes a signLanguageSet property exists; this is it. Added
+     * because a Deaf profile without sign language is not a Deaf profile, and
+     * because the model's own table already reached for it. */
+    signLanguageSet: {
+      ontology: "language", precedence: ["language", "sight"],
+      measurement: {
+        type: "discrete",
+        values: ["ASL", "LSQ", "BSL", "Auslan", "ISL", "SSE"],
+        multiple: true,
+      },
+      description:
+        "MY CHOICE (supplying a parent Table 4 names but does not define). Signed " +
+        "languages the user knows. Parented on sight as well as language, because a " +
+        "signed language is received visually — which is exactly why Table 4 gives " +
+        "readSignText two parents in two different ontologies.",
+    },
+    /* Table 4 verbatim, including its parent list. This row was skipped in the
+     * first transcription precisely because signLanguageSet was undefined; with
+     * that supplied it goes in as written, and it is the clearest demonstration
+     * in the whole model that precedence crosses ontology boundaries while
+     * ontology membership stays disjoint. */
+    readSignText: {
+      ontology: "language", precedence: ["sight", "signLanguageSet"],
+      description: "Can the user read (and see) sign?",
     },
     readFontText: {
       ontology: "language", precedence: ["sight", "language"],
@@ -400,30 +486,35 @@ export const userCapability = defineCapability({
     listening: {
       description: "MY CHOICE. Sonic capability, the design space this demonstrator leans on.",
       properties: [
-        "hearing", "usableFrequencyRange", "azimuthResolution", "elevationResolution",
-        "concurrentStreams", "listeningDuration",
+        "hearing", "binauralHearing", "usableFrequencyRange", "azimuthResolution",
+        "elevationResolution", "concurrentStreams", "listeningDuration",
       ],
     },
     input: {
       description: "MY CHOICE. Motor capability: what the user can do to the device.",
       properties: [
         "pointerControl", "keyControl", "manualStability", "minTargetSize",
-        "sustainedPress", "minKeyRepeatDelay",
+        "sustainedPress", "minKeyRepeatDelay", "kinaesthesia",
       ],
     },
     reading: {
       description: "Table 4 — language-based properties.",
       properties: [
-        "language", "hapticLanguageSet", "readFontText", "readAudioText",
+        "language", "hapticLanguageSet", "signLanguageSet", "readSignText",
+        "readFontText", "readAudioText",
         "minReadFontSizeForFont", "minInterWordGap", "writeFontSet",
       ],
+    },
+    touchSense: {
+      description: "MY CHOICE. The haptic design space, both halves of it.",
+      properties: ["touch", "vibrationDetection", "kinaesthesia"],
     },
   },
 
   templateSets: {
     perceptual: {
       description: "The Nesbitt design spaces.",
-      templates: ["vision", "colour", "listening"],
+      templates: ["vision", "colour", "listening", "touchSense"],
     },
     interaction: {
       description: "Groupings not tied to a design space.",

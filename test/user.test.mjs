@@ -15,7 +15,8 @@ import { A, run, MapStore, ActionError, checkEventGenerator, classify }
   from "../cradle/action/action-language.js";
 import { userCapability } from "../vocabulary/user-capability.js";
 import { exemplars, reference, blindSinceBirth, lowVisionContrast,
-         lowVisionColour, keyboardOnly, handTremor } from "../vocabulary/profiles.js";
+         lowVisionColour, keyboardOnly, handTremor,
+         deaf, deafenedAsymmetric, multipleSclerosis } from "../vocabulary/profiles.js";
 
 let pass = 0, fail = 0;
 const ok = (label, fn) => {
@@ -232,8 +233,8 @@ throws("a composed collection without a CompositionOrder is refused", Capability
 /* ------------------------------------------------------------------ */
 console.log("\nCapacity Model — a measurement qualifies PARTIAL and nothing else:");
 
-ok("all six exemplars build", () => {
-  eq(Object.keys(exemplars).length, 6, "count");
+ok("all nine exemplars build", () => {
+  eq(Object.keys(exemplars).length, 9, "count");
   for (const [name, p] of Object.entries(exemplars)) {
     if (!p.entity.basis.startsWith("exemplar")) throw new Error(`${name} records no basis`);
   }
@@ -412,6 +413,103 @@ ok("keyboard-only is a capability, not a preference", () => {
   eq(keyboardOnly.settings.pointerControl.capability, "NONE", "pointer");
   eq(keyboardOnly.settings.keyControl.capability, "FULL", "keys");
   eq(keyboardOnly.settings.writeFontSet.measurement[0], "SELECT", "writes by selection");
+});
+
+console.log("\nstress tests — the three profiles built to break the model:");
+
+ok("Deaf: hearing NONE settles the whole sonic ontology", () => {
+  eq(deaf.settings.hearing.capability, "NONE", "hearing");
+  for (const gone of ["usableFrequencyRange", "azimuthResolution", "elevationResolution",
+                      "binauralHearing", "concurrentStreams", "listeningDuration"]) {
+    if (deaf.settings[gone]) throw new Error(`${gone} cannot exist beneath hearing: NONE`);
+  }
+  eq(deaf.settings.readAudioText.capability, "NONE", "cannot understand speech");
+});
+
+ok("Deaf: signs, and is not confused with DeafBlind", () => {
+  eq(deaf.settings.signLanguageSet.measurement[0], "ASL", "signs ASL");
+  eq(deaf.settings.readSignText.capability, "FULL", "reads sign");
+  /* Braille has nothing to do with being Deaf. Reaching for "the other
+   * accessibility thing" is exactly what capability modelling prevents. */
+  if (deaf.settings.hapticLanguageSet) throw new Error("Deaf is not DeafBlind");
+});
+
+ok("readSignText is Table 4 verbatim: parents in two ontologies", () => {
+  const p = userCapability.properties.readSignText;
+  eq(p.precedence.join("+"), "sight+signLanguageSet", "the paper's own parent list");
+  eq(userCapability.properties.sight.ontology, "visual", "one parent visual");
+  eq(userCapability.properties.signLanguageSet.ontology, "language", "one parent language");
+});
+
+throws("Deaf: a sonic capability beneath hearing NONE is refused", CapacityError, () =>
+  defineCapacity(userCapability, {
+    entity: { id: "x", kind: "user" },
+    settings: {
+      hearing: { capability: "NONE" },
+      azimuthResolution: { capability: "PARTIAL", measurement: 30 },
+    },
+  }));
+
+ok("deafened: asymmetric loss costs azimuth but NOT elevation", () => {
+  eq(deafenedAsymmetric.settings.binauralHearing.capability, "PARTIAL", "ears do not combine");
+  eq(deafenedAsymmetric.settings.azimuthResolution.measurement, 75, "left-right collapses");
+  eq(deafenedAsymmetric.settings.elevationResolution.measurement, 40, "up-down survives");
+  if (deafenedAsymmetric.settings.azimuthResolution.measurement
+      <= deafenedAsymmetric.settings.elevationResolution.measurement) {
+    throw new Error("azimuth should be the WORSE of the two for a monaural-ish listener");
+  }
+});
+
+ok("azimuth depends on binaural hearing; elevation deliberately does not", () => {
+  eq(userCapability.properties.azimuthResolution.precedence.includes("binauralHearing"), true,
+     "azimuth needs two ears");
+  eq(userCapability.properties.elevationResolution.precedence.includes("binauralHearing"), false,
+     "elevation is a monaural pinna cue and must survive single-sided loss");
+});
+
+ok("deafened: the low-register gap is in the usable range, not an absence", () => {
+  const band = deafenedAsymmetric.settings.usableFrequencyRange.measurement[0];
+  eq(band.from, 400, "nothing reliable below 400 Hz");
+  if (band.from <= 20) throw new Error("the lost lower register should show in the range");
+});
+
+ok("MS: touch NONE, but kinaesthesia is a separate property that survives", () => {
+  eq(multipleSclerosis.settings.touch.capability, "NONE", "no tactile sense");
+  eq(multipleSclerosis.settings.kinaesthesia.capability, "PARTIAL", "proprioception partial");
+  eq(multipleSclerosis.settings.kinaesthesia.measurement, 25, "and measured");
+  /* The dissociation is the point: modelling proprioception under touch would
+   * have made this profile inexpressible. */
+  eq(userCapability.properties.kinaesthesia.precedence.length, 0, "not a child of touch");
+  if (multipleSclerosis.settings.vibrationDetection) {
+    throw new Error("vibrationDetection is beneath touch: NONE and cannot exist");
+  }
+});
+
+ok("MS: double vision is focus PARTIAL and stereo NONE", () => {
+  eq(multipleSclerosis.settings.focus.capability, "PARTIAL", "the paper's own gloss");
+  eq(multipleSclerosis.settings.stereo.capability, "NONE", "diplopia is failure to fuse");
+});
+
+ok("MS: fatigue under a FULL parent — why FULL must not propagate", () => {
+  /* Hearing is unimpaired and listening still tires him. Under the ceiling rule
+   * first written (child <= parent) this would have been rejected as
+   * incoherent. It is not incoherent, it is MS. */
+  eq(multipleSclerosis.settings.hearing.capability, "FULL", "hearing unimpaired");
+  eq(multipleSclerosis.settings.listeningDuration.measurement, 15, "and still tires");
+});
+
+ok("MS is spiky: capabilities at all three levels across four ontologies", () => {
+  const s = multipleSclerosis.settings;
+  const levels = new Set(Object.values(s).map((x) => x.capability));
+  eq(levels.has("FULL") && levels.has("PARTIAL") && levels.has("NONE"), true, "all three");
+  const ontologies = new Set(Object.values(s).map((x) => userCapability.properties[x.property].ontology));
+  if (ontologies.size < 4) throw new Error(`expected 4+ ontologies, got ${[...ontologies]}`);
+});
+
+ok("minTargetSize needs three parents, one in another ontology", () => {
+  const p = userCapability.properties.minTargetSize;
+  eq(p.precedence.join(","), "pointerControl,manualStability,kinaesthesia", "parents");
+  eq(userCapability.properties.kinaesthesia.ontology, "haptic", "crosses from motor to haptic");
 });
 
 console.log("\nfunctional dependency — the paper's own worked example:");

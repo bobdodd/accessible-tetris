@@ -97,7 +97,8 @@ MY CHOICE. Sonic capability, the design space this demonstrator leans on.
 | Property | Values (PARTIAL measurement) | Parent | Ontology | Description |
 |---|---|---|---|---|
 | `hearing` | — | None | sonic | MY CHOICE. Top-level property for hearing, following the shape of `sight`. Remaining sonic properties only of interest for PARTIAL hearing. |
-| `azimuthResolution` | 1–180 deg | hearing | sonic | MY CHOICE. Smallest left-right angular difference the user can reliably distinguish. |
+| `binauralHearing` | — | hearing | sonic | MY CHOICE. Can the user hear with both ears together? NONE means effectively monaural listening — the two ears do not combine, whether through single-… |
+| `azimuthResolution` | 1–180 deg | hearing, binauralHearing | sonic | MY CHOICE. Smallest left-right angular difference the user can reliably distinguish. |
 | `concurrentStreams` | 1–8 streams | hearing | sonic | MY CHOICE. How many simultaneous audio streams the user can attend to and still separate. The sonic analogue of Table 3's tracking. |
 | `elevationResolution` | 1–180 deg | hearing | sonic | MY CHOICE. Smallest up-down angular difference the user can reliably distinguish. Typically much coarser than azimuth for most listeners. |
 | `listeningDuration` | 1–480 min | hearing | sonic | MY CHOICE. Length of time the user can attend to a dense soundscape before experiencing fatigue. The sonic analogue of trackingDuration. |
@@ -110,10 +111,11 @@ MY CHOICE. Motor capability: what the user can do to the device.
 | Property | Values (PARTIAL measurement) | Parent | Ontology | Description |
 |---|---|---|---|---|
 | `keyControl` | — | None | motor | MY CHOICE. Can the user operate discrete keys or switches? |
+| `kinaesthesia` | 1–99 % | None | haptic | MY CHOICE. Can the user tell where their hand is without looking at it? The other half of the haptic design space: limb position and movement sensed f… |
 | `manualStability` | 1–99 % | None | motor | MY CHOICE. Steadiness of the user's hand under load. FULL is no tremor; PARTIAL carries the percentage. |
 | `minKeyRepeatDelay` | 1–2000 ms | keyControl, manualStability | motor | MY CHOICE. Minimum delay before a held key should repeat, below which tremor produces unintended repeats. |
 | `pointerControl` | — | None | motor | MY CHOICE. Can the user operate a continuous pointing device? NONE is the capability usually described as 'keyboard only' — and describing it as capab… |
-| `minTargetSize` | 1–40 mm | pointerControl, manualStability | motor | MY CHOICE. Smallest target the user can reliably acquire with a pointing device. |
+| `minTargetSize` | 1–40 mm | pointerControl, manualStability, kinaesthesia | motor | MY CHOICE. Smallest target the user can reliably acquire with a pointing device. |
 | `sustainedPress` | — | keyControl | motor | MY CHOICE. Can the user hold a key down, or chord two keys? NONE is the capability that sticky-keys exists to answer. |
 
 ### Template: reading
@@ -128,7 +130,19 @@ Table 4 — language-based properties.
 | `minInterWordGap` | 1–2000 ms | readAudioText | language | Minimum required gap in milliseconds between words required for the user to understand the spoken word. |
 | `readFontText` | — | sight, language | language | MY CHOICE (supplying a parent Table 4 names but does not define). |
 | `minReadFontSizeForFont` | size: 4–96 pt + font: text | readFontText, manualStability | language | Minimum readable font size for user, in points and per font, when presented on a 1024x768 pixel 15" screen. |
+| `signLanguageSet` | ASL, LSQ, BSL, Auslan, ISL, SSE (one or more) | language, sight | language | MY CHOICE (supplying a parent Table 4 names but does not define). Signed languages the user knows. |
+| `readSignText` | — | sight, signLanguageSet | language | Can the user read (and see) sign? |
 | `writeFontSet` | CURSIVE, BLOCK, SELECT (one or more) | language, keyControl | language | Modes some form of writing text. SELECT means some form of technology e.g. keyboard, scanning, eye tracking etc. |
+
+### Template: touchSense
+
+MY CHOICE. The haptic design space, both halves of it.
+
+| Property | Values (PARTIAL measurement) | Parent | Ontology | Description |
+|---|---|---|---|---|
+| `touch` | — | None | haptic | MY CHOICE. Tactile perception: can the user feel contact on the skin? Deliberately narrower than the haptic design space as a whole — see kinaesthesia… |
+| `kinaesthesia` | 1–99 % | None | haptic | MY CHOICE. Can the user tell where their hand is without looking at it? The other half of the haptic design space: limb position and movement sensed f… |
+| `vibrationDetection` | 1–99 % | touch | haptic | MY CHOICE. Effective detection of device vibration. |
 
 ### Subject ontologies
 
@@ -140,10 +154,10 @@ with *"sight + signLanguageSet"*.
 | Ontology | Nesbitt design space | Properties |
 |---|---|---|
 | visual | yes | 15 |
-| sonic | yes | 6 |
-| haptic | yes | 2 |
+| sonic | yes | 7 |
+| haptic | yes | 3 |
 | motor | no | 6 |
-| language | no | 7 |
+| language | no | 9 |
 
 ---
 
@@ -166,9 +180,9 @@ with *"sight + signLanguageSet"*.
 | — | `manualStability` | **FULL** | — | None |
 | — | `pointerControl` | **FULL** | — | None |
 
-**Not recorded: 29 of 36 properties.**
+**Not recorded: 33 of 40 properties.**
 
-- **Not of interest** (29), because no precedence parent is PARTIAL: `stereo`, `focus`, `focusDuration`, `tracking`, `trackingDuration`, `viewRectangle`, `nonViewRectangle`, `colorLow`, `colorMedium`, `colorHigh`, `intensityLow`, `intensityMedium`, and 17 more.
+- **Not of interest** (33), because no precedence parent is PARTIAL: `stereo`, `focus`, `focusDuration`, `tracking`, `trackingDuration`, `viewRectangle`, `nonViewRectangle`, `colorLow`, `colorMedium`, `colorHigh`, `intensityLow`, `intensityMedium`, and 21 more.
 
 #### Setting groups (contexts)
 
@@ -197,11 +211,11 @@ with *"sight + signLanguageSet"*.
 | — | `readFontText` | **NONE** | — | sight, language |
 | — | `pointerControl` | **FULL** | — | None |
 
-**Not recorded: 27 of 36 properties.**
+**Not recorded: 31 of 40 properties.**
 
-- **Cannot exist** (12), because a precedence parent is NONE: `stereo`, `focus`, `viewRectangle`, `nonViewRectangle`, `colorLow`, `colorMedium`, `colorHigh`, `intensityLow`, `intensityMedium`, `intensityHigh`, `contrastSensitivity`, `minReadFontSizeForFont`.
+- **Cannot exist** (14), because a precedence parent is NONE: `stereo`, `focus`, `viewRectangle`, `nonViewRectangle`, `colorLow`, `colorMedium`, `colorHigh`, `intensityLow`, `intensityMedium`, `intensityHigh`, `contrastSensitivity`, `signLanguageSet`, `readSignText`, `minReadFontSizeForFont`.
 
-- **Not of interest** (15), because no precedence parent is PARTIAL: `focusDuration`, `tracking`, `trackingDuration`, `usableFrequencyRange`, `azimuthResolution`, `elevationResolution`, `concurrentStreams`, `listeningDuration`, `vibrationDetection`, `minTargetSize`, `sustainedPress`, `minKeyRepeatDelay`, and 3 more.
+- **Not of interest** (17), because no precedence parent is PARTIAL: `focusDuration`, `tracking`, `trackingDuration`, `usableFrequencyRange`, `binauralHearing`, `azimuthResolution`, `elevationResolution`, `concurrentStreams`, `listeningDuration`, `vibrationDetection`, `kinaesthesia`, `minTargetSize`, and 5 more.
 
 #### Setting groups (contexts)
 
@@ -241,9 +255,9 @@ with *"sight + signLanguageSet"*.
 | — | `tracking` | **PARTIAL** | — | focus |
 | — | `trackingDuration` | **PARTIAL** | 12 min | tracking |
 
-**Not recorded: 16 of 36 properties.**
+**Not recorded: 20 of 40 properties.**
 
-- **Not of interest** (16), because no precedence parent is PARTIAL: `stereo`, `viewRectangle`, `nonViewRectangle`, `usableFrequencyRange`, `azimuthResolution`, `elevationResolution`, `concurrentStreams`, `listeningDuration`, `vibrationDetection`, `minTargetSize`, `sustainedPress`, `minKeyRepeatDelay`, and 4 more.
+- **Not of interest** (20), because no precedence parent is PARTIAL: `stereo`, `viewRectangle`, `nonViewRectangle`, `usableFrequencyRange`, `binauralHearing`, `azimuthResolution`, `elevationResolution`, `concurrentStreams`, `listeningDuration`, `vibrationDetection`, `kinaesthesia`, `minTargetSize`, and 8 more.
 
 #### Setting groups (contexts)
 
@@ -275,9 +289,9 @@ with *"sight + signLanguageSet"*.
 | — | `manualStability` | **FULL** | — | None |
 | — | `pointerControl` | **FULL** | — | None |
 
-**Not recorded: 24 of 36 properties.**
+**Not recorded: 28 of 40 properties.**
 
-- **Not of interest** (24), because no precedence parent is PARTIAL: `stereo`, `focus`, `focusDuration`, `tracking`, `trackingDuration`, `viewRectangle`, `nonViewRectangle`, `intensityLow`, `intensityHigh`, `usableFrequencyRange`, `azimuthResolution`, `elevationResolution`, and 12 more.
+- **Not of interest** (28), because no precedence parent is PARTIAL: `stereo`, `focus`, `focusDuration`, `tracking`, `trackingDuration`, `viewRectangle`, `nonViewRectangle`, `intensityLow`, `intensityHigh`, `usableFrequencyRange`, `binauralHearing`, `azimuthResolution`, and 16 more.
 
 #### Setting groups (contexts)
 
@@ -305,11 +319,11 @@ with *"sight + signLanguageSet"*.
 | — | `pointerControl` | **NONE** | — | None |
 | — | `writeFontSet` | **PARTIAL** | SELECT | language, keyControl |
 
-**Not recorded: 28 of 36 properties.**
+**Not recorded: 32 of 40 properties.**
 
 - **Cannot exist** (1), because a precedence parent is NONE: `minTargetSize`.
 
-- **Not of interest** (27), because no precedence parent is PARTIAL: `stereo`, `focus`, `focusDuration`, `tracking`, `trackingDuration`, `viewRectangle`, `nonViewRectangle`, `colorLow`, `colorMedium`, `colorHigh`, `intensityLow`, `intensityMedium`, and 15 more.
+- **Not of interest** (31), because no precedence parent is PARTIAL: `stereo`, `focus`, `focusDuration`, `tracking`, `trackingDuration`, `viewRectangle`, `nonViewRectangle`, `colorLow`, `colorMedium`, `colorHigh`, `intensityLow`, `intensityMedium`, and 19 more.
 
 #### Setting groups (contexts)
 
@@ -338,12 +352,12 @@ with *"sight + signLanguageSet"*.
 | `fontSizeSeated` | `minReadFontSizeForFont` | **PARTIAL** | size 12, font system-sans | readFontText, manualStability |
 | — | `minReadFontSizeForFont` | **PARTIAL** | *derived — see below* | readFontText, manualStability |
 | — | `pointerControl` | **PARTIAL** | — | None |
-| — | `minTargetSize` | **PARTIAL** | 18 mm | pointerControl, manualStability |
+| — | `minTargetSize` | **PARTIAL** | 18 mm | pointerControl, manualStability, kinaesthesia |
 | — | `sustainedPress` | **PARTIAL** | — | keyControl |
 
-**Not recorded: 25 of 36 properties.**
+**Not recorded: 29 of 40 properties.**
 
-- **Not of interest** (25), because no precedence parent is PARTIAL: `stereo`, `focus`, `focusDuration`, `tracking`, `trackingDuration`, `viewRectangle`, `nonViewRectangle`, `colorLow`, `colorMedium`, `colorHigh`, `intensityLow`, `intensityMedium`, and 13 more.
+- **Not of interest** (29), because no precedence parent is PARTIAL: `stereo`, `focus`, `focusDuration`, `tracking`, `trackingDuration`, `viewRectangle`, `nonViewRectangle`, `colorLow`, `colorMedium`, `colorHigh`, `intensityLow`, `intensityMedium`, and 17 more.
 
 #### Functionally dependent settings
 
@@ -374,6 +388,120 @@ criticises.
 | `listening` | listening | `hearing` | `ambientNoise` |
 | `input` | input | `pointerControl`, `keyControl`, `manualStability` | — |
 
+### deaf
+
+*No usable hearing. Signs fluently. No other reported limitation. The hardest case for an audio-first demonstrator, which is why it is here.*
+
+**Basis:** exemplar — stands in for lived experience, not derived from any person  
+**Entity kind:** user · **Settings recorded:** 10
+
+| Setting | Property | Capability | Measurement | Parent |
+|---|---|---|---|---|
+| — | `hearing` | **NONE** | — | None |
+| — | `sight` | **FULL** | — | None |
+| — | `language` | **FULL** | — | None |
+| — | `touch` | **FULL** | — | None |
+| — | `keyControl` | **FULL** | — | None |
+| — | `manualStability` | **FULL** | — | None |
+| — | `readAudioText` | **NONE** | — | hearing, language |
+| — | `pointerControl` | **FULL** | — | None |
+| — | `signLanguageSet` | **PARTIAL** | ASL | language, sight |
+| — | `readSignText` | **FULL** | — | sight, signLanguageSet |
+
+**Not recorded: 30 of 40 properties.**
+
+- **Cannot exist** (7), because a precedence parent is NONE: `usableFrequencyRange`, `binauralHearing`, `azimuthResolution`, `elevationResolution`, `concurrentStreams`, `listeningDuration`, `minInterWordGap`.
+
+- **Not of interest** (23), because no precedence parent is PARTIAL: `stereo`, `focus`, `focusDuration`, `tracking`, `trackingDuration`, `viewRectangle`, `nonViewRectangle`, `colorLow`, `colorMedium`, `colorHigh`, `intensityLow`, `intensityMedium`, and 11 more.
+
+#### Setting groups (contexts)
+
+| Group | Template | Settings | Influenced by |
+|---|---|---|---|
+| `seeing` | vision | `sight` | `deviceStability` |
+| `listening` | listening | `hearing` | `ambientNoise` |
+| `input` | input | `pointerControl`, `keyControl`, `manualStability` | — |
+
+### deafened-asymmetric
+
+*Acquired hearing loss in later life after years in a noisy workplace. Worse in one ear, and worst in the lower register. Speaks and expects speech; does not sign.*
+
+**Basis:** exemplar — stands in for lived experience, not derived from any person  
+**Entity kind:** user · **Settings recorded:** 15
+
+| Setting | Property | Capability | Measurement | Parent |
+|---|---|---|---|---|
+| — | `hearing` | **PARTIAL** | — | None |
+| — | `binauralHearing` | **PARTIAL** | — | hearing |
+| — | `azimuthResolution` | **PARTIAL** | 75 deg | hearing, binauralHearing |
+| — | `sight` | **FULL** | — | None |
+| — | `concurrentStreams` | **PARTIAL** | 1 streams | hearing |
+| — | `elevationResolution` | **PARTIAL** | 40 deg | hearing |
+| — | `language` | **FULL** | — | None |
+| — | `touch` | **FULL** | — | None |
+| — | `keyControl` | **FULL** | — | None |
+| — | `listeningDuration` | **PARTIAL** | 20 min | hearing |
+| — | `manualStability` | **FULL** | — | None |
+| — | `readAudioText` | **PARTIAL** | — | hearing, language |
+| — | `minInterWordGap` | **PARTIAL** | 220 ms | readAudioText |
+| — | `pointerControl` | **FULL** | — | None |
+| — | `usableFrequencyRange` | **PARTIAL** | 400–6000 | hearing |
+
+**Not recorded: 25 of 40 properties.**
+
+- **Not of interest** (25), because no precedence parent is PARTIAL: `stereo`, `focus`, `focusDuration`, `tracking`, `trackingDuration`, `viewRectangle`, `nonViewRectangle`, `colorLow`, `colorMedium`, `colorHigh`, `intensityLow`, `intensityMedium`, and 13 more.
+
+#### Setting groups (contexts)
+
+| Group | Template | Settings | Influenced by |
+|---|---|---|---|
+| `seeing` | vision | `sight` | `deviceStability` |
+| `listening` | listening | `hearing` | `ambientNoise` |
+| `input` | input | `pointerControl`, `keyControl`, `manualStability` | — |
+
+### multiple-sclerosis
+
+*Double vision, absent touch, tremor, poor proprioception, and fatigue that cuts across all of it. A spiky profile: the paper's own example of what stereotype templates handle worst.*
+
+**Basis:** exemplar — stands in for lived experience, not derived from any person  
+**Entity kind:** user · **Settings recorded:** 19
+
+| Setting | Property | Capability | Measurement | Parent |
+|---|---|---|---|---|
+| — | `hearing` | **FULL** | — | None |
+| — | `sight` | **PARTIAL** | — | None |
+| — | `focus` | **PARTIAL** | — | sight |
+| — | `focusDuration` | **PARTIAL** | 8 min | focus |
+| — | `language` | **FULL** | — | None |
+| — | `touch` | **NONE** | — | None |
+| — | `keyControl` | **PARTIAL** | — | None |
+| — | `kinaesthesia` | **PARTIAL** | 25 % | None |
+| — | `listeningDuration` | **PARTIAL** | 15 min | hearing |
+| — | `manualStability` | **PARTIAL** | 30 % | None |
+| — | `minKeyRepeatDelay` | **PARTIAL** | 1200 ms | keyControl, manualStability |
+| — | `readFontText` | **PARTIAL** | — | sight, language |
+| — | `minReadFontSizeForFont` | **PARTIAL** | size 20, font system-sans | readFontText, manualStability |
+| — | `pointerControl` | **PARTIAL** | — | None |
+| — | `minTargetSize` | **PARTIAL** | 28 mm | pointerControl, manualStability, kinaesthesia |
+| — | `stereo` | **NONE** | — | sight |
+| — | `sustainedPress` | **PARTIAL** | — | keyControl |
+| — | `tracking` | **PARTIAL** | — | focus |
+| — | `trackingDuration` | **PARTIAL** | 4 min | tracking |
+
+**Not recorded: 21 of 40 properties.**
+
+- **Cannot exist** (2), because a precedence parent is NONE: `vibrationDetection`, `hapticLanguageSet`.
+
+- **Not of interest** (19), because no precedence parent is PARTIAL: `viewRectangle`, `nonViewRectangle`, `colorLow`, `colorMedium`, `colorHigh`, `intensityLow`, `intensityMedium`, `intensityHigh`, `contrastSensitivity`, `usableFrequencyRange`, `binauralHearing`, `azimuthResolution`, and 7 more.
+
+#### Setting groups (contexts)
+
+| Group | Template | Settings | Influenced by |
+|---|---|---|---|
+| `seeing` | vision | `sight` | `deviceStability` |
+| `listening` | listening | `hearing` | `ambientNoise` |
+| `input` | input | `pointerControl`, `keyControl`, `manualStability` | — |
+
 ---
 
 ## All profiles compared
@@ -382,33 +510,45 @@ Only properties recorded in at least one profile appear. A blank cell means the
 property is not recorded for that profile — either because a precedence parent is
 NONE, or because no parent is PARTIAL and so the question does not arise.
 
-| Property | reference | blindSinceBirth | lowVisionContrast | lowVisionColour | keyboardOnly | handTremor |
-|---|---|---|---|---|---|---|
-| `hearing` | FULL | FULL | FULL | FULL | FULL | FULL |
-| `sight` | FULL | NONE | PARTIAL | PARTIAL | FULL | FULL |
-| `colorHigh` |  |  | FULL | PARTIAL 80 % |  |  |
-| `colorLow` |  |  | FULL | PARTIAL 40 % |  |  |
-| `colorMedium` |  |  | FULL | PARTIAL 25 % |  |  |
-| `contrastSensitivity` |  |  | PARTIAL 30 % | FULL |  |  |
-| `focus` |  |  | PARTIAL |  |  |  |
-| `focusDuration` |  |  | PARTIAL 25 min |  |  |  |
-| `language` | FULL | FULL | FULL | FULL | FULL | FULL |
-| `touch` | FULL | FULL | FULL | FULL | FULL | FULL |
-| `hapticLanguageSet` |  | PARTIAL Braille |  |  |  |  |
-| `intensityHigh` |  |  | PARTIAL 45 % |  |  |  |
-| `intensityLow` |  |  | PARTIAL 45 % |  |  |  |
-| `intensityMedium` |  |  | PARTIAL 45 % | PARTIAL 70 % |  |  |
-| `keyControl` | FULL | FULL | FULL | FULL | FULL | PARTIAL |
-| `manualStability` | FULL | FULL | FULL | FULL | FULL | PARTIAL 35 % |
-| `minKeyRepeatDelay` |  |  |  |  |  | PARTIAL 900 ms |
-| `readFontText` |  | NONE | PARTIAL |  |  |  |
-| `minReadFontSizeForFont` |  |  | PARTIAL size 18, font system-sans |  |  | PARTIAL size 12, font system-sans; PARTIAL *(M)* |
-| `pointerControl` | FULL | FULL | FULL | FULL | NONE | PARTIAL |
-| `minTargetSize` |  |  |  |  |  | PARTIAL 18 mm |
-| `sustainedPress` |  |  |  |  |  | PARTIAL |
-| `tracking` |  |  | PARTIAL |  |  |  |
-| `trackingDuration` |  |  | PARTIAL 12 min |  |  |  |
-| `writeFontSet` |  |  |  |  | PARTIAL SELECT |  |
+| Property | reference | blindSinceBirth | lowVisionContrast | lowVisionColour | keyboardOnly | handTremor | deaf | deafenedAsymmetric | multipleSclerosis |
+|---|---|---|---|---|---|---|---|---|---|
+| `hearing` | FULL | FULL | FULL | FULL | FULL | FULL | NONE | PARTIAL | FULL |
+| `binauralHearing` |  |  |  |  |  |  |  | PARTIAL |  |
+| `azimuthResolution` |  |  |  |  |  |  |  | PARTIAL 75 deg |  |
+| `sight` | FULL | NONE | PARTIAL | PARTIAL | FULL | FULL | FULL | FULL | PARTIAL |
+| `colorHigh` |  |  | FULL | PARTIAL 80 % |  |  |  |  |  |
+| `colorLow` |  |  | FULL | PARTIAL 40 % |  |  |  |  |  |
+| `colorMedium` |  |  | FULL | PARTIAL 25 % |  |  |  |  |  |
+| `concurrentStreams` |  |  |  |  |  |  |  | PARTIAL 1 streams |  |
+| `contrastSensitivity` |  |  | PARTIAL 30 % | FULL |  |  |  |  |  |
+| `elevationResolution` |  |  |  |  |  |  |  | PARTIAL 40 deg |  |
+| `focus` |  |  | PARTIAL |  |  |  |  |  | PARTIAL |
+| `focusDuration` |  |  | PARTIAL 25 min |  |  |  |  |  | PARTIAL 8 min |
+| `language` | FULL | FULL | FULL | FULL | FULL | FULL | FULL | FULL | FULL |
+| `touch` | FULL | FULL | FULL | FULL | FULL | FULL | FULL | FULL | NONE |
+| `hapticLanguageSet` |  | PARTIAL Braille |  |  |  |  |  |  |  |
+| `intensityHigh` |  |  | PARTIAL 45 % |  |  |  |  |  |  |
+| `intensityLow` |  |  | PARTIAL 45 % |  |  |  |  |  |  |
+| `intensityMedium` |  |  | PARTIAL 45 % | PARTIAL 70 % |  |  |  |  |  |
+| `keyControl` | FULL | FULL | FULL | FULL | FULL | PARTIAL | FULL | FULL | PARTIAL |
+| `kinaesthesia` |  |  |  |  |  |  |  |  | PARTIAL 25 % |
+| `listeningDuration` |  |  |  |  |  |  |  | PARTIAL 20 min | PARTIAL 15 min |
+| `manualStability` | FULL | FULL | FULL | FULL | FULL | PARTIAL 35 % | FULL | FULL | PARTIAL 30 % |
+| `readAudioText` |  |  |  |  |  |  | NONE | PARTIAL |  |
+| `minInterWordGap` |  |  |  |  |  |  |  | PARTIAL 220 ms |  |
+| `minKeyRepeatDelay` |  |  |  |  |  | PARTIAL 900 ms |  |  | PARTIAL 1200 ms |
+| `readFontText` |  | NONE | PARTIAL |  |  |  |  |  | PARTIAL |
+| `minReadFontSizeForFont` |  |  | PARTIAL size 18, font system-sans |  |  | PARTIAL size 12, font system-sans; PARTIAL *(M)* |  |  | PARTIAL size 20, font system-sans |
+| `pointerControl` | FULL | FULL | FULL | FULL | NONE | PARTIAL | FULL | FULL | PARTIAL |
+| `minTargetSize` |  |  |  |  |  | PARTIAL 18 mm |  |  | PARTIAL 28 mm |
+| `signLanguageSet` |  |  |  |  |  |  | PARTIAL ASL |  |  |
+| `readSignText` |  |  |  |  |  |  | FULL |  |  |
+| `stereo` |  |  |  |  |  |  |  |  | NONE |
+| `sustainedPress` |  |  |  |  |  | PARTIAL |  |  | PARTIAL |
+| `tracking` |  |  | PARTIAL |  |  |  |  |  | PARTIAL |
+| `trackingDuration` |  |  | PARTIAL 12 min |  |  |  |  |  | PARTIAL 4 min |
+| `usableFrequencyRange` |  |  |  |  |  |  |  | PARTIAL 400–6000 |  |
+| `writeFontSet` |  |  |  |  | PARTIAL SELECT |  |  |  |  |
 
 ---
 

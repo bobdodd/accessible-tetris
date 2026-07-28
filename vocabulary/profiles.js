@@ -386,6 +386,191 @@ export const handTremor = defineCapacity(
   }),
 );
 
+/* ---------------------------------------------------------------------------
+ * Stress-test exemplars
+ *
+ * The first five were built to populate the model. These three were built to
+ * BREAK it, and each found something. What they found is recorded against each
+ * profile rather than smoothed over, because a stress test whose findings get
+ * quietly fixed and forgotten has told you nothing.
+ * ------------------------------------------------------------------------- */
+
+/**
+ * Fully Deaf.
+ *
+ * The hardest case for this demonstrator specifically, because the thing being
+ * demonstrated is an audio-first game. `hearing: NONE` settles the entire sonic
+ * ontology, and the model enforces it: nothing beneath a NONE parent may exist.
+ *
+ * WHAT THIS FOUND. Sign language was missing. Table 4 gives `readSignText` the
+ * parent "sight + signLanguageSet" but never defines `signLanguageSet`, so the
+ * row could not be transcribed and the first pass skipped it. A Deaf profile
+ * with no signed language is not a Deaf profile, so the property was added —
+ * and `readSignText` then went in exactly as Table 4 writes it. The model
+ * reached for this and stopped short; the exemplar is what made the gap visible.
+ *
+ * Note also what is NOT recorded here: `hapticLanguageSet`. Deaf is not
+ * DeafBlind, and Braille is nothing to do with it. The temptation to reach for
+ * "the other accessibility thing" is exactly what capability modelling exists to
+ * prevent.
+ */
+export const deaf = defineCapacity(
+  userCapability,
+  variation(referenceSpec, {
+    entity: {
+      id: "deaf",
+      description:
+        "No usable hearing. Signs fluently. No other reported limitation. The hardest " +
+        "case for an audio-first demonstrator, which is why it is here.",
+      basis: EXEMPLAR,
+    },
+    modify: { hearing: { capability: "NONE" } },
+    add: {
+      readAudioText: { capability: "NONE" },
+      signLanguageSet: { capability: "PARTIAL", measurement: ["ASL"] },
+      readSignText: { capability: "FULL" },
+    },
+  }),
+);
+
+/**
+ * Deafened in later life, asymmetric loss.
+ *
+ * Acquired, not congenital — and the distinction is not decorative. A deafened
+ * adult has spoken language, expects speech, and is not a signer; a Deaf signer
+ * has a first language that is not English. Both may have `hearing: NONE`, and a
+ * system that treats them identically will be wrong about one of them. Here the
+ * loss is partial and asymmetric: worse in one ear, and worst in the lower
+ * register.
+ *
+ * WHAT THIS FOUND. The model has no laterality anywhere — no per-ear or per-eye
+ * property — and at first that looked fatal for this profile.
+ *
+ * It is not, and working out why was the most useful thing in this exercise.
+ * WHICH ear is damaged is mechanism, and mechanism is what Table 1 does and
+ * Table 2 rejects: "It is what the user can do, not why she cannot." The
+ * functional consequence is what a renderer needs, and it is expressible —
+ * `binauralHearing: PARTIAL` says the two ears no longer combine reliably, and
+ * `azimuthResolution` collapses because left-right localisation is built from
+ * interaural differences.
+ *
+ * `elevationResolution` deliberately does NOT collapse with it: elevation cues
+ * are monaural, filtered by the pinna, so one axis of spatial hearing survives
+ * and the other does not. Modelling both as lost would have been easier and
+ * wrong.
+ *
+ * The genuine limit, recorded rather than hidden: the model cannot say "put the
+ * important channel on his good side". That needs laterality, and laterality is
+ * not here.
+ */
+export const deafenedAsymmetric = defineCapacity(
+  userCapability,
+  variation(referenceSpec, {
+    entity: {
+      id: "deafened-asymmetric",
+      description:
+        "Acquired hearing loss in later life after years in a noisy workplace. Worse " +
+        "in one ear, and worst in the lower register. Speaks and expects speech; does " +
+        "not sign.",
+      basis: EXEMPLAR,
+    },
+    modify: { hearing: { capability: "PARTIAL" } },
+    add: {
+      /* The two ears no longer combine usefully, but neither is dead. */
+      binauralHearing: { capability: "PARTIAL" },
+      /* The BINAURAL usable range — what he hears with both ears working
+       * together, which is the better ear's range where they differ. The gap is
+       * the low end: everything below ~400 Hz is unreliable. */
+      usableFrequencyRange: {
+        capability: "PARTIAL",
+        measurement: [{ from: 400, to: 6000 }],
+      },
+      /* Localisation is the first casualty of asymmetric loss, well before
+       * intelligibility. 75 degrees is barely better than "somewhere to the
+       * left", and it makes a spatialised soundscape close to unusable. */
+      azimuthResolution: { capability: "PARTIAL", measurement: 75 },
+      /* Monaural cue, so it survives. This asymmetry is the whole point. */
+      elevationResolution: { capability: "PARTIAL", measurement: 40 },
+      /* Effortful listening: separating streams costs him attention that a
+       * binaural listener spends nothing on. */
+      concurrentStreams: { capability: "PARTIAL", measurement: 1 },
+      listeningDuration: { capability: "PARTIAL", measurement: 20 },
+      readAudioText: { capability: "PARTIAL" },
+      minInterWordGap: { capability: "PARTIAL", measurement: 220 },
+    },
+  }),
+);
+
+/**
+ * Multiple Sclerosis.
+ *
+ * The paper's own subject. Table 3's example set "is based upon the real-life
+ * experiences of a person with Multiple Sclerosis", and §8 names MS explicitly
+ * as the case that defeats stereotype templates: "users with spiky profiles,
+ * such as users with Multiple Sclerosis who experience varied and multiple
+ * impairments". So this is less a stress test of the model than the model's own
+ * motivating example, finally populated.
+ *
+ * Double vision is the paper's own gloss on `focus: PARTIAL` — "PARTIAL would
+ * suggest blurred/double vision" — and it takes `stereo` to NONE, because
+ * diplopia is precisely the failure to fuse two images into one.
+ *
+ * WHAT THIS FOUND. Kinaesthesia was missing. The haptic ontology modelled only
+ * the tactile half, so a user with absent touch but partial proprioception —
+ * or the reverse — was inexpressible. Both dissociate in MS, and the second
+ * matters far more for input than the first: not feeling the key is survivable,
+ * not knowing where your hand is without looking is not.
+ *
+ * WHAT THIS ALSO SHOWED, and it justifies an earlier correction. Fatigue here is
+ * central, not sensory: hearing is FULL and `listeningDuration` is still
+ * PARTIAL at 15 minutes. Under the ceiling rule I first wrote — child may not
+ * exceed its parent — that combination would have been rejected as incoherent.
+ * It is not incoherent, it is MS. FULL parents make a child uninteresting by
+ * default, never forbidden, and this profile is why.
+ */
+export const multipleSclerosis = defineCapacity(
+  userCapability,
+  variation(referenceSpec, {
+    entity: {
+      id: "multiple-sclerosis",
+      description:
+        "Double vision, absent touch, tremor, poor proprioception, and fatigue that " +
+        "cuts across all of it. A spiky profile: the paper's own example of what " +
+        "stereotype templates handle worst.",
+      basis: EXEMPLAR,
+    },
+    modify: {
+      sight: { capability: "PARTIAL" },
+      touch: { capability: "NONE" },
+      manualStability: { capability: "PARTIAL", measurement: 30 },
+      pointerControl: { capability: "PARTIAL" },
+      keyControl: { capability: "PARTIAL" },
+    },
+    add: {
+      /* Diplopia: two images, not fused. */
+      focus: { capability: "PARTIAL" },
+      stereo: { capability: "NONE" },
+      /* Fatigue, the defining symptom, expressed everywhere it bites. */
+      focusDuration: { capability: "PARTIAL", measurement: 8 },
+      tracking: { capability: "PARTIAL" },
+      trackingDuration: { capability: "PARTIAL", measurement: 4 },
+      /* Hearing is FULL and this is still PARTIAL. See the note above: MS
+       * fatigue is not a sensory limit, and the model must allow saying so. */
+      listeningDuration: { capability: "PARTIAL", measurement: 15 },
+      /* The property this profile forced into existence. */
+      kinaesthesia: { capability: "PARTIAL", measurement: 25 },
+      sustainedPress: { capability: "PARTIAL" },
+      minKeyRepeatDelay: { capability: "PARTIAL", measurement: 1200 },
+      minTargetSize: { capability: "PARTIAL", measurement: 28 },
+      readFontText: { capability: "PARTIAL" },
+      minReadFontSizeForFont: {
+        capability: "PARTIAL",
+        measurement: { size: 20, font: "system-sans" },
+      },
+    },
+  }),
+);
+
 /** Every exemplar, for iteration in tests and demos. */
 export const exemplars = Object.freeze({
   reference,
@@ -394,4 +579,7 @@ export const exemplars = Object.freeze({
   lowVisionColour,
   keyboardOnly,
   handTremor,
+  deaf,
+  deafenedAsymmetric,
+  multipleSclerosis,
 });
