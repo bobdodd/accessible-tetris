@@ -7,7 +7,7 @@
  * cycle. A capability model that accepts anything describes nobody. */
 
 import { defineCapability, CapabilityError, propertiesOf, ofInterest,
-         isOfInterest, impliedCapability, CAPABILITY }
+         isOfInterest, impliedCapability, CAPABILITY, ordinalOf, isAtLeast }
   from "../cradle/user/capability.js";
 import { defineCapacity, resolve, groupValues, CapacityError }
   from "../cradle/user/capacity.js";
@@ -415,6 +415,75 @@ ok("keyboard-only is a capability, not a preference", () => {
   eq(keyboardOnly.settings.keyControl.capability, "FULL", "keys");
   eq(keyboardOnly.settings.writeFontSet.measurement[0], "SELECT", "writes by selection");
 });
+
+console.log("\nordered discrete scales — the groundwork for Likert (issue #8):");
+
+/* A fixture rather than a real property: nothing in the vocabulary is an
+ * ordered scale yet, because converting the ten percentages is issue #8. This
+ * exercises the machinery so it does not rot before it is used. */
+const likertModel = defineCapability({
+  id: "fixture.likert", version: "1",
+  ontologies: { visual: { description: "d" }, language: { description: "d" } },
+  properties: {
+    sight: { ontology: "visual", description: "d" },
+    contrastNeed: {
+      ontology: "visual", precedence: ["sight"], description: "d",
+      measurement: {
+        type: "discrete",
+        ordered: true,
+        values: [
+          "no preference",
+          "prefers more contrast",
+          "needs strong contrast",
+          "needs black on white",
+        ],
+      },
+    },
+    signs: {
+      ontology: "language", description: "d",
+      measurement: { type: "discrete", values: ["ASL", "LSQ", "BSL"], multiple: true },
+    },
+  },
+});
+
+ok("an ordered scale carries rank by declared position", () => {
+  const p = likertModel.properties.contrastNeed;
+  eq(ordinalOf(p, "no preference"), 0, "first");
+  eq(ordinalOf(p, "needs black on white"), 3, "last");
+  eq(isAtLeast(p, "needs strong contrast", "prefers more contrast"), true, "above");
+  eq(isAtLeast(p, "prefers more contrast", "needs strong contrast"), false, "below");
+});
+
+ok("ordinalOf returns a POSITION, never a percentage", () => {
+  /* The whole point of issue #8: a Likert point is ordinal, not interval.
+   * "position 2 of 4" is true; "50%" is a fabrication. */
+  const p = likertModel.properties.contrastNeed;
+  const r = ordinalOf(p, "needs strong contrast");
+  eq(Number.isInteger(r), true, "an integer rank");
+  if (r > 0 && r < 1) throw new Error("a fraction would be interval data we do not have");
+});
+
+throws("comparing an UNordered set is refused", CapabilityError, () =>
+  ordinalOf(likertModel.properties.signs, "ASL"));
+
+ok("unordered is the default, and signLanguageSet proves why", () => {
+  /* ASL, LSQ and BSL are unrelated languages. Ranking them would be nonsense,
+   * so `ordered` must be opt-in rather than assumed from list position. */
+  eq(likertModel.properties.signs.measurement.ordered, false, "default is unordered");
+  eq(userCapability.properties.signLanguageSet.measurement.ordered, false,
+     "the real property too");
+});
+
+throws("a value not on the scale is refused", CapabilityError, () =>
+  ordinalOf(likertModel.properties.contrastNeed, "quite bad"));
+
+throws("duplicate values in a discrete list are refused", CapabilityError, () =>
+  defineCapability({
+    id: "x", version: "1",
+    ontologies: { v: { description: "d" } },
+    properties: { a: { ontology: "v", description: "d",
+                       measurement: { type: "discrete", values: ["one", "one"] } } },
+  }));
 
 console.log("\nstress tests — the three profiles built to break the model:");
 

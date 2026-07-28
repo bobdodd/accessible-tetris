@@ -118,11 +118,35 @@ function normaliseMeasurement(spec, where) {
       if (!Array.isArray(spec.values) || spec.values.length < 2) {
         throw new CapabilityError(`${where}: discrete measurement needs at least two values`);
       }
+      if (new Set(spec.values).size !== spec.values.length) {
+        throw new CapabilityError(`${where}: discrete values must be distinct`);
+      }
       m.values = Object.freeze([...spec.values]);
       /* Discrete measurements may be answered with a set rather than a single
        * value — Table 4's writeFontSet is literally named a *Set*, and a user
        * may write in more than one mode. */
       m.multiple = spec.multiple ?? false;
+      /* ORDERED, and deliberately opt-in.
+       *
+       * A discrete list makes no promise about rank by default, and it must not:
+       * signLanguageSet holds ASL, LSQ, BSL, which are unrelated languages with
+       * no order whatever. Comparing them would be meaningless and asserting an
+       * order would be worse than meaningless.
+       *
+       * Some discrete measurements ARE ranked, and a Likert scale is the case
+       * this exists for (issue #8). Where `ordered` is set, position in the
+       * `values` array carries rank — first is least capable, last is most — and
+       * `ordinalOf` and `isAtLeast` become available.
+       *
+       * NOT rejected in combination with `multiple`, though a Likert response is
+       * a single choice. "Which of these levels have you experienced" is a
+       * coherent question, and this project has already made the mistake of
+       * forbidding combinations that sounded implausible and turned out to
+       * describe real people (C7, C8, C8b). */
+      m.ordered = spec.ordered ?? false;
+      if (typeof m.ordered !== "boolean") {
+        throw new CapabilityError(`${where}: ordered must be true or false`);
+      }
       break;
 
     case "numeric":
@@ -430,6 +454,52 @@ export function isOfInterest(model, name, valueOf) {
  */
 export function ofInterest(model, values) {
   return model.acquisitionOrder.filter((n) => isOfInterest(model, n, (p) => values[p]));
+}
+
+/* ---------------------------------------------------------------------------
+ * Ordered discrete measurements
+ *
+ * The rank of a value on a scale that declares itself ordered. Exists so that
+ * adaptation logic can ask "is this at least X" without hard-coding the scale,
+ * and so that a Likert response never has to be turned into a number to be
+ * compared (issue #8).
+ * ------------------------------------------------------------------------- */
+
+function orderedSpec(property, fn) {
+  const m = property?.measurement;
+  if (!m || m.type !== "discrete") {
+    throw new CapabilityError(`${fn}: ${property?.name} has no discrete measurement`);
+  }
+  if (!m.ordered) {
+    throw new CapabilityError(
+      `${fn}: ${property.name} is not an ordered scale. Comparing its values would ` +
+        `assert a rank the model does not claim — set \`ordered: true\` if there is one`,
+    );
+  }
+  return m;
+}
+
+/**
+ * Rank of a value on an ordered scale: 0 is the first declared value.
+ *
+ * Deliberately returns position rather than a normalised fraction. A Likert
+ * point is ordinal, not interval — "position 3 of 5" is true, "60%" is not, and
+ * turning one into the other is the pseudo-precision issue #8 is about.
+ */
+export function ordinalOf(property, value) {
+  const m = orderedSpec(property, "ordinalOf");
+  const i = m.values.indexOf(value);
+  if (i === -1) {
+    throw new CapabilityError(
+      `ordinalOf: "${value}" is not one of ${property.name}'s values (${m.values.join(", ")})`,
+    );
+  }
+  return i;
+}
+
+/** Is `value` at or above `threshold` on an ordered scale? */
+export function isAtLeast(property, value, threshold) {
+  return ordinalOf(property, value) >= ordinalOf(property, threshold);
 }
 
 /** Every property in one ontology, in acquisition order. */
