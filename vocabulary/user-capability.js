@@ -314,10 +314,31 @@ export const userCapability = defineCapability({
 
     touch: {
       ontology: "haptic", precedence: [],
+      /* NARROWED, deliberately, to the hands and fingertips.
+       *
+       * An earlier draft read "contact on the skin", which is whole-body and
+       * turned out to be unusable. Vibration white finger takes tactile sense
+       * from the fingers and leaves it everywhere else, and under a whole-body
+       * reading that person is inexpressible: NONE would be false about their
+       * back and their feet, FULL would be false about the only part that
+       * touches a device.
+       *
+       * The narrowing costs nothing, because EVERY property that depends on
+       * touch is already about hands — reading Braille, receiving tactile sign,
+       * spelling onto someone's hand, feeling a device vibrate. Whole-body
+       * tactile sense has no consumer here.
+       *
+       * KNOWN LIMIT, recorded rather than hidden: the model has no body-site
+       * granularity, so a person with sensation in one hand and not the other,
+       * or in the palm but not the fingertips, is not expressible. Same shape of
+       * limit as laterality in hearing, and resolved the same way — the model
+       * carries the functional consequence at the interaction surface, not the
+       * anatomy. */
       description:
-        "MY CHOICE. Tactile perception: can the user feel contact on the skin? " +
-        "Deliberately narrower than the haptic design space as a whole — see " +
-        "kinaesthesia.",
+        "MY CHOICE. Tactile perception AT THE HANDS AND FINGERTIPS — the surface that " +
+        "meets a device, reads Braille, and finds another person's hand. Deliberately " +
+        "not whole-body: every dependent property is a hand task, and conditions such " +
+        "as vibration white finger take the fingers while leaving the rest intact.",
     },
     vibrationDetection: {
       ontology: "haptic", precedence: ["touch"], measurement: percent,

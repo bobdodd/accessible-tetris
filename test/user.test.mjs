@@ -17,7 +17,7 @@ import { userCapability } from "../vocabulary/user-capability.js";
 import { exemplars, reference, blindSinceBirth, lowVisionContrast,
          lowVisionColour, keyboardOnly, handTremor,
          deaf, deafenedAsymmetric, multipleSclerosis,
-         deafBlind } from "../vocabulary/profiles.js";
+         deafBlind, deafenedNotch } from "../vocabulary/profiles.js";
 
 let pass = 0, fail = 0;
 const ok = (label, fn) => {
@@ -234,8 +234,8 @@ throws("a composed collection without a CompositionOrder is refused", Capability
 /* ------------------------------------------------------------------ */
 console.log("\nCapacity Model — a measurement qualifies PARTIAL and nothing else:");
 
-ok("all ten exemplars build", () => {
-  eq(Object.keys(exemplars).length, 10, "count");
+ok("all eleven exemplars build", () => {
+  eq(Object.keys(exemplars).length, 11, "count");
   for (const [name, p] of Object.entries(exemplars)) {
     if (!p.entity.basis.startsWith("exemplar")) throw new Error(`${name} records no basis`);
   }
@@ -734,6 +734,85 @@ ok("minTargetSize needs three parents, one in another ontology", () => {
   const p = userCapability.properties.minTargetSize;
   eq(p.precedence.join(","), "pointerControl,manualStability,kinaesthesia", "parents");
   eq(userCapability.properties.kinaesthesia.ontology, "haptic", "crosses from motor to haptic");
+});
+
+console.log("\nthe 4 kHz notch — a GAP, which is why Composite Property exists:");
+
+ok("the notch is two bands with nothing usable between", () => {
+  const bands = deafenedNotch.settings.usableFrequencyRange.measurement;
+  eq(bands.length, 2, "two bands");
+  eq(bands[0].to, 3000, "hearing stops at 3 kHz");
+  eq(bands[1].from, 6000, "and resumes at 6 kHz");
+  /* The gap is the whole justification for the type. A single min and max
+   * would say 20-12000 and silently claim he hears 4 kHz, which he does not. */
+  if (bands[0].to >= bands[1].from) throw new Error("no gap — this needs no composite");
+});
+
+ok("a gap is a silent failure, not a quiet one — 4 kHz is simply not received", () => {
+  const bands = deafenedNotch.settings.usableFrequencyRange.measurement;
+  const audible = (hz) => bands.some((b) => hz >= b.from && hz <= b.to);
+  eq(audible(1000), true, "1 kHz fine");
+  eq(audible(4000), false, "4 kHz never arrives");
+  eq(audible(8000), true, "8 kHz fine again");
+  /* This is the case a single range cannot express, and the case where
+   * "put the cue at 4 kHz" fails without anyone noticing. */
+});
+
+ok("matched ears: the binaural band IS the usable band", () => {
+  const u = deafenedNotch.settings.usableFrequencyRange.measurement;
+  const b = deafenedNotch.settings.binauralHearing.measurement;
+  eq(JSON.stringify(b), JSON.stringify(u), "symmetric loss combines wherever it hears");
+  /* Contrast deafened-asymmetric, where the two differ because the ears do. */
+  const a = deafenedAsymmetric;
+  if (JSON.stringify(a.settings.binauralHearing.measurement)
+      === JSON.stringify(a.settings.usableFrequencyRange.measurement)) {
+    throw new Error("asymmetric loss should NOT have binaural == usable");
+  }
+});
+
+ok("the two deafened profiles fail in opposite directions", () => {
+  /* Same top-level capability, opposite design consequences: one needs the
+   * stereo image simplified, the other needs content moved out of a band. */
+  eq(deafenedNotch.settings.hearing.capability, "PARTIAL", "both PARTIAL");
+  eq(deafenedAsymmetric.settings.hearing.capability, "PARTIAL", "both PARTIAL");
+  const notchAz = deafenedNotch.settings.azimuthResolution.measurement;
+  const asymAz = deafenedAsymmetric.settings.azimuthResolution.measurement;
+  if (notchAz >= asymAz) throw new Error("symmetric loss should localise BETTER");
+  eq(deafenedNotch.settings.usableFrequencyRange.measurement.length, 2, "notch has a gap");
+  eq(deafenedAsymmetric.settings.usableFrequencyRange.measurement.length, 1, "asymmetric does not");
+});
+
+console.log("\nvibration white finger — touch is the hands, and the cold matters:");
+
+ok("touch is narrowed to the hands, so fingertip loss is expressible", () => {
+  eq(deafenedNotch.settings.touch.capability, "NONE", "no tactile sense at the fingers");
+  /* Whole-body touch would have made this person inexpressible: NONE false
+   * about their back, FULL false about the only part that meets a device. */
+  if (!/hands and fingertips/i.test(userCapability.properties.touch.description)) {
+    throw new Error("touch must document that it means the interaction surface");
+  }
+  eq(deafenedNotch.settings.vibrationDetection.capability, "NONE",
+     "and no vibrotactile sense — which rules out haptic feedback as a substitute");
+});
+
+ok("cold is a capability trigger, not a comfort setting", () => {
+  const warm = resolve(userCapability, deafenedNotch, { ambientTemperature: "WARM" });
+  const cold = resolve(userCapability, deafenedNotch, { ambientTemperature: "COLD" });
+  eq(warm.settings.minTargetSize.measurement, 12, "warm");
+  eq(cold.settings.minTargetSize.measurement, 19, "cold — 1.6x, rounded");
+  if (cold.settings.minTargetSize.measurement <= warm.settings.minTargetSize.measurement) {
+    throw new Error("vibration white finger worsens in cold; targets must grow");
+  }
+});
+
+ok("the second worked functional dependency, on a different influence", () => {
+  /* handTremor derives from deviceStability, this one from ambientTemperature.
+   * Two profiles, two triggers, one mechanism — which is what makes the
+   * Capacity Model adaptive rather than a static profile store. */
+  const cited = resolve(userCapability, deafenedNotch, { ambientTemperature: "COLD" })
+    .trace.find((t) => t.derived === "minTargetSize");
+  if (!cited?.cite) throw new Error("the (M) formula must cite itself");
+  if (!/cold/i.test(cited.cite)) throw new Error("the citation should name the trigger");
 });
 
 console.log("\nfunctional dependency — the paper's own worked example:");

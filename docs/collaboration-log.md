@@ -1223,6 +1223,92 @@ quantification. If the quantification cannot be obtained from the person, that
 critique partly rebounds. Inheriting the percentages silently would be the wrong
 response; naming it is the interesting one, and it belongs in the write-up.
 
+## S4 · source · The 4 kHz notch and vibration white finger, from Bob's father
+
+**2026-07-28.** I flagged that nine of ten exemplars barely touched the sonic
+ontology, and the one that did used a single unbroken band — leaving the paper's
+own justification for Composite Property unexercised on a demonstrator whose
+premise is audio.
+
+Bob's answer supplied both the missing shape and the reason it is real: *"Let's
+use the 4K notch and add another Deafened person and maybe give them another
+issue: no sense of touch in their fingers specifically (Industrial White Finger)
+which is a condition my father, a coal miner had, so the 4k with automated mining
+machines could be a real fit."*
+
+### Why the pairing is exactly right
+
+Both come from the same job. Prolonged broadband machine noise produces the
+classic notch near 4 kHz; the vibrating tools that come with that work produce
+vibration white finger. Bilateral in both cases, because both ears and both hands
+did the same work for the same years. The occupational history is one fact with
+two consequences, which is what makes it a better exemplar than two unrelated
+conditions bolted together.
+
+### A 4 kHz notch IS the gap
+
+`usableFrequencyRange` is now two bands — 20–3000 and 6000–12000 — with nothing
+usable between. That is the paper's own worked justification for Composite
+Property finally exercised by a profile rather than only by a test fixture:
+
+> "the usable audio frequency range for a user… described as a collection of
+> numeric ranges measured in Hertz, WITH GAPS BETWEEN THE RANGES."
+
+And a gap is a **silent** failure. A single min and max would say 20–12000 and
+quietly claim he hears 4 kHz. He does not mishear a cue placed there; he never
+receives it. For an audio-first demonstrator that is the sharpest test in the
+profile set, and it did not exist until now.
+
+### Two deafened profiles that fail in opposite directions
+
+This is the more interesting result. Both have `hearing: PARTIAL`, and their
+design consequences are almost disjoint:
+
+| | asymmetric | notch |
+|---|---|---|
+| Ears | different | matched |
+| `usableFrequencyRange` | one band, 20–8000 | **two bands, gap at 3–6 kHz** |
+| `binauralHearing` | 800–8000, narrower than usable | **identical to usable** |
+| Localisation | poor (45°) | reasonable (20°) |
+| What a renderer must do | simplify the stereo image | move content out of a band |
+
+The binaural relationship is the neat part: with matched ears the two combine
+wherever either hears, so the binaural band *equals* the usable band. With
+asymmetric loss they differ. Same property, and its relationship to another
+property is what distinguishes the two people.
+
+### What the fingers forced
+
+`touch` was described as "contact on the skin" — whole-body, and it made this
+person inexpressible. NONE would be false about his back; FULL false about the
+only part of him that meets a device. Narrowed to **the hands and fingertips**,
+which costs nothing because every dependent property was already a hand task:
+Braille, tactile sign, spelling onto a hand, feeling a device vibrate.
+
+Known limit recorded rather than hidden: no body-site granularity, so sensation
+in one hand and not the other is still inexpressible. Same shape as the laterality
+limit, resolved the same way — carry the functional consequence at the interaction
+surface, not the anatomy.
+
+### And the cold
+
+Vibration white finger is *defined* by its cold response, which makes
+`ambientTemperature` a capability trigger rather than a comfort setting. That
+gives the model a second worked functional dependency on a different influence:
+`minTargetSize` goes from 12 mm warm to 19 mm cold.
+
+Arguably a better example than the paper's own. The tremor case depends on how
+the device is held, which is a usage choice; this one depends on the weather,
+which is not. A cold bus shelter and a warm room are different devices in the
+same hands.
+
+*Worth noting for the experience report: the two most useful exemplars in the set
+both came from Bob's direct knowledge of people — the CNIB borrowing statistics
+and his father's hands. Neither was derivable from the literature, and the second
+supplied a functional dependency that is cleaner than the published one.*
+
+44 properties, 11 exemplars, 107 tests.
+
 ## X1 · disagreement · Bob corrected Claude's conclusion, not its facts
 
 **2026-07-27.** After C3, Claude concluded that the working practice should be

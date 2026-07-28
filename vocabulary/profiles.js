@@ -124,6 +124,15 @@ const influences = {
     values: ["QUIET", "NOISY"],
     default: "QUIET",
   },
+  ambientTemperature: {
+    description:
+      "Cold or warm surroundings. Vibration white finger is defined by its response to " +
+      "cold — the fingers blanch, numbness deepens and dexterity drops — so for anyone " +
+      "with it this is not a comfort setting but a capability trigger. A cold bus " +
+      "shelter and a warm room are different devices in the same hands.",
+    values: ["COLD", "WARM"],
+    default: "WARM",
+  },
 };
 
 /* ---------------------------------------------------------------------------
@@ -725,6 +734,132 @@ export const deafBlind = defineCapacity(
   }),
 );
 
+/**
+ * Deafened with a 4 kHz notch, and no tactile sense in the fingers.
+ *
+ * The textbook occupational pattern, and the one the earlier deafened exemplar
+ * deliberately is not. Prolonged broadband machine noise produces a notch
+ * centred near 4 kHz — hearing recovers above it — while the vibrating tools
+ * that come with the same work produce vibration white finger, which takes
+ * sensation from the fingertips and leaves the rest of the body untouched.
+ * Bilateral, because both ears and both hands did the same job for the same
+ * years.
+ *
+ * WHY THIS PROFILE EXISTS. Nine of the ten exemplars before it left the sonic
+ * ontology almost untouched, and the one that did not used a single unbroken
+ * band. That is a poor showing on a demonstrator whose entire premise is audio,
+ * and it left the paper's own justification for Composite Property unexercised:
+ *
+ *     "the usable audio frequency range for a user, which may be described as a
+ *      collection of numeric ranges measured in Hertz, WITH GAPS BETWEEN THE
+ *      RANGES."
+ *
+ * A 4 kHz notch IS that gap. `usableFrequencyRange` here is two bands with
+ * nothing usable between them, which a single minimum and maximum could not
+ * express — and a gap is the case where "put the cue at 4 kHz" fails silently.
+ * The listener does not mishear it. They never receive it.
+ *
+ * THE CONTRAST WITH deafened-asymmetric IS THE POINT. That listener has
+ * different ears and localises poorly. This one has matched ears and localises
+ * reasonably, but has a hole in the middle of the spectrum that both ears share.
+ * Same top-level capability, opposite design consequences: one needs the stereo
+ * image simplified, the other needs content moved out of a frequency band.
+ *
+ * WHAT THE FINGERS FORCED. `touch` was described as "contact on the skin",
+ * which is whole-body and made this person inexpressible — NONE would be false
+ * about their back, FULL false about the only part that touches a device. It is
+ * now narrowed to the hands and fingertips, which costs nothing because every
+ * dependent property was already a hand task.
+ *
+ * AND THE COLD. Vibration white finger is defined by its cold response, so
+ * `ambientTemperature` is a genuine capability trigger rather than a comfort
+ * setting — a better worked example of functional dependency than the tremor
+ * case, because here the environment is part of the diagnosis.
+ */
+export const deafenedNotch = defineCapacity(
+  userCapability,
+  variation(referenceSpec, {
+    entity: {
+      id: "deafened-notch",
+      description:
+        "Hears below 3 kHz and above 6 kHz with both ears, and places sound reasonably " +
+        "well. Follows speech with longer gaps between words and does better with " +
+        "higher-pitched voices. Works by sight and sound rather than by feel, using " +
+        "large targets that need to be larger still in the cold.",
+      basis: EXEMPLAR,
+    },
+    modify: {
+      hearing: { capability: "PARTIAL" },
+      /* The fingers, not the body. See the note on `touch` in the schema. */
+      touch: { capability: "NONE" },
+      pointerControl: { capability: "PARTIAL" },
+      /* Grip and fine control, reduced by the same exposure. The percentage is
+       * pseudo-precision and issue #8 will replace it with an anchored scale;
+       * recorded here in the property's current type rather than inventing a
+       * one-off. */
+      manualStability: { capability: "PARTIAL", measurement: 55 },
+    },
+    add: {
+      /* THE GAP. Two bands, nothing usable between 3 and 6 kHz — which is
+       * exactly where the consonants live, and why speech is the casualty
+       * long before volume is. */
+      usableFrequencyRange: {
+        capability: "PARTIAL",
+        measurement: [{ from: 20, to: 3000 }, { from: 6000, to: 12000 }],
+      },
+      /* Matched ears, so the two combine wherever either works: the binaural
+       * band is the usable band. Contrast deafened-asymmetric, where they are
+       * different. */
+      binauralHearing: {
+        capability: "PARTIAL",
+        measurement: [{ from: 20, to: 3000 }, { from: 6000, to: 12000 }],
+      },
+      /* Localisation is largely intact — symmetric loss keeps interaural
+       * comparison honest — but degraded inside the notch, where there is
+       * nothing to compare. */
+      azimuthResolution: { capability: "PARTIAL", measurement: 20 },
+      elevationResolution: { capability: "PARTIAL", measurement: 30 },
+      concurrentStreams: { capability: "PARTIAL", measurement: 2 },
+      listeningDuration: { capability: "PARTIAL", measurement: 25 },
+      readAudioText: { capability: "PARTIAL" },
+      minInterWordGap: { capability: "PARTIAL", measurement: 260 },
+      intelligibleVoicePitch: {
+        capability: "PARTIAL",
+        measurement: { from: 165, to: 300 },
+      },
+      /* No vibrotactile sense at the fingers — which is the clinical test for
+       * the condition, and rules out haptic feedback as a substitute channel. */
+      vibrationDetection: { capability: "NONE" },
+
+      /* The cold-dependent target size. Base first, then the derived value. */
+      targetSizeWarm: {
+        property: "minTargetSize",
+        capability: "PARTIAL",
+        measurement: 12,
+      },
+      minTargetSize: {
+        capability: "PARTIAL",
+        derived: {
+          reads: ["targetSizeWarm"],
+          influences: ["ambientTemperature"],
+          cite:
+            "WARM: targetSizeWarm. COLD: targetSizeWarm x 1.6, rounded, clamped to " +
+            "1..40 mm. Vibration white finger blanches and numbs further in cold, so " +
+            "the same hand needs a larger target outdoors in winter than indoors.",
+          formula: A.ifThen(
+            A.eq(A.influence("ambientTemperature"), A.lit("COLD")),
+            A.round(
+              A.clamp(A.mul(A.measure("targetSizeWarm"), A.lit(1.6)), A.lit(1), A.lit(40)),
+              0,
+            ),
+            A.measure("targetSizeWarm"),
+          ),
+        },
+      },
+    },
+  }),
+);
+
 /** Every exemplar, for iteration in tests and demos. */
 export const exemplars = Object.freeze({
   reference,
@@ -737,4 +872,5 @@ export const exemplars = Object.freeze({
   deafenedAsymmetric,
   multipleSclerosis,
   deafBlind,
+  deafenedNotch,
 });
