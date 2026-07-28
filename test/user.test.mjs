@@ -555,6 +555,62 @@ ok("DeafBlind: every visual and auditory channel is closed, touch is the whole s
   if (deafBlind.settings.hearing.capability !== "NONE") throw new Error("hearing");
 });
 
+ok("reception is sensory, production is motor — the parents differ", () => {
+  const P = userCapability.properties;
+  /* Receiving depends on a sense. */
+  eq(P.readTactileSign.precedence.includes("touch"), true, "reading sign by hand needs touch");
+  eq(P.readSignText.precedence.includes("sight"), true, "reading sign by eye needs sight");
+  /* Producing depends on hands. */
+  eq(P.writeSignSet.precedence.includes("manualStability"), true, "signing needs steady hands");
+  eq(P.writeTactileSet.precedence.includes("manualStability"), true, "spelling needs steady hands");
+  /* And crucially, producing does NOT depend on the receiving sense. Signing
+   * visually needs no tactile sense, so touch must not gate the whole property
+   * — that would be the same over-constraining error as C7 and C8. */
+  eq(P.writeSignSet.precedence.includes("touch"), false,
+     "visual signing needs no tactile sense");
+  /* Spelling onto someone else's hand DOES need touch: you cannot place letters
+   * on a hand you cannot feel. */
+  eq(P.writeTactileSet.precedence.includes("touch"), true,
+     "spelling onto a hand needs to find that hand");
+});
+
+ok("a tremor can leave someone fluent at receiving and unable to deliver", () => {
+  /* Bob's case. Touch intact, hands unsteady: reads the two-handed manual on
+   * their own hand without difficulty, cannot spell it onto someone else's.
+   * Before the read/write split this was inexpressible — the model had only
+   * "knows the script" and would have implied both. */
+  const m = defineCapacity(userCapability, {
+    entity: { id: "tremor-signer", kind: "user", basis: "exemplar — test fixture" },
+    settings: {
+      language: { capability: "FULL" },
+      touch: { capability: "FULL" },
+      keyControl: { capability: "FULL" },
+      kinaesthesia: { capability: "FULL" },
+      manualStability: { capability: "PARTIAL", measurement: 20 },
+      hapticLanguageSet: { capability: "PARTIAL", measurement: ["DeafblindManual"] },
+      signLanguageSet: { capability: "PARTIAL", measurement: ["ASL"] },
+      /* Receives fine. */
+      readTactileSign: { capability: "FULL" },
+      /* Cannot deliver. */
+      writeTactileSet: { capability: "NONE" },
+      writeSignSet: { capability: "PARTIAL", measurement: ["Visual"] },
+    },
+  });
+  eq(m.settings.readTactileSign.capability, "FULL", "receives");
+  eq(m.settings.writeTactileSet.capability, "NONE", "cannot deliver");
+  eq(m.settings.hapticLanguageSet.measurement[0], "DeafblindManual", "still knows the script");
+  /* Three separate facts about one script: knows it, reads it, cannot write it. */
+});
+
+ok("deaf and DeafBlind differ in production, not only reception", () => {
+  eq(deaf.settings.writeSignSet.measurement.join(","), "Visual", "signs to sighted people");
+  eq(deafBlind.settings.writeSignSet.measurement.join(","), "Visual,Tactile",
+     "signs both ways — normally formed, and hand-over-hand");
+  if (deaf.settings.writeTactileSet) {
+    throw new Error("Deaf profile has no tactile script to produce");
+  }
+});
+
 ok("sign languages are named unambiguously, and codes are flagged as codes", () => {
   const vals = userCapability.properties.signLanguageSet.measurement.values;
   /* "ISL" denotes Irish, Indian AND Israeli Sign Language depending on source. */

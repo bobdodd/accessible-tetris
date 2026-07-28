@@ -1111,7 +1111,64 @@ both, are far more common than neither, and the real design question is usually
 "which fragment remains". This profile sits at the end of the range on purpose,
 to see whether the model degrades cleanly. It does.
 
-42 properties, 10 exemplars, 91 tests.
+### C8b, same exchange: reception is sensory, production is motor
+
+Bob again, immediately after: "If you are going this route you can receive sign
+without being able to deliver it. A person with no sense of touch or hand tremors
+or both would struggle to deliver two handed manual."
+
+A second axis I had collapsed, and the same shape of error as the first. Having
+just separated *knowing* a language from *receiving* it, I had left *producing*
+it merged into reception.
+
+**The paper has exactly one production property and never generalises it.**
+Table 4 gives `writeFontSet` as the counterpart of `readFontText` and then stops:
+there is no production counterpart for sign or for tactile script. So a person
+who reads the two-handed manual alphabet on their own hand and cannot spell it
+onto someone else's was inexpressible — and that combination is ordinary, not
+exotic.
+
+The structural rule, now stated on the properties themselves: **the `read*`
+properties depend on senses, the `write*` properties depend on hands.**
+
+| | Receive | Produce |
+|---|---|---|
+| written | `readFontText` (sight) | `writeFontSet` (keyControl, manualStability) |
+| spoken | `readAudioText` (hearing) | — |
+| sign | `readSignText` (sight) | `writeSignSet` (manualStability, kinaesthesia) |
+| sign, tactile | `readTactileSign` (touch) | `writeSignSet`, Tactile mode |
+| tactile script | `hapticLanguageSet` (touch) | `writeTactileSet` (manualStability, touch) |
+
+Two details worth keeping, because both were nearly got wrong:
+
+- **`writeSignSet` deliberately does NOT take `touch` as a parent.** Signing
+  visually needs no tactile sense whatever, so gating the whole property on touch
+  would forbid a person with absent touch from signing at all. That is precisely
+  the over-constraining error of C7 and C8 arriving a third time, and it was
+  caught only because the previous two were fresh. The Tactile *mode* does need
+  touch, and that is expressed by which values appear in the measurement — not
+  by blocking the property.
+- **`writeTactileSet` DOES take `touch`.** You cannot place letters on a hand you
+  cannot feel. This is Bob's case exactly, and it is now the difference between
+  the two production properties rather than a footnote.
+
+`writeFontSet` also gained `manualStability`: CURSIVE and BLOCK are handwriting
+and need a steady hand, while SELECT explicitly does not, which is why the modes
+belong in the measurement.
+
+A test now builds the case directly — touch intact, hands unsteady — and asserts
+three separate facts about one script: knows it, reads it, cannot write it.
+
+**The pattern across C7, C8 and C8b is now unmistakable and belongs in the
+experience report.** Three times in two days I added a constraint that felt
+conservative and each time it made a real person inexpressible: a hard ceiling
+erased tunnel vision with intact colour; `sight` on `signLanguageSet` erased
+DeafBlind signers; `touch` on sign production would have erased signers with
+neuropathy. The bias is consistent — **an AI modelling disability reaches for
+restrictions that sound cautious and are actually erasures** — and it took a
+practitioner to catch each one.
+
+44 properties, 10 exemplars, 94 tests.
 
 ## X1 · disagreement · Bob corrected Claude's conclusion, not its facts
 

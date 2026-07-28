@@ -459,6 +459,9 @@ export const deaf = defineCapacity(
       readAudioText: { capability: "NONE" },
       signLanguageSet: { capability: "PARTIAL", measurement: ["ASL"] },
       readSignText: { capability: "FULL" },
+      /* Receives AND delivers, which is the ordinary case and worth recording
+       * explicitly so that the DeafBlind profile's difference is visible. */
+      writeSignSet: { capability: "PARTIAL", measurement: ["Visual"] },
     },
   }),
 );
@@ -701,6 +704,17 @@ export const deafBlind = defineCapacity(
       readAudioText: { capability: "NONE" },
       /* Text arrives by touch, in more than one script. */
       hapticLanguageSet: {
+        capability: "PARTIAL",
+        measurement: ["Braille", "DeafblindManual", "PrintOnPalm"],
+      },
+      /* Delivers sign in both modes: normally formed for a sighted receiver,
+       * and hand-over-hand for another DeafBlind signer. Production is a
+       * separate fact from reception and this profile has both. */
+      writeSignSet: { capability: "PARTIAL", measurement: ["Visual", "Tactile"] },
+      /* And can spell onto another person's hand — which needs steady hands and
+       * enough touch to find theirs. Both intact here; see the note below for
+       * the case where they are not. */
+      writeTactileSet: {
         capability: "PARTIAL",
         measurement: ["Braille", "DeafblindManual", "PrintOnPalm"],
       },

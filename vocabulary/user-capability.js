@@ -551,8 +551,29 @@ export const userCapability = defineCapability({
         "Minimum required gap in milliseconds between words required for the user to " +
         "understand the spoken word.",
     },
+    /* RECEPTION IS SENSORY, PRODUCTION IS MOTOR.
+     *
+     * This is the structural rule behind the three write* properties, and the
+     * paper states only one of them. Table 4 has `writeFontSet` — producing
+     * written text — as the counterpart of `readFontText`, and then stops. There
+     * is no production counterpart for sign or for tactile script, which leaves
+     * a person who can RECEIVE a language but not DELIVER it inexpressible.
+     *
+     * That combination is ordinary, not exotic. Someone with tremor or absent
+     * touch may read two-handed manual on their own hand without difficulty and
+     * be quite unable to spell it onto someone else's. The channels are
+     * genuinely independent: the read* properties depend on senses, the write*
+     * properties depend on hands.
+     *
+     * So each read* property below has a write* sibling, and they take different
+     * parents by design.
+     */
     writeFontSet: {
-      ontology: "language", precedence: ["language", "keyControl"],
+      ontology: "language",
+      /* manualStability added: CURSIVE and BLOCK are handwriting and need a
+       * steady hand, while SELECT explicitly does not — which is why the modes
+       * live in the measurement rather than in separate properties. */
+      precedence: ["language", "keyControl", "manualStability"],
       measurement: {
         type: "discrete", values: ["CURSIVE", "BLOCK", "SELECT"], multiple: true,
       },
@@ -560,7 +581,48 @@ export const userCapability = defineCapability({
         "Modes some form of writing text. SELECT means some form of technology e.g. " +
         "keyboard, scanning, eye tracking etc. Table 4 gives the parent as " +
         "'fontLanguage + eSet', neither of which the fragment defines; MY CHOICE " +
-        "substitutes language and keyControl.",
+        "substitutes language, keyControl and manualStability.",
+    },
+    /* MY CHOICE. The production counterpart of readSignText and readTactileSign,
+     * which the paper does not have. Both modes are one property because the
+     * measurement distinguishes them: signing to a sighted person and signing
+     * into someone's hands are the same language with different demands.
+     *
+     * Note that `touch` is deliberately NOT a parent. Signing visually needs no
+     * tactile sense at all, and making touch a precedence parent would forbid a
+     * person with absent touch from signing — which is false and is exactly the
+     * over-constraining mistake made twice already (C7, C8). Tactile signing
+     * does need touch, and that is expressed by which modes appear in the
+     * measurement, not by blocking the whole property. */
+    writeSignSet: {
+      ontology: "language",
+      precedence: ["signLanguageSet", "manualStability", "kinaesthesia"],
+      measurement: {
+        type: "discrete", values: ["Visual", "Tactile"], multiple: true,
+      },
+      description:
+        "MY CHOICE. Modes of sign the user can PRODUCE. Visual is signing to someone " +
+        "who watches; Tactile is signing into their hands. Depends on hands and on " +
+        "knowing where those hands are, not on the senses that receive sign — a person " +
+        "may read sign fluently and deliver it poorly, or the reverse.",
+    },
+    /* MY CHOICE. Producing a tactile script — spelling the two-handed manual
+     * alphabet onto another person's hand, or writing Braille. Touch IS a parent
+     * here, unlike writeSignSet: you cannot place letters on a hand you cannot
+     * feel. This is Bob's case exactly. */
+    writeTactileSet: {
+      ontology: "language",
+      precedence: ["hapticLanguageSet", "manualStability", "touch"],
+      measurement: {
+        type: "discrete",
+        values: ["Braille", "DeafblindManual", "PrintOnPalm", "BlockAlphabet", "Lorm"],
+        multiple: true,
+      },
+      description:
+        "MY CHOICE. Tactile scripts the user can PRODUCE, as distinct from those they " +
+        "can read. Spelling onto another person's hand needs a steady hand and enough " +
+        "touch to find theirs, so tremor or absent tactile sense can leave someone " +
+        "fluent in receiving a script and unable to deliver it.",
     },
   },
 
@@ -603,7 +665,7 @@ export const userCapability = defineCapability({
         "language", "hapticLanguageSet", "signLanguageSet",
         "readSignText", "readTactileSign", "readFontText", "readAudioText",
         "minReadFontSizeForFont", "minInterWordGap", "intelligibleVoicePitch",
-        "writeFontSet",
+        "writeFontSet", "writeSignSet", "writeTactileSet",
       ],
     },
     touchSense: {
