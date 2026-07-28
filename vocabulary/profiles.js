@@ -951,6 +951,212 @@ export const secondLanguage = defineCapacity(
   }),
 );
 
+/* ---------------------------------------------------------------------------
+ * Alternative access: switch, breath and gaze
+ *
+ * These three break the model in a way none of the previous twelve did. Their
+ * limitation is almost entirely OUTPUT: sensation is intact, cognition is
+ * intact, language is intact, and what varies is only what the person can DO.
+ * Every earlier profile varied a sense.
+ *
+ * THE FINDING THAT MATTERS MOST, and it is about the demonstrator rather than
+ * the model. Switch scanning takes seconds per selection. Tetris pieces fall
+ * continuously. **A real-time falling-block game is not slow-adaptable, it is
+ * structurally closed to a single-switch scanning user** — no rendering choice
+ * fixes it, because the barrier is that the game will not wait. Including these
+ * users needs a turn-based or pausable mode, which is a game design decision and
+ * not a rendering one.
+ *
+ * That is the DeafBlind finding again in another domain, and §6a says it must
+ * stay visible rather than be designed around. Recorded here, at the point where
+ * anyone reading the profiles will meet it.
+ *
+ * NOTHING HERE NAMES A DEVICE. "Uses sip-and-puff" is a configuration choice and
+ * belongs in the Preference Model; "produces four distinguishable breath
+ * signals" is a capability. Naming equipment would rebuild the Access for All
+ * functional list the paper spends section 4 rejecting.
+ * ------------------------------------------------------------------------- */
+
+/**
+ * Single-switch scanning, spastic cerebral palsy.
+ *
+ * Sees, hears and understands everything. Operates one switch from one reliable
+ * body site, and the limiting factor is not the movement but its TIMING — spastic
+ * CP disrupts when a movement arrives more than whether it arrives at all.
+ *
+ * WHY THE TWO PROPERTIES ARE SEPARATE. Scanning is either timed single-switch or
+ * untimed two-switch, so `switchSites` and `activationTiming` fail
+ * independently and their combination decides everything. This person sits in
+ * the worst cell: one site, so timing is unavoidable, and poor timing, so the
+ * scan must be slow. Give the same person a second switch site and the timing
+ * problem disappears entirely — the model can express that, and a model that
+ * recorded only "uses switch access" could not.
+ *
+ * Speech is affected too, which is common in CP and quite separate from
+ * cognition. Recorded, because a system that hears unclear speech and infers
+ * anything about comprehension has made a serious mistake about a person who
+ * understands every word.
+ */
+export const switchScanning = defineCapacity(
+  userCapability,
+  variation(referenceSpec, {
+    entity: {
+      id: "switch-scanning",
+      description:
+        "Full sight, hearing and language. Operates one switch reliably from a single " +
+        "body site, and needs a slow scan to meet it. Speaks, and is understood by " +
+        "people who know him. Works in stretches of about twenty minutes.",
+      basis: EXEMPLAR,
+    },
+    modify: {
+      pointerControl: { capability: "NONE" },
+      keyControl: { capability: "PARTIAL" },
+      manualStability: { capability: "PARTIAL", measurement: 15 },
+    },
+    add: {
+      /* One site, so scanning must be timed — the count is what forces it. */
+      switchSites: { capability: "PARTIAL", measurement: 1 },
+      /* And timing is the weak part, so the scan has to be slow. Given a second
+       * site this row would be irrelevant, which is the point of separating
+       * them. */
+      activationTiming: { capability: "PARTIAL", measurement: "needs a slow scan" },
+      sustainedPress: { capability: "PARTIAL" },
+      inputDuration: { capability: "PARTIAL", measurement: 20 },
+      /* Dysarthria: speech exists and is not reliable for strangers or machines.
+       * Nothing here bears on what he understands. */
+      speech: { capability: "PARTIAL" },
+      speechIntelligibility: { capability: "PARTIAL", measurement: "familiar listeners" },
+      speechRecognisedByMachine: { capability: "NONE" },
+    },
+  }),
+);
+
+/**
+ * Eye gaze, late-stage ALS.
+ *
+ * THE SPLIT THIS PROFILE EXISTS TO MAKE. `sight` is FULL — vision is unaffected
+ * by ALS — while `gazeControl` is PARTIAL, because ocular motility slows, the
+ * eyelid droops across the pupil and the eyes dry. Perception and ocular motor
+ * control are different capabilities, and filing gaze under vision would have
+ * said this person cannot see, taking every visual property down with it.
+ *
+ * Sensation is intact too, and that is not a detail: ALS is a motor neuron
+ * disease and spares the sensory neurons, so `touch` and `kinaesthesia` stay
+ * FULL while nothing can be moved. A model that assumed paralysis implies
+ * numbness would be wrong about the whole population.
+ *
+ * The numbers come from the literature rather than from me. Dwell thresholds run
+ * 500-1000 ms in general use and cap communication at five to ten words a
+ * minute; users with slow eye movement may need 2500 ms, which is where this
+ * profile sits. Fatigue is reported as a primary limit, which is what
+ * `inputDuration` is for.
+ *
+ * NOT RECORDED, and deliberately: the progression. ALS capability changes over
+ * months, and this profile is a snapshot. Versioning a profile through time is
+ * what the Adaptation Model's Instance Sequences are for (Figure 5), which is
+ * not implemented — issue #6. Worth saying plainly, because a static profile of
+ * a progressive condition is true only on the day it was taken.
+ */
+export const eyeGazeALS = defineCapacity(
+  userCapability,
+  variation(referenceSpec, {
+    entity: {
+      id: "eye-gaze-als",
+      description:
+        "Sees and hears perfectly, reads and writes fluently, and communicates entirely " +
+        "by gaze — holding a fixation for about two and a half seconds to select, within " +
+        "about three degrees. Full sensation throughout. Works in stretches of about " +
+        "fifteen minutes.",
+      basis: EXEMPLAR,
+    },
+    modify: {
+      /* Motor output is gone; sensation is not. */
+      pointerControl: { capability: "NONE" },
+      keyControl: { capability: "NONE" },
+      manualStability: { capability: "NONE" },
+      /* ALS spares sensory neurons — touch and kinaesthesia stay intact. */
+      touch: { capability: "FULL" },
+    },
+    add: {
+      headControl: { capability: "NONE" },
+      /* Vision intact, ocular motor control not. The whole reason gazeControl
+       * lives in `motor` and takes `sight` as a parent rather than being a
+       * visual property itself. */
+      gazeControl: { capability: "PARTIAL" },
+      gazeAccuracy: { capability: "PARTIAL", measurement: 3 },
+      dwellTolerance: { capability: "PARTIAL", measurement: 2500 },
+      inputDuration: { capability: "PARTIAL", measurement: 15 },
+      /* Anarthria. Language is entirely intact — this is the distinction that
+       * matters most about locked-in and near-locked-in users, and the one most
+       * often got wrong. */
+      speech: { capability: "NONE" },
+      knownLanguages: {
+        capability: "PARTIAL",
+        measurement: [
+          { tag: "en-CA", listening: "native", speaking: "none",
+            reading: "native", writing: "native" },
+        ],
+      },
+    },
+  }),
+);
+
+/**
+ * Sip-and-puff and head pointing, C4 tetraplegia.
+ *
+ * Two channels rather than one, which is what makes this profile different in
+ * kind from the switch user: head position gives continuous pointing and breath
+ * gives discrete selection, so the two together behave rather like a mouse.
+ *
+ * WHY THE NARROWED `touch` PAYS OFF AGAIN. At C4 sensation is preserved above
+ * the injury and absent below it, so the head and neck feel everything and the
+ * hands feel nothing. Under the old whole-body reading of `touch` this person
+ * was inexpressible in exactly the way the vibration-white-finger profile was.
+ * Narrowed to the hands and fingertips, `touch: NONE` is simply true.
+ *
+ * Speech is intact. C4 leaves the diaphragm working, so this person breathes
+ * and speaks independently — which is also what makes four breath signals
+ * available. A higher injury would take both at once, and would be a different
+ * profile rather than a more severe version of this one.
+ */
+export const sipAndPuff = defineCapacity(
+  userCapability,
+  variation(referenceSpec, {
+    entity: {
+      id: "sip-and-puff",
+      description:
+        "Full sight, hearing, language and speech. Points with head position and selects " +
+        "with four distinguishable breath signals. Feels the head and neck normally and " +
+        "the hands not at all. Works in stretches of about forty-five minutes.",
+      basis: EXEMPLAR,
+    },
+    modify: {
+      pointerControl: { capability: "NONE" },
+      keyControl: { capability: "NONE" },
+      manualStability: { capability: "NONE" },
+      /* At the hands. Sensation above the injury is unaffected. */
+      touch: { capability: "NONE" },
+    },
+    add: {
+      kinaesthesia: { capability: "NONE" },
+      /* Stated rather than left implicit, because at this injury level it is
+       * the notable fact: C4 leaves the diaphragm working, so this person
+       * breathes and speaks independently. It is also what makes four breath
+       * signals available at all. A higher injury would take speech and breath
+       * control together, and would be a different profile rather than a more
+       * severe version of this one. */
+      speech: { capability: "FULL" },
+      /* Neck movement is preserved at this level, and gives continuous
+       * pointing. */
+      headControl: { capability: "FULL" },
+      /* Sip, puff, hard and soft — four signals, which is enough for discrete
+       * selection alongside head pointing. */
+      breathControl: { capability: "PARTIAL", measurement: 4 },
+      inputDuration: { capability: "PARTIAL", measurement: 45 },
+    },
+  }),
+);
+
 /** Every exemplar, for iteration in tests and demos. */
 export const exemplars = Object.freeze({
   reference,
@@ -965,4 +1171,7 @@ export const exemplars = Object.freeze({
   deafBlind,
   deafenedNotch,
   secondLanguage,
+  switchScanning,
+  eyeGazeALS,
+  sipAndPuff,
 });

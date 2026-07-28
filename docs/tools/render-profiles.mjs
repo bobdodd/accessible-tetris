@@ -52,18 +52,37 @@ function specOf(property) {
   }
 }
 
+/** One tuple — `{tag, listening, …}` or `{x, y, w, h}` — as readable text.
+ *  A `tag` leads, because for knownLanguages it names what the rest describes. */
+function tupleText(o) {
+  const entries = Object.entries(o);
+  const tag = entries.find(([k]) => k === "tag");
+  const rest = entries.filter(([k]) => k !== "tag");
+  const body = rest.map(([k, v]) => `${k} ${v}`).join(", ");
+  return tag ? `**${tag[1]}** — ${body}` : body;
+}
+
 /** Render a measurement *value* as recorded in a profile. */
 function valueOf(measurement) {
   if (measurement === null || measurement === undefined) return "—";
   if (Array.isArray(measurement)) {
-    if (measurement.length && typeof measurement[0] === "object" && "from" in measurement[0]) {
+    if (!measurement.length) return "—";
+    const first = measurement[0];
+    /* A collection of ranges: usableFrequencyRange, binauralHearing. */
+    if (typeof first === "object" && first !== null && "from" in first) {
       return measurement.map((r) => `${r.from}–${r.to}`).join(", ");
     }
+    /* A collection of tuples: knownLanguages. Rendered one per line so four
+     * skills per language stay legible rather than becoming a wall of commas. */
+    if (typeof first === "object" && first !== null) {
+      return measurement.map(tupleText).join("; ");
+    }
+    /* A plain set: signLanguageSet, writeFontSet. */
     return measurement.join(", ");
   }
   if (typeof measurement === "object") {
     if ("from" in measurement) return `${measurement.from}–${measurement.to}`;
-    return Object.entries(measurement).map(([k, v]) => `${k} ${v}`).join(", ");
+    return tupleText(measurement);
   }
   return String(measurement);
 }

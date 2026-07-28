@@ -17,7 +17,8 @@ import { userCapability } from "../vocabulary/user-capability.js";
 import { exemplars, reference, blindSinceBirth, lowVisionContrast,
          lowVisionColour, keyboardOnly, handTremor,
          deaf, deafenedAsymmetric, multipleSclerosis,
-         deafBlind, deafenedNotch, secondLanguage } from "../vocabulary/profiles.js";
+         deafBlind, deafenedNotch, secondLanguage,
+         switchScanning, eyeGazeALS, sipAndPuff } from "../vocabulary/profiles.js";
 
 let pass = 0, fail = 0;
 const ok = (label, fn) => {
@@ -234,8 +235,8 @@ throws("a composed collection without a CompositionOrder is refused", Capability
 /* ------------------------------------------------------------------ */
 console.log("\nCapacity Model — a measurement qualifies PARTIAL and nothing else:");
 
-ok("all twelve exemplars build", () => {
-  eq(Object.keys(exemplars).length, 12, "count");
+ok("all fifteen exemplars build", () => {
+  eq(Object.keys(exemplars).length, 15, "count");
   for (const [name, p] of Object.entries(exemplars)) {
     if (!p.entity.basis.startsWith("exemplar")) throw new Error(`${name} records no basis`);
   }
@@ -734,6 +735,103 @@ ok("minTargetSize needs three parents, one in another ontology", () => {
   const p = userCapability.properties.minTargetSize;
   eq(p.precedence.join(","), "pointerControl,manualStability,kinaesthesia", "parents");
   eq(userCapability.properties.kinaesthesia.ontology, "haptic", "crosses from motor to haptic");
+});
+
+console.log("\nalternative access — limitation in output, not in the senses:");
+
+ok("all three vary only what the person can DO", () => {
+  /* Every earlier profile varied a sense. These vary output alone, which is a
+   * shape the model had never been asked for. */
+  for (const p of [switchScanning, eyeGazeALS, sipAndPuff]) {
+    eq(p.settings.sight.capability, "FULL", `${p.entity.id} sees`);
+    eq(p.settings.hearing.capability, "FULL", `${p.entity.id} hears`);
+    eq(p.settings.language.capability, "FULL", `${p.entity.id} understands`);
+    eq(p.settings.pointerControl.capability, "NONE", `${p.entity.id} no hand pointing`);
+  }
+});
+
+ok("switch: one site forces timed scanning; two would not", () => {
+  eq(switchScanning.settings.switchSites.measurement, 1, "one reliable site");
+  eq(switchScanning.settings.activationTiming.measurement, "needs a slow scan", "and slow");
+  /* The two properties fail independently, which is why they are separate.
+   * Scanning is timed single-switch or untimed two-switch, so a second site
+   * would make the timing row irrelevant. */
+  const P = userCapability.properties;
+  eq(P.switchSites.precedence.join(","), "keyControl", "both hang off keyControl");
+  eq(P.activationTiming.precedence.join(","), "keyControl", "and not off each other");
+});
+
+ok("switch: unclear speech says nothing about comprehension", () => {
+  eq(switchScanning.settings.speechIntelligibility.measurement, "familiar listeners", "dysarthria");
+  eq(switchScanning.settings.language.capability, "FULL", "and understands every word");
+});
+
+ok("ALS: sight is FULL while gaze control is not", () => {
+  /* The split this profile exists to make. Filing gaze under vision would say
+   * this person cannot see, taking every visual property down with it. */
+  eq(eyeGazeALS.settings.sight.capability, "FULL", "vision unaffected");
+  eq(eyeGazeALS.settings.gazeControl.capability, "PARTIAL", "ocular motor control is not");
+  eq(userCapability.properties.gazeControl.ontology, "motor", "gaze control is MOTOR");
+  eq(userCapability.properties.gazeControl.precedence.join(","), "sight",
+     "depends on sight without being sight");
+});
+
+ok("ALS: motor neurons go, sensory neurons stay", () => {
+  /* A model that assumed paralysis implies numbness would be wrong about this
+   * whole population. */
+  eq(eyeGazeALS.settings.manualStability.capability, "NONE", "no movement");
+  eq(eyeGazeALS.settings.touch.capability, "FULL", "full sensation");
+});
+
+ok("ALS: anarthria with language entirely intact", () => {
+  eq(eyeGazeALS.settings.speech.capability, "NONE", "no speech");
+  const en = eyeGazeALS.settings.knownLanguages.measurement.find((l) => l.tag === "en-CA");
+  eq(en.speaking, "none", "cannot speak it");
+  eq(en.reading, "native", "and reads it natively");
+  eq(en.listening, "native", "and hears it natively");
+  /* The distinction most often got wrong about locked-in and near-locked-in
+   * users, and the one that matters most. */
+});
+
+ok("ALS: dwell tolerance is the number that decides usability", () => {
+  eq(eyeGazeALS.settings.dwellTolerance.measurement, 2500, "slow eye movement");
+  eq(eyeGazeALS.settings.gazeAccuracy.measurement, 3, "degrees");
+  /* Published thresholds run 500-1000 ms; 2500 is the slow-movement case, and
+   * a dwell interface built for 500 ms would be unusable here. */
+  const spec = userCapability.properties.dwellTolerance.measurement;
+  eq(spec.unit, "ms", "milliseconds");
+  if (spec.max < 2500) throw new Error("the scale must reach the slow-movement case");
+});
+
+ok("sip-and-puff: two channels, and the narrowed touch pays off again", () => {
+  eq(sipAndPuff.settings.headControl.capability, "FULL", "continuous pointing by head");
+  eq(sipAndPuff.settings.breathControl.measurement, 4, "sip, puff, hard and soft");
+  /* At C4 sensation is preserved above the injury and absent below: head and
+   * neck feel everything, hands feel nothing. Whole-body `touch` could not say
+   * this — the same limit the vibration white finger profile exposed. */
+  eq(sipAndPuff.settings.touch.capability, "NONE", "at the hands");
+  eq(sipAndPuff.settings.speech.capability, "FULL", "C4 leaves the diaphragm working");
+});
+
+ok("no profile names a device — capability, not equipment", () => {
+  /* "Uses sip-and-puff" is a configuration choice for the Preference Model.
+   * "Produces four distinguishable breath signals" is a capability. Naming
+   * equipment would rebuild the functional list the paper rejects. */
+  const banned = /\b(sip.and.puff|eye.?tracker|head ?mouse|switch interface|AAC device|joystick)\b/i;
+  for (const [name, p] of Object.entries(exemplars)) {
+    if (banned.test(p.entity.description)) {
+      throw new Error(`${name} names equipment: "${p.entity.description}"`);
+    }
+  }
+});
+
+ok("input fatigue is modelled for DOING, not only for perceiving", () => {
+  /* focusDuration, trackingDuration and listeningDuration existed; nothing
+   * covered input, yet fatigue is a primary limit for all three of these. */
+  eq(switchScanning.settings.inputDuration.measurement, 20, "switch");
+  eq(eyeGazeALS.settings.inputDuration.measurement, 15, "gaze — dwell is tiring");
+  eq(sipAndPuff.settings.inputDuration.measurement, 45, "breath");
+  eq(userCapability.properties.inputDuration.ontology, "motor", "a motor property");
 });
 
 console.log("\nspeech — four skills, rated separately:");

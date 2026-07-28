@@ -371,10 +371,128 @@ export const userCapability = defineCapability({
     pointerControl: {
       ontology: "motor", precedence: [],
       description:
-        "MY CHOICE. Can the user operate a continuous pointing device? NONE is the " +
-        "capability usually described as 'keyboard only' — and describing it as capability " +
-        "rather than preference is the paper's whole argument: 'Does the user need a " +
-        "screen reader, or does she simply wish to use one?'",
+        "MY CHOICE. Can the user operate a continuous pointing device WITH A HAND? NONE " +
+        "is the capability usually described as 'keyboard only' — and describing it as " +
+        "capability rather than preference is the paper's whole argument: 'Does the user " +
+        "need a screen reader, or does she simply wish to use one?' Head and eye pointing " +
+        "are separate channels: see headControl and gazeControl.",
+    },
+
+    /* --- alternative access: switches, breath, head, gaze -----------------
+     *
+     * MY CHOICE throughout, added after researching who actually uses switch
+     * scanning, sip-and-puff and eye gaze. These users broke the model in a way
+     * nothing before them had: their limitation is almost entirely OUTPUT, with
+     * sensation and cognition intact. Nine of the twelve profiles before this
+     * point varied a sense; these vary only what the person can do.
+     *
+     * Nothing here is a device. "Uses sip-and-puff" is a configuration choice
+     * and belongs in the Preference Model; "can produce four distinguishable
+     * breath signals" is a capability and belongs here. The model must never
+     * name the equipment, or it becomes the Access for All functional list the
+     * paper spends section 4 rejecting.
+     */
+
+    /* The single most consequential fact about a switch user, and the model had
+     * no way to record it. Scanning is either TIMED single-switch or UNTIMED
+     * two-switch, so the count decides whether timing accuracy is required at
+     * all — a person who cannot time a movement can still scan reliably given a
+     * second switch. Burkhart: "all timed methods of switch scanning require a
+     * certain level of automaticity of motor skill to be functional." */
+    switchSites: {
+      ontology: "motor", precedence: ["keyControl"],
+      measurement: { type: "numeric", min: 1, max: 8, unit: "sites" },
+      description:
+        "MY CHOICE. How many independent body sites the user can operate a switch from, " +
+        "reliably and repeatably — head, hand, foot, knee, chin, eyebrow. One site forces " +
+        "timed scanning; two allow untimed, which removes the timing demand entirely. The " +
+        "count is a capability, not an equipment list.",
+    },
+
+    /* Whether a moving scan target can be caught at all. Spastic cerebral palsy
+     * in particular disrupts the timing of a movement rather than the movement
+     * itself, so this is independent of how many switch sites exist. An ordered
+     * scale rather than milliseconds: the points are things a person or a
+     * therapist can judge from watching, and it sets the scan rate directly. */
+    activationTiming: {
+      ontology: "motor", precedence: ["keyControl"],
+      measurement: {
+        type: "discrete",
+        ordered: true,
+        values: [
+          "cannot reliably time a moving target",
+          "needs a slow scan",
+          "needs a moderate scan",
+          "any scan rate",
+        ],
+      },
+      description:
+        "MY CHOICE. Can the user activate a switch at the moment a scan reaches the item " +
+        "they want? Ordered least to most capable. Independent of switchSites, because " +
+        "timing and movement fail separately — and a person at the bottom of this scale " +
+        "with two switch sites can scan perfectly well untimed.",
+    },
+
+    headControl: {
+      ontology: "motor", precedence: [],
+      description:
+        "MY CHOICE. Can the user direct head position deliberately, for head pointing or " +
+        "head switches? Preserved in high cervical injury well below the level at which " +
+        "the hands are not, which is why it is a separate channel from pointerControl.",
+    },
+
+    breathControl: {
+      ontology: "motor", precedence: [],
+      measurement: { type: "numeric", min: 1, max: 4, unit: "signals" },
+      description:
+        "MY CHOICE. How many distinguishable breath signals the user can produce on " +
+        "demand — sip and puff, each optionally hard and soft, so up to four. Counting " +
+        "signals rather than naming the device keeps this a capability: the same four " +
+        "signals drive very different equipment.",
+    },
+
+    /* Gaze control is MOTOR, not visual, and the separation matters. A person
+     * with late-stage ALS sees perfectly — `sight: FULL` — while ocular motor
+     * control degrades: ptosis obscures the pupil, motility slows, the eyes dry.
+     * Filing gaze under vision would say they cannot see, which is false and
+     * would take every visual property down with it. */
+    gazeControl: {
+      ontology: "motor", precedence: ["sight"],
+      description:
+        "MY CHOICE. Can the user direct their gaze deliberately at a target? A MOTOR " +
+        "capability that depends on sight but is not sight: in late-stage ALS vision is " +
+        "intact while ocular motility, eyelid control and tear function are not.",
+    },
+    gazeAccuracy: {
+      ontology: "motor", precedence: ["gazeControl"],
+      measurement: { type: "numeric", min: 1, max: 15, unit: "deg" },
+      description:
+        "MY CHOICE. The angular error within which the user can place their gaze. Sets " +
+        "the minimum on-screen target size directly. Demonstrable rather than reportable " +
+        "— it falls out of a calibration pass — and worth distrusting, since calibration " +
+        "can appear to succeed and still be wrong if the user moved during it.",
+    },
+    dwellTolerance: {
+      ontology: "motor", precedence: ["gazeControl"],
+      measurement: { type: "numeric", min: 100, max: 4000, unit: "ms" },
+      description:
+        "MY CHOICE. How long the user can hold a fixation steady enough to confirm a " +
+        "selection. Published dwell thresholds run 500-1000 ms and cap communication at " +
+        "5-10 words per minute; users with slow eye movement may need 2500 ms. This is " +
+        "the number that decides whether a dwell interface is usable at all.",
+    },
+
+    /* Fatigue, for doing rather than perceiving. The model had focusDuration,
+     * trackingDuration and listeningDuration and nothing for input — yet every
+     * source on alternative access names fatigue as a primary limit, and dwell
+     * selection is reported as actively tiring. */
+    inputDuration: {
+      ontology: "motor", precedence: [],
+      measurement: minutes(),
+      description:
+        "MY CHOICE. How long the user can sustain deliberate input before fatigue forces " +
+        "a break. The motor counterpart of focusDuration and listeningDuration, and the " +
+        "constraint that most often decides how long a session can be.",
     },
     keyControl: {
       ontology: "motor", precedence: [],
@@ -800,6 +918,19 @@ export const userCapability = defineCapability({
       properties: [
         "pointerControl", "keyControl", "manualStability", "minTargetSize",
         "sustainedPress", "minKeyRepeatDelay", "kinaesthesia", "speech",
+        "headControl", "inputDuration",
+      ],
+    },
+    alternativeAccess: {
+      description:
+        "MY CHOICE. Switch, breath, head and gaze access — the channels used when a hand " +
+        "on a pointing device is not available. Overlaps `input` deliberately: the same " +
+        "Property may appear in many templates.",
+      properties: [
+        "keyControl", "switchSites", "activationTiming", "sustainedPress",
+        "headControl", "breathControl",
+        "gazeControl", "gazeAccuracy", "dwellTolerance",
+        "inputDuration",
       ],
     },
     reading: {
@@ -825,7 +956,7 @@ export const userCapability = defineCapability({
     },
     interaction: {
       description: "Groupings not tied to a design space.",
-      templates: ["input", "reading"],
+      templates: ["input", "alternativeAccess", "reading"],
     },
   },
 });

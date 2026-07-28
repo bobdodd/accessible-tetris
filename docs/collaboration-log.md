@@ -1378,6 +1378,86 @@ Recorded on the profile so nothing there reads as what a Deaf person is like.
 
 48 properties, 12 exemplars, 114 tests.
 
+## D15 · decision · Alternative access: switch, breath and gaze
+
+**2026-07-28.** Bob: "Now I'm wondering about who we are not describing well.
+People who use switches, sip-and-puff, eye-tracking. Please research typical
+users of that AT and what profiles we might need." Then, on seeing the proposal:
+"Let's build all 3. I find with these things I need to read, pause, think, and
+get back to you. Better to have all 3 down on paper first to think about."
+
+Built all three, plus eight properties. Research sources: Burkhart's ASHA
+Perspectives paper on switch access, the 2025 state-of-the-science review on
+alternative access, OHSU's chapter on AAC in late-stage ALS, and the Frontiers
+work on eye tracking with late-stage ALS.
+
+### The shape these three share, and why it is new
+
+**Their limitation is almost entirely OUTPUT.** Sensation intact, cognition
+intact, language intact — and every one of the twelve profiles before them varied
+a sense. The model had been asked to describe perception fifteen different ways
+and had never once been asked to describe someone who perceives everything and
+can barely act.
+
+### What the research settled that guesswork would not have
+
+**Switch access turns on a count, not a severity.** Scanning is either *timed*
+single-switch or *untimed* two-switch, and Burkhart is explicit that "all timed
+methods of switch scanning require a certain level of automaticity of motor
+skill." So `switchSites` and `activationTiming` are separate properties that fail
+independently: a person who cannot time a movement scans perfectly well **given a
+second switch site**. One property called "switch access" would have hidden the
+single most useful fact about the user.
+
+**Dwell tolerance is the number that decides usability.** Published thresholds
+run 500–1000 ms and cap communication at 5–10 words per minute; users with slow
+eye movement may need 2500 ms. A dwell interface built for 500 ms is not slightly
+worse for that person, it is unusable.
+
+**ALS spares sensory neurons.** `touch` and `kinaesthesia` stay FULL while nothing
+can be moved. A model that assumed paralysis implies numbness would be wrong
+about the entire population, and I would have assumed it.
+
+### Two splits the profiles forced
+
+**Gaze control is MOTOR, not visual.** `sight: FULL` with `gazeControl: PARTIAL`
+— vision is unaffected by ALS while ocular motility slows, the eyelid droops
+across the pupil and the eyes dry. Filing gaze under vision would have said this
+person cannot see and taken every visual property down with it.
+
+**The narrowed `touch` paid off a second time.** At C4 sensation is preserved
+above the injury and absent below: head and neck feel everything, hands feel
+nothing. Whole-body `touch` could not have said that — the same limit the
+vibration white finger profile exposed a few hours earlier, hit from the opposite
+direction.
+
+### The finding about the demonstrator
+
+**A real-time falling-block game is structurally closed to a single-switch
+scanning user.** Scanning takes seconds per selection; the pieces do not wait.
+No rendering choice fixes this, because the barrier is not how the game is
+presented but that it will not pause. Including these users needs a turn-based or
+pausable mode, which is a game design decision and not an adaptation one.
+
+That is the DeafBlind finding again in another domain: the profile set keeps
+producing people the demonstrator cannot serve, and §6a says that must stay
+visible. Recorded at the head of the alternative-access section, where anyone
+reading the profiles meets it before the tables.
+
+### One discipline held throughout
+
+**No profile names a device.** "Uses sip-and-puff" is a configuration choice for
+the Preference Model; "produces four distinguishable breath signals" is a
+capability. Naming equipment would rebuild exactly the Access for All functional
+list the paper spends section 4 rejecting, and there is now a test that fails if
+any profile description mentions hardware.
+
+All eight new properties use counts, durations or ordered scales. Not one is a
+percentage — issue #8's direction applied at the point of design rather than
+retrofitted later.
+
+56 properties, 15 exemplars, 124 tests.
+
 ## X1 · disagreement · Bob corrected Claude's conclusion, not its facts
 
 **2026-07-27.** After C3, Claude concluded that the working practice should be
