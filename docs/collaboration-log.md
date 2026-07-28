@@ -933,6 +933,52 @@ the case stereotype templates handle worst, and Table 3's set is "based upon the
 real-life experiences of a person with Multiple Sclerosis". This exemplar is
 less a stress test than the model's own motivating example, finally populated.
 
+### CORRECTION, same day: the deafened profile was built wrong
+
+Bob: "Not sure you got my Deafened case correct. The person has lost the lower
+register in one ear, but they still have the higher register. So some degree of
+binaural hearing still exists."
+
+He is right, and the first build asserted something false about the man. Two
+errors, and they compounded:
+
+1. **`usableFrequencyRange` was truncated at 400 Hz.** That says he cannot hear
+   bass *at all*. He can — with the good ear. What he has lost is not audibility
+   but the *second opinion* on the low end. The range should be wide; the
+   impairment shows elsewhere.
+
+2. **`binauralHearing` was treated as uniformly degraded.** Asymmetric loss is
+   rarely flat across the spectrum. An ear that has lost only its lower register
+   goes on contributing above the crossover, so the two ears keep combining up
+   there and stop below.
+
+The fix makes `binauralHearing` carry **a frequency band rather than a scalar** —
+PARTIAL now means "the ears combine from 800 Hz up", which is a statement a
+renderer can act on. And azimuth resolution went from 75° (near-useless) to 45°
+(coarse but real), because the physics is specific: **low frequencies are
+localised by interaural TIME difference, high by interaural LEVEL difference**.
+Losing the lows in one ear takes out ITD localisation and leaves ILD. Spatial
+hearing is impaired unevenly, not abolished.
+
+A second known limit fell out of this and is recorded on the property:
+`azimuthResolution` is a single number where his real acuity varies by
+frequency. The model can say "coarse overall" and "binaural above 800 Hz"; it
+cannot yet say "good above 800 Hz, hopeless below".
+
+**And the part worth keeping for the experience report.** I had written a test
+asserting `band.from === 400` — a test whose entire content was my
+misunderstanding, phrased as a requirement and passing. It sat one line below a
+test that described the same profile correctly. This is C7's lesson arriving a
+second time in a single day: **tests confirm the model you built, not the model
+you should have built.** Encoding a wrong assumption in an assertion does not
+make it right, it makes it durable, and it makes the next reader trust it.
+
+The two errors also share a shape worth naming: both were *over-simplifications
+in the direction of severity*. Truncating the range and flattening the binaural
+capability each made the man more impaired than he is. That is a specific bias,
+not random noise, and it is the one to watch for in profile work — a model that
+overstates impairment produces adaptations nobody asked for.
+
 ### One thing to check with Bob
 
 Noise-induced and age-related hearing loss are classically **high**-frequency —

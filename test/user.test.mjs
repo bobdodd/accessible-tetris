@@ -450,14 +450,35 @@ throws("Deaf: a sonic capability beneath hearing NONE is refused", CapacityError
     },
   }));
 
-ok("deafened: asymmetric loss costs azimuth but NOT elevation", () => {
-  eq(deafenedAsymmetric.settings.binauralHearing.capability, "PARTIAL", "ears do not combine");
-  eq(deafenedAsymmetric.settings.azimuthResolution.measurement, 75, "left-right collapses");
-  eq(deafenedAsymmetric.settings.elevationResolution.measurement, 40, "up-down survives");
-  if (deafenedAsymmetric.settings.azimuthResolution.measurement
-      <= deafenedAsymmetric.settings.elevationResolution.measurement) {
-    throw new Error("azimuth should be the WORSE of the two for a monaural-ish listener");
+ok("deafened: he can still HEAR the low end — with the good ear", () => {
+  /* The correction that mattered. An earlier draft truncated the usable range
+   * at 400 Hz, asserting he cannot hear bass at all. He can; what he has lost
+   * is the second opinion on it. */
+  const band = deafenedAsymmetric.settings.usableFrequencyRange.measurement[0];
+  eq(band.from, 20, "low frequencies are audible");
+  if (band.from > 100) throw new Error("truncating the range would claim deafness to bass");
+});
+
+ok("deafened: binaural hearing is a BAND, not a percentage", () => {
+  const bin = deafenedAsymmetric.settings.binauralHearing.measurement[0];
+  const usable = deafenedAsymmetric.settings.usableFrequencyRange.measurement[0];
+  eq(deafenedAsymmetric.settings.binauralHearing.capability, "PARTIAL", "partial");
+  eq(bin.from, 800, "the two ears combine only above the crossover");
+  /* Below the crossover he hears but does not combine: the binaural band must
+   * sit strictly inside the audible range. */
+  if (bin.from <= usable.from) {
+    throw new Error("binaural band should start above the audible range's floor");
   }
+  if (bin.to > usable.to) throw new Error("cannot combine ears where he cannot hear");
+});
+
+ok("deafened: azimuth degrades but does not collapse; elevation is untouched", () => {
+  const az = deafenedAsymmetric.settings.azimuthResolution.measurement;
+  const el = deafenedAsymmetric.settings.elevationResolution.measurement;
+  eq(az, 45, "coarse but usable — interaural LEVEL differences survive above 800 Hz");
+  eq(el, 40, "monaural pinna cue, unaffected");
+  if (az < el) throw new Error("azimuth should be no better than elevation here");
+  if (az > 90) throw new Error("azimuth should not collapse entirely — ILD still works");
 });
 
 ok("azimuth depends on binaural hearing; elevation deliberately does not", () => {
@@ -465,12 +486,6 @@ ok("azimuth depends on binaural hearing; elevation deliberately does not", () =>
      "azimuth needs two ears");
   eq(userCapability.properties.elevationResolution.precedence.includes("binauralHearing"), false,
      "elevation is a monaural pinna cue and must survive single-sided loss");
-});
-
-ok("deafened: the low-register gap is in the usable range, not an absence", () => {
-  const band = deafenedAsymmetric.settings.usableFrequencyRange.measurement[0];
-  eq(band.from, 400, "nothing reliable below 400 Hz");
-  if (band.from <= 20) throw new Error("the lost lower register should show in the range");
 });
 
 ok("MS: touch NONE, but kinaesthesia is a separate property that survives", () => {

@@ -248,12 +248,24 @@ export const userCapability = defineCapability({
      * and it is recorded here rather than hidden. */
     binauralHearing: {
       ontology: "sonic", precedence: ["hearing"],
+      /* The measurement is a frequency range, not a percentage, and that is the
+       * whole point. Asymmetric loss is rarely uniform across the spectrum: an
+       * ear that has lost its lower register still contributes its higher one,
+       * so the two ears go on combining ABOVE some crossover and stop below it.
+       * FULL is binaural across the whole audible range; PARTIAL carries the
+       * band or bands where both ears still contribute; NONE is genuinely
+       * monaural. */
+      measurement: {
+        type: "composite",
+        of: { type: "numericRange", unit: "Hz", min: 0, max: 22050 },
+        order: "lowestToHighest",
+      },
       description:
-        "MY CHOICE. Can the user hear with both ears together? NONE means " +
-        "effectively monaural listening — the two ears do not combine, whether " +
-        "through single-sided deafness or asymmetric loss severe enough that " +
-        "binaural cues stop working. This is the capability that decides whether a " +
-        "spatialised soundscape can carry meaning in stereo at all.",
+        "MY CHOICE. Over which frequencies do the two ears still combine? NONE is " +
+        "genuinely monaural listening. PARTIAL carries the bands where binaural " +
+        "hearing survives — an ear that has lost only its lower register still " +
+        "contributes above the crossover. This is the capability that decides " +
+        "whether a spatialised soundscape can carry meaning in stereo, and where.",
     },
     azimuthResolution: {
       ontology: "sonic", precedence: ["hearing", "binauralHearing"],
@@ -262,7 +274,13 @@ export const userCapability = defineCapability({
         "MY CHOICE. Smallest left-right angular difference the user can reliably " +
         "distinguish. Directly bounds how many positions a spatialised soundscape can " +
         "use. Depends on binauralHearing: left-right localisation is built from " +
-        "interaural time and level differences, so it collapses without two working ears.",
+        "interaural differences, so it degrades as those ears stop combining. " +
+        "KNOWN LIMIT: this is one number, but real localisation is frequency " +
+        "dependent — low frequencies are localised by interaural TIME difference and " +
+        "high by interaural LEVEL difference, so a listener who has lost the lows in " +
+        "one ear localises high content far better than low. The model records the " +
+        "band in binauralHearing and the overall acuity here, and cannot yet say " +
+        "\"good above 800 Hz, hopeless below\".",
     },
     elevationResolution: {
       /* Deliberately NOT dependent on binauralHearing. Elevation cues are

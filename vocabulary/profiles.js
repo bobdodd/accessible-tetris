@@ -449,19 +449,31 @@ export const deaf = defineCapacity(
  * It is not, and working out why was the most useful thing in this exercise.
  * WHICH ear is damaged is mechanism, and mechanism is what Table 1 does and
  * Table 2 rejects: "It is what the user can do, not why she cannot." The
- * functional consequence is what a renderer needs, and it is expressible —
- * `binauralHearing: PARTIAL` says the two ears no longer combine reliably, and
- * `azimuthResolution` collapses because left-right localisation is built from
- * interaural differences.
+ * functional consequence is what a renderer needs, and it is expressible.
  *
- * `elevationResolution` deliberately does NOT collapse with it: elevation cues
- * are monaural, filtered by the pinna, so one axis of spatial hearing survives
- * and the other does not. Modelling both as lost would have been easier and
- * wrong.
+ * THE LOSS IS FREQUENCY DEPENDENT, AND SO IS EVERYTHING THAT FOLLOWS. He lost
+ * the lower register in one ear and kept the higher one, so:
  *
- * The genuine limit, recorded rather than hidden: the model cannot say "put the
- * important channel on his good side". That needs laterality, and laterality is
- * not here.
+ *   - He still HEARS low frequencies — with the good ear. `usableFrequencyRange`
+ *     is therefore wide, not truncated. An earlier draft started it at 400 Hz,
+ *     which asserted he cannot hear bass at all. He can; he just cannot place it.
+ *   - The two ears go on combining ABOVE the crossover and stop below it, which
+ *     is why `binauralHearing` carries a frequency band rather than a percentage.
+ *   - Localisation degrades in a specific way. Low frequencies are localised by
+ *     interaural TIME difference and high by interaural LEVEL difference, so
+ *     losing the lows in one ear takes out ITD localisation and leaves ILD.
+ *     Spatial hearing is impaired, not absent, and impaired unevenly.
+ *
+ * `elevationResolution` deliberately does NOT depend on binaural hearing at all:
+ * elevation cues are monaural, filtered by the pinna, so that axis survives
+ * whatever happens to the other. Modelling both as lost would have been easier
+ * and wrong.
+ *
+ * Two genuine limits, recorded rather than hidden. The model cannot say "put the
+ * important channel on his good side" — that needs laterality. And
+ * `azimuthResolution` is a single number where his real acuity varies by
+ * frequency, so it records the overall figure and `binauralHearing` records
+ * where it applies.
  */
 export const deafenedAsymmetric = defineCapacity(
   userCapability,
@@ -476,24 +488,34 @@ export const deafenedAsymmetric = defineCapacity(
     },
     modify: { hearing: { capability: "PARTIAL" } },
     add: {
-      /* The two ears no longer combine usefully, but neither is dead. */
-      binauralHearing: { capability: "PARTIAL" },
-      /* The BINAURAL usable range — what he hears with both ears working
-       * together, which is the better ear's range where they differ. The gap is
-       * the low end: everything below ~400 Hz is unreliable. */
+      /* What he can HEAR, across both ears together. The low end is present —
+       * the good ear supplies it — so this is close to full range, with a
+       * modest high rolloff for age. What is lost is not audibility but the
+       * SECOND opinion on the low end. */
       usableFrequencyRange: {
         capability: "PARTIAL",
-        measurement: [{ from: 400, to: 6000 }],
+        measurement: [{ from: 20, to: 8000 }],
       },
-      /* Localisation is the first casualty of asymmetric loss, well before
-       * intelligibility. 75 degrees is barely better than "somewhere to the
-       * left", and it makes a spatialised soundscape close to unusable. */
-      azimuthResolution: { capability: "PARTIAL", measurement: 75 },
-      /* Monaural cue, so it survives. This asymmetry is the whole point. */
+      /* Where the two ears still combine: above the crossover only. Below 800 Hz
+       * he is effectively listening with one ear, which is why this is a band
+       * and not a percentage. */
+      binauralHearing: {
+        capability: "PARTIAL",
+        measurement: [{ from: 800, to: 8000 }],
+      },
+      /* Degraded but far from gone. Interaural level differences still work
+       * above the crossover, so high-frequency content is placeable; interaural
+       * time differences below it are not, so bass is heard but not located.
+       * 45 degrees is the overall figure — usable for coarse left/centre/right,
+       * useless for anything finer. */
+      azimuthResolution: { capability: "PARTIAL", measurement: 45 },
+      /* Monaural pinna cue, unaffected by any of the above. This asymmetry
+       * between the two axes is the whole point of the exemplar. */
       elevationResolution: { capability: "PARTIAL", measurement: 40 },
-      /* Effortful listening: separating streams costs him attention that a
-       * binaural listener spends nothing on. */
-      concurrentStreams: { capability: "PARTIAL", measurement: 1 },
+      /* Effortful listening: separating streams costs him attention a fully
+       * binaural listener spends nothing on, and the cost is worst where the
+       * competing sounds are low-pitched. */
+      concurrentStreams: { capability: "PARTIAL", measurement: 2 },
       listeningDuration: { capability: "PARTIAL", measurement: 20 },
       readAudioText: { capability: "PARTIAL" },
       minInterWordGap: { capability: "PARTIAL", measurement: 220 },

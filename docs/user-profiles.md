@@ -97,7 +97,7 @@ MY CHOICE. Sonic capability, the design space this demonstrator leans on.
 | Property | Values (PARTIAL measurement) | Parent | Ontology | Description |
 |---|---|---|---|---|
 | `hearing` | — | None | sonic | MY CHOICE. Top-level property for hearing, following the shape of `sight`. Remaining sonic properties only of interest for PARTIAL hearing. |
-| `binauralHearing` | — | hearing | sonic | MY CHOICE. Can the user hear with both ears together? NONE means effectively monaural listening — the two ears do not combine, whether through single-… |
+| `binauralHearing` | collection of range in Hz, lowestToHighest | hearing | sonic | MY CHOICE. Over which frequencies do the two ears still combine? NONE is genuinely monaural listening. |
 | `azimuthResolution` | 1–180 deg | hearing, binauralHearing | sonic | MY CHOICE. Smallest left-right angular difference the user can reliably distinguish. |
 | `concurrentStreams` | 1–8 streams | hearing | sonic | MY CHOICE. How many simultaneous audio streams the user can attend to and still separate. The sonic analogue of Table 3's tracking. |
 | `elevationResolution` | 1–180 deg | hearing | sonic | MY CHOICE. Smallest up-down angular difference the user can reliably distinguish. Typically much coarser than azimuth for most listeners. |
@@ -432,10 +432,10 @@ criticises.
 | Setting | Property | Capability | Measurement | Parent |
 |---|---|---|---|---|
 | — | `hearing` | **PARTIAL** | — | None |
-| — | `binauralHearing` | **PARTIAL** | — | hearing |
-| — | `azimuthResolution` | **PARTIAL** | 75 deg | hearing, binauralHearing |
+| — | `binauralHearing` | **PARTIAL** | 800–8000 | hearing |
+| — | `azimuthResolution` | **PARTIAL** | 45 deg | hearing, binauralHearing |
 | — | `sight` | **FULL** | — | None |
-| — | `concurrentStreams` | **PARTIAL** | 1 streams | hearing |
+| — | `concurrentStreams` | **PARTIAL** | 2 streams | hearing |
 | — | `elevationResolution` | **PARTIAL** | 40 deg | hearing |
 | — | `language` | **FULL** | — | None |
 | — | `touch` | **FULL** | — | None |
@@ -445,7 +445,7 @@ criticises.
 | — | `readAudioText` | **PARTIAL** | — | hearing, language |
 | — | `minInterWordGap` | **PARTIAL** | 220 ms | readAudioText |
 | — | `pointerControl` | **FULL** | — | None |
-| — | `usableFrequencyRange` | **PARTIAL** | 400–6000 | hearing |
+| — | `usableFrequencyRange` | **PARTIAL** | 20–8000 | hearing |
 
 **Not recorded: 25 of 40 properties.**
 
@@ -513,13 +513,13 @@ NONE, or because no parent is PARTIAL and so the question does not arise.
 | Property | reference | blindSinceBirth | lowVisionContrast | lowVisionColour | keyboardOnly | handTremor | deaf | deafenedAsymmetric | multipleSclerosis |
 |---|---|---|---|---|---|---|---|---|---|
 | `hearing` | FULL | FULL | FULL | FULL | FULL | FULL | NONE | PARTIAL | FULL |
-| `binauralHearing` |  |  |  |  |  |  |  | PARTIAL |  |
-| `azimuthResolution` |  |  |  |  |  |  |  | PARTIAL 75 deg |  |
+| `binauralHearing` |  |  |  |  |  |  |  | PARTIAL 800–8000 |  |
+| `azimuthResolution` |  |  |  |  |  |  |  | PARTIAL 45 deg |  |
 | `sight` | FULL | NONE | PARTIAL | PARTIAL | FULL | FULL | FULL | FULL | PARTIAL |
 | `colorHigh` |  |  | FULL | PARTIAL 80 % |  |  |  |  |  |
 | `colorLow` |  |  | FULL | PARTIAL 40 % |  |  |  |  |  |
 | `colorMedium` |  |  | FULL | PARTIAL 25 % |  |  |  |  |  |
-| `concurrentStreams` |  |  |  |  |  |  |  | PARTIAL 1 streams |  |
+| `concurrentStreams` |  |  |  |  |  |  |  | PARTIAL 2 streams |  |
 | `contrastSensitivity` |  |  | PARTIAL 30 % | FULL |  |  |  |  |  |
 | `elevationResolution` |  |  |  |  |  |  |  | PARTIAL 40 deg |  |
 | `focus` |  |  | PARTIAL |  |  |  |  |  | PARTIAL |
@@ -547,7 +547,7 @@ NONE, or because no parent is PARTIAL and so the question does not arise.
 | `sustainedPress` |  |  |  |  |  | PARTIAL |  |  | PARTIAL |
 | `tracking` |  |  | PARTIAL |  |  |  |  |  | PARTIAL |
 | `trackingDuration` |  |  | PARTIAL 12 min |  |  |  |  |  | PARTIAL 4 min |
-| `usableFrequencyRange` |  |  |  |  |  |  |  | PARTIAL 400–6000 |  |
+| `usableFrequencyRange` |  |  |  |  |  |  |  | PARTIAL 20–8000 |  |
 | `writeFontSet` |  |  |  |  | PARTIAL SELECT |  |  |  |  |
 
 ---
