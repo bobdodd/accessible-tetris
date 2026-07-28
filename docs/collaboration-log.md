@@ -1170,6 +1170,59 @@ practitioner to catch each one.
 
 44 properties, 10 exemplars, 94 tests.
 
+## N5 · note · "User profiles need to be human not robotic" — issue #8
+
+**2026-07-28.** Bob, flagging a concern for later rather than asking for a fix:
+
+> I'm concerned at the measurement/scales we use for PARTIAL. I/we tend to fall
+> back to percentages on things that may not be expressable as a percentage. If
+> we were populating these tables with real people then we would be interviewing
+> them and I'm not sure percentages would be the reliable measure of their
+> abilities even hearing. The measure may need to be more vague or abstract to
+> match what real people can tell us… **User profiles need to be human not
+> robotic.**
+
+Filed as issue #8 with a full audit. Recorded here because the *shape* of the
+observation matters more than the fix.
+
+**The audit.** 10 of 44 properties carry a percentage, and they are precisely the
+ones no person can source: `contrastSensitivity`, `manualStability`,
+`kinaesthesia`, the six colour and intensity bands, `vibrationDetection`. Sorting
+all 44 by how a value would actually be obtained gives five honest categories —
+interview, demonstration, tuning in situ, clinical instrument — and one
+dishonest one. Nobody reports their kinaesthesia as 25%. That number came from
+me, dressed as data.
+
+**The model already supported the fix.** `Discrete` is one of the five intrinsic
+types, so an ordinal scale with concrete anchors — "needs black on white",
+"needs strong contrast", "prefers more contrast", "no preference" — was
+expressible from the start. I reached for `numeric` + `%` out of habit. This is
+not a limitation of the model; it is a limitation of the person populating it.
+
+**What makes this different from C7, C8 and C8b.** Those were over-constraints —
+restrictions that erased people. This is the opposite failure: **pseudo-precision
+that invents people.** A percentage nobody could have told you is a fabrication
+with a decimal point, and it is more dangerous than a missing property because
+it does not look like a gap. It looks like evidence.
+
+Both failures share a root, which is the useful thing for the experience report:
+*an AI populating a model will produce whatever the schema will accept, and a
+schema that accepts a number will get a number.* The check that catches it is not
+type validation but asking **"who said this, and how would they know?"** — which
+is a question about acquisition method, not about data.
+
+**The follow-on idea, worth more than the fix.** Record a measurement's
+provenance: self-reported, demonstrated, tuned, instrumented, or inferred from
+behaviour. Bob's CNIB borrowing statistics are that fifth kind and were more
+useful for design than the controlled intelligibility studies. This would push
+`basis` down from the Entity to the individual Setting.
+
+**And a tension in the source paper.** MSIADU'09 rejects Access for All's
+functional lists as "unwieldy and unquantifiable" and offers percentages as the
+quantification. If the quantification cannot be obtained from the person, that
+critique partly rebounds. Inheriting the percentages silently would be the wrong
+response; naming it is the interesting one, and it belongs in the write-up.
+
 ## X1 · disagreement · Bob corrected Claude's conclusion, not its facts
 
 **2026-07-27.** After C3, Claude concluded that the working practice should be
