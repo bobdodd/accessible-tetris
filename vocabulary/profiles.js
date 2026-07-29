@@ -67,7 +67,28 @@
 
 import { defineCapacity, A } from "../cradle/user/capacity.js";
 import { copilotPair } from "../cradle/user/group.js";
-import { userCapability } from "./user-capability.js";
+import { userCapability, TARGET_FACTOR } from "./user-capability.js";
+
+/** STEADINESS -> size multiplier, as an executable expression.
+ *
+ *  Built FROM TARGET_FACTOR rather than written out, so the declared table and
+ *  the running code cannot drift apart: change the table and every formula
+ *  using it changes with it.
+ *
+ *  A chain of ifThen and not arithmetic, because STEADINESS is ORDINAL.
+ *  "unsteady" is not a number, and the distance from it to "mostly-steady" is
+ *  not a quantity, so there is nothing to multiply. The code this replaces
+ *  computed (1 + (100 - stability)/100), which asserted a straight line
+ *  between steadiness and required size — an assumption nobody established,
+ *  invented along with the percentage it operated on, and hidden inside the
+ *  formula where no one could argue with it. Now it is four numbers in a table
+ *  with names on them. */
+const steadinessFactor = (property) =>
+  Object.entries(TARGET_FACTOR).reduceRight(
+    (otherwise, [point, factor]) =>
+      A.ifThen(A.eq(A.measure(property), A.lit(point)), A.lit(factor), otherwise),
+    A.lit(1.0),
+  );
 
 /** "Fred is like Jim except…" — one Instance applied to a base specification.
  *
@@ -256,10 +277,10 @@ export const lowVisionContrast = defineCapacity(
       focusDuration: { capability: "PARTIAL", measurement: 25 },
       tracking: { capability: "PARTIAL" },
       trackingDuration: { capability: "PARTIAL", measurement: 12 },
-      contrastSensitivity: { capability: "PARTIAL", measurement: 30 },
-      intensityLow: { capability: "PARTIAL", measurement: 45 },
-      intensityMedium: { capability: "PARTIAL", measurement: 45 },
-      intensityHigh: { capability: "PARTIAL", measurement: 45 },
+      contrastSensitivity: { capability: "PARTIAL", measurement: "strong" },
+      intensityLow: { capability: "PARTIAL", measurement: "with-support" },
+      intensityMedium: { capability: "PARTIAL", measurement: "with-support" },
+      intensityHigh: { capability: "PARTIAL", measurement: "with-support" },
       colorLow: { capability: "FULL" },
       colorMedium: { capability: "FULL" },
       colorHigh: { capability: "FULL" },
@@ -294,10 +315,10 @@ export const lowVisionColour = defineCapacity(
     },
     modify: { sight: { capability: "PARTIAL" } },
     add: {
-      colorLow: { capability: "PARTIAL", measurement: 40 },
-      colorMedium: { capability: "PARTIAL", measurement: 25 },
-      colorHigh: { capability: "PARTIAL", measurement: 80 },
-      intensityMedium: { capability: "PARTIAL", measurement: 70 },
+      colorLow: { capability: "PARTIAL", measurement: "with-support" },
+      colorMedium: { capability: "PARTIAL", measurement: "unreliable" },
+      colorHigh: { capability: "PARTIAL", measurement: "reliably" },
+      intensityMedium: { capability: "PARTIAL", measurement: "when-emphasised" },
       contrastSensitivity: { capability: "FULL" },
     },
   }),
@@ -368,7 +389,7 @@ export const handTremor = defineCapacity(
       basis: EXEMPLAR,
     },
     modify: {
-      effectorStability: { capability: "PARTIAL", measurement: 35 },
+      effectorStability: { capability: "PARTIAL", measurement: "unsteady" },
       pointerControl: { capability: "PARTIAL", measurement: [{ site: "hands", side: "both" }, { site: "fingertips", side: "both" }] },
       keyControl: { capability: "PARTIAL", measurement: [{ site: "hands", side: "both" }, { site: "fingertips", side: "both" }] },
     },
@@ -396,8 +417,10 @@ export const handTremor = defineCapacity(
            * the formula or algorithm used to determine the value". */
           cite:
             "MOUNTED: fontSizeSeated.size. HANDHELD: fontSizeSeated.size scaled by " +
-            "(1 + (100 - effectorStability)/100), clamped to 4..96pt and rounded to 1dp. " +
-            "At 35% stability a hand-held display needs 1.65x the mounted size.",
+            "TARGET_FACTOR[effectorStability], clamped to 4..96pt and rounded to 1dp. " +
+            "At 'unsteady' a hand-held display needs 2x the mounted size. The factor is " +
+            "a LOOKUP, not a calculation: STEADINESS is ordinal, so there is no arithmetic " +
+            "to do on it, and the four numbers are declared where they can be argued with.",
           formula: A.tuple({
             size: A.ifThen(
               A.eq(A.influence("deviceStability"), A.lit("HANDHELD")),
@@ -405,10 +428,7 @@ export const handTremor = defineCapacity(
                 A.clamp(
                   A.mul(
                     A.field(A.measure("fontSizeSeated"), "size"),
-                    A.add(
-                      A.lit(1),
-                      A.div(A.sub(A.lit(100), A.measure("effectorStability")), A.lit(100)),
-                    ),
+                    steadinessFactor("effectorStability"),
                   ),
                   A.lit(4),
                   A.lit(96),
@@ -645,7 +665,7 @@ export const multipleSclerosis = defineCapacity(
     modify: {
       sight: { capability: "PARTIAL" },
       touch: { capability: "NONE" },
-      effectorStability: { capability: "PARTIAL", measurement: 30 },
+      effectorStability: { capability: "PARTIAL", measurement: "unsteady" },
       pointerControl: { capability: "PARTIAL", measurement: [{ site: "hands", side: "both" }, { site: "fingertips", side: "both" }] },
       keyControl: { capability: "PARTIAL", measurement: [{ site: "hands", side: "both" }, { site: "fingertips", side: "both" }] },
     },
@@ -661,7 +681,7 @@ export const multipleSclerosis = defineCapacity(
        * fatigue is not a sensory limit, and the model must allow saying so. */
       listeningDuration: { capability: "PARTIAL", measurement: 15 },
       /* The property this profile forced into existence. */
-      kinaesthesia: { capability: "PARTIAL", measurement: 25 },
+      kinaesthesia: { capability: "PARTIAL", measurement: "needs-watching" },
       sustainedPress: { capability: "PARTIAL" },
       minKeyRepeatDelay: { capability: "PARTIAL", measurement: 1200 },
       minTargetSize: { capability: "PARTIAL", measurement: 28 },
@@ -754,7 +774,7 @@ export const deafBlind = defineCapacity(
       },
       /* Touch is now the entire input and output surface, so its acuity stops
        * being a detail and becomes the design constraint. */
-      vibrationDetection: { capability: "PARTIAL", measurement: 85 },
+      vibrationDetection: { capability: "PARTIAL", measurement: "subtle" },
     },
   }),
 );
@@ -831,7 +851,7 @@ export const deafenedNotch = defineCapacity(
        * pseudo-precision and issue #8 will replace it with an anchored scale;
        * recorded here in the property's current type rather than inventing a
        * one-off. */
-      effectorStability: { capability: "PARTIAL", measurement: 55 },
+      effectorStability: { capability: "PARTIAL", measurement: "mostly-steady" },
     },
     add: {
       /* THE GAP. Two bands, nothing usable between 3 and 6 kHz — which is
@@ -1023,7 +1043,7 @@ export const switchScanning = defineCapacity(
       /* One site, and the model now makes us say which. A head switch is a
         * different design problem from a hand switch even at the same count. */
        keyControl: { capability: "PARTIAL", measurement: [{ site: "head", side: "midline" }] },
-       effectorStability: { capability: "PARTIAL", measurement: 15 },
+       effectorStability: { capability: "PARTIAL", measurement: "large-only" },
     },
     add: {
       /* One site, so scanning must be timed — the count is what forces it. */

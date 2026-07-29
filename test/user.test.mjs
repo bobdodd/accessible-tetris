@@ -408,10 +408,22 @@ ok("blind-since-birth is one changed line, and nothing is zeroed", () => {
 });
 
 ok("the two low-vision exemplars differ in the right dimension", () => {
-  eq(lowVisionContrast.settings.contrastSensitivity.measurement, 30, "contrast impaired");
+  eq(lowVisionContrast.settings.contrastSensitivity.measurement, "strong", "contrast impaired");
   eq(lowVisionContrast.settings.colorMedium.capability, "FULL", "colour intact");
-  eq(lowVisionColour.settings.colorMedium.measurement, 25, "colour impaired");
+  eq(lowVisionColour.settings.colorMedium.measurement, "unreliable", "colour impaired");
   eq(lowVisionColour.settings.contrastSensitivity.capability, "FULL", "contrast intact");
+});
+
+/* The colour exemplar is a red-green pattern, and the POINT of it is that the
+ * two are not equally affected. Mechanically banding the old percentages put
+ * colorLow and colorMedium on the same scale point and flattened exactly the
+ * distinction the profile exists to carry; this pins the shape so a future
+ * migration cannot quietly do it again. */
+ok("the colour exemplar keeps green worse than red, and blue unaffected", () => {
+  const s = lowVisionColour.settings;
+  eq(s.colorMedium.measurement, "unreliable", "green is the worst channel");
+  eq(s.colorLow.measurement, "with-support", "red is impaired but usable");
+  eq(s.colorHigh.measurement, "reliably", "blue carries");
 });
 
 ok("keyboard-only is a capability, not a preference", () => {
@@ -422,16 +434,23 @@ ok("keyboard-only is a capability, not a preference", () => {
 
 console.log("\nordered discrete scales — the groundwork for Likert (issue #8):");
 
-/* A fixture rather than a real property: nothing in the vocabulary is an
- * ordered scale yet, because converting the ten percentages is issue #8. This
- * exercises the machinery so it does not rot before it is used. */
+/* A fixture alongside the real thing. Issue #8 is now DONE in the vocabulary —
+ * the ten percentages are five ordered scales — but this keeps a scale whose
+ * values differ from any real one, so the machinery is exercised independently
+ * of whatever the vocabulary happens to say today. It also holds an UNORDERED
+ * discrete scale (`signs`), because the interesting guarantee is that ranking
+ * that one throws rather than inventing an order. */
 const likertModel = defineCapability({
   id: "fixture.likert", version: "1",
   ontologies: { visual: { description: "d" }, language: { description: "d" } },
   properties: {
-    sight: { ontology: "visual", description: "d" },
+    sight: {
+      ontology: "visual", description: "d",
+      decides: "whether anything may be carried visually at all",
+    },
     contrastNeed: {
       ontology: "visual", precedence: ["sight"], description: "d",
+      decides: "how much contrast the interface must guarantee",
       measurement: {
         type: "discrete",
         ordered: true,
@@ -445,6 +464,7 @@ const likertModel = defineCapability({
     },
     signs: {
       ontology: "language", description: "d",
+      decides: "which sign languages may be rendered",
       measurement: { type: "discrete", values: ["ASL", "LSQ", "BSL"], multiple: true },
     },
   },
@@ -659,7 +679,7 @@ ok("a tremor can leave someone fluent at receiving and unable to deliver", () =>
       touch: { capability: "FULL" },
       keyControl: { capability: "FULL" },
       kinaesthesia: { capability: "FULL" },
-      effectorStability: { capability: "PARTIAL", measurement: 20 },
+      effectorStability: { capability: "PARTIAL", measurement: "large-only" },
       hapticLanguageSet: { capability: "PARTIAL", measurement: ["DeafblindManual"] },
       signLanguageSet: { capability: "PARTIAL", measurement: ["ASL"] },
       /* Receives fine. */
@@ -704,7 +724,7 @@ ok("sign languages are named unambiguously, and codes are flagged as codes", () 
 ok("MS: touch NONE, but kinaesthesia is a separate property that survives", () => {
   eq(multipleSclerosis.settings.touch.capability, "NONE", "no tactile sense");
   eq(multipleSclerosis.settings.kinaesthesia.capability, "PARTIAL", "proprioception partial");
-  eq(multipleSclerosis.settings.kinaesthesia.measurement, 25, "and measured");
+  eq(multipleSclerosis.settings.kinaesthesia.measurement, "needs-watching", "and measured");
   /* The dissociation is the point: modelling proprioception under touch would
    * have made this profile inexpressible. */
   eq(userCapability.properties.kinaesthesia.precedence.length, 0, "not a child of touch");
@@ -742,10 +762,16 @@ ok("minTargetSize needs three parents, one in another ontology", () => {
 
 console.log("\nthe body, not just the hands:");
 
+/* Effector entries are {site, side} tuples since one-handedness was added, so
+ * they cannot be join()ed as bare strings. Asserting the side too is the point:
+ * "head" and "head/midline" are different claims, and the second is the one the
+ * model now makes. */
+const effectors = (m) => m.map((e) => `${e.site}/${e.side}`).join(",");
+
 ok("touch says WHERE, and unlisted sites are unimpaired", () => {
   const spec = userCapability.properties.touch.measurement;
   const parts = spec.of.parts.map((p) => p.name);
-  eq(parts.join(","), "site,level", "a site and a level per entry");
+  eq(parts.join(","), "site,side,level", "a site, a side and a level per entry");
   /* Vibration white finger: fingertips gone, hands reduced, everything else
    * unlisted and therefore fine. Neither whole-body nor hands-only could say
    * this — the property has now been wrong in both directions. */
@@ -782,8 +808,8 @@ ok("a toe typist has FULL control, done with feet", () => {
   const s = toeTypist.settings;
   /* The capability is not diminished by the site. "PARTIAL" here means "the
    * sites are named", not "reduced" — and effectorStability is FULL. */
-  eq(s.keyControl.measurement.join(","), "feet,toes", "types with feet");
-  eq(s.pointerControl.measurement.join(","), "feet,toes", "points with feet");
+  eq(effectors(s.keyControl.measurement), "feet/both,toes/both", "types with feet");
+  eq(effectors(s.pointerControl.measurement), "feet/both,toes/both", "points with feet");
   eq(s.effectorStability.capability, "FULL", "no less steady than a hand");
   /* And sensation lives where the person does. */
   const sites = Object.fromEntries(s.touch.measurement.map((m) => [m.site, m.level]));
@@ -794,9 +820,16 @@ ok("a toe typist has FULL control, done with feet", () => {
 ok("naming the effector is now compulsory for partial control", () => {
   /* Before this, `keyControl: PARTIAL` said nothing about what does the work.
    * A head switch and a toe are different design problems at the same count. */
-  eq(switchScanning.settings.keyControl.measurement.join(","), "head", "a head switch");
-  eq(handTremor.settings.keyControl.measurement.join(","), "hands,fingertips", "hands");
-  eq(userCapability.properties.keyControl.measurement.multiple, true, "one or more sites");
+  eq(effectors(switchScanning.settings.keyControl.measurement), "head/midline", "a head switch");
+  eq(effectors(handTremor.settings.keyControl.measurement), "hands/both,fingertips/both", "hands");
+  /* "One or more sites" is carried by the SHAPE, not by a `multiple` flag: the
+   * measurement is a composite LIST whose entries are {site, side} composites.
+   * The flag went away when effectors gained a side, and this assertion had
+   * been reading `undefined` as a pass ever since — the suite was crashing
+   * before it got here, so nobody found out. */
+  const spec = userCapability.properties.keyControl.measurement;
+  eq(spec.type, "composite", "a list of effectors");
+  eq(spec.of.parts.map((p) => p.name).join(","), "site,side", "each entry names site and side");
 });
 
 ok("effectorStability is not named for hands", () => {
@@ -1181,7 +1214,11 @@ ok("hand tremor: mounted display uses the seated size", () => {
 
 ok("hand tremor: hand-held display needs a larger size", () => {
   const { settings, trace } = resolve(userCapability, handTremor, { deviceStability: "HANDHELD" });
-  eq(settings.minReadFontSizeForFont.measurement.size, 19.8, "handheld, exactly 19.8");
+  /* 12pt x TARGET_FACTOR["unsteady"] = 24. Was 19.8, from 12 x (1 + (100-35)/100).
+   * The number moved because the arithmetic went away: there is no straight line
+   * between steadiness and target size to compute along, so the factor is now a
+   * declared lookup that someone who has watched a shaking hand can correct. */
+  eq(settings.minReadFontSizeForFont.measurement.size, 24, "handheld, factor 2.0");
   eq(settings.minReadFontSizeForFont.measurement.font, "system-sans", "font carried through");
   if (!trace.find((t) => t.derived === "minReadFontSizeForFont")?.cite) {
     throw new Error("the (M) formula was not cited in the trace");

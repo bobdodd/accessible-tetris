@@ -82,13 +82,13 @@ Table 2 — capability model of colour-blindness.
 | Property | Values (PARTIAL measurement) | Parent | What it decides |
 |---|---|---|---|
 | `sight` | — | None | whether to render visually at all |
-| `colorHigh` | 1–99 % | sight | the visual palette — which hues and tones may carry meaning — *with `colorLow`, `colorMedium`, `intensityLow`, `intensityMedium`, `intensityHigh`, `contrastSensitivity`* |
-| `colorLow` | 1–99 % | sight | the visual palette — which hues and tones may carry meaning — *with `colorMedium`, `colorHigh`, `intensityLow`, `intensityMedium`, `intensityHigh`, `contrastSensitivity`* |
-| `colorMedium` | 1–99 % | sight | the visual palette — which hues and tones may carry meaning — *with `colorLow`, `colorHigh`, `intensityLow`, `intensityMedium`, `intensityHigh`, `contrastSensitivity`* |
-| `contrastSensitivity` | 1–99 % | sight | the visual palette — which hues and tones may carry meaning — *with `colorLow`, `colorMedium`, `colorHigh`, `intensityLow`, `intensityMedium`, `intensityHigh`* |
-| `intensityHigh` | 1–99 % | sight | the visual palette — which hues and tones may carry meaning — *with `colorLow`, `colorMedium`, `colorHigh`, `intensityLow`, `intensityMedium`, `contrastSensitivity`* |
-| `intensityLow` | 1–99 % | sight | the visual palette — which hues and tones may carry meaning — *with `colorLow`, `colorMedium`, `colorHigh`, `intensityMedium`, `intensityHigh`, `contrastSensitivity`* |
-| `intensityMedium` | 1–99 % | sight | the visual palette — which hues and tones may carry meaning — *with `colorLow`, `colorMedium`, `colorHigh`, `intensityLow`, `intensityHigh`, `contrastSensitivity`* |
+| `colorHigh` | unreliable, with-support, when-emphasised, reliably | sight | the visual palette — which hues and tones may carry meaning — *with `colorLow`, `colorMedium`, `intensityLow`, `intensityMedium`, `intensityHigh`, `contrastSensitivity`* |
+| `colorLow` | unreliable, with-support, when-emphasised, reliably | sight | the visual palette — which hues and tones may carry meaning — *with `colorMedium`, `colorHigh`, `intensityLow`, `intensityMedium`, `intensityHigh`, `contrastSensitivity`* |
+| `colorMedium` | unreliable, with-support, when-emphasised, reliably | sight | the visual palette — which hues and tones may carry meaning — *with `colorLow`, `colorHigh`, `intensityLow`, `intensityMedium`, `intensityHigh`, `contrastSensitivity`* |
+| `contrastSensitivity` | maximum, strong, raised, typical | sight | the visual palette — which hues and tones may carry meaning — *with `colorLow`, `colorMedium`, `colorHigh`, `intensityLow`, `intensityMedium`, `intensityHigh`* |
+| `intensityHigh` | unreliable, with-support, when-emphasised, reliably | sight | the visual palette — which hues and tones may carry meaning — *with `colorLow`, `colorMedium`, `colorHigh`, `intensityLow`, `intensityMedium`, `contrastSensitivity`* |
+| `intensityLow` | unreliable, with-support, when-emphasised, reliably | sight | the visual palette — which hues and tones may carry meaning — *with `colorLow`, `colorMedium`, `colorHigh`, `intensityMedium`, `intensityHigh`, `contrastSensitivity`* |
+| `intensityMedium` | unreliable, with-support, when-emphasised, reliably | sight | the visual palette — which hues and tones may carry meaning — *with `colorLow`, `colorMedium`, `colorHigh`, `intensityLow`, `intensityHigh`, `contrastSensitivity`* |
 
 ### Template: listening
 
@@ -111,10 +111,10 @@ MY CHOICE. Motor capability: what the user can do to the device.
 | Property | Values (PARTIAL measurement) | Parent | What it decides |
 |---|---|---|---|
 | `keyControl` | collection of site: head, face, mouth, trunk, arms, hands, fingertips, legs, feet, toes + side: left, right, both, midline, asDeclared | None | which input channels are available, and from which body site — *with `pointerControl`, `headControl`, `gazeControl`, `breathControl`, `speech`* |
-| `effectorStability` | 1–99 % | None | the smallest a control may be drawn — *with `minTargetSize`, `gazeAccuracy`* |
+| `effectorStability` | large-only, unsteady, mostly-steady, steady | None | the smallest a control may be drawn — *with `minTargetSize`, `gazeAccuracy`* |
 | `headControl` | — | None | which input channels are available, and from which body site — *with `pointerControl`, `keyControl`, `gazeControl`, `breathControl`, `speech`* |
 | `inputDuration` | 1–480 min | None | how long a session may run before a break is offered — *with `focusDuration`, `trackingDuration`, `listeningDuration`* |
-| `kinaesthesia` | 1–99 % | None | whether the user needs visual confirmation of where their effector is |
+| `kinaesthesia` | needs-watching, needs-landing-check, reliable-unseen | None | whether the user needs visual confirmation of where their effector is |
 | `minKeyRepeatDelay` | 1–2000 ms | keyControl, effectorStability | how long a selection must be held, and how long before it repeats — *with `sustainedPress`, `dwellTolerance`* |
 | `pointerControl` | collection of site: head, face, mouth, trunk, arms, hands, fingertips, legs, feet, toes + side: left, right, both, midline, asDeclared | None | which input channels are available, and from which body site — *with `keyControl`, `headControl`, `gazeControl`, `breathControl`, `speech`* |
 | `minTargetSize` | 1–40 mm | pointerControl, effectorStability, kinaesthesia | the smallest a control may be drawn — *with `effectorStability`, `gazeAccuracy`* |
@@ -170,8 +170,8 @@ MY CHOICE. The haptic design space, both halves of it.
 | Property | Values (PARTIAL measurement) | Parent | What it decides |
 |---|---|---|---|
 | `touch` | collection of site: head, face, mouth, trunk, arms, hands, fingertips, legs, feet, toes + side: left, right, both, midline + level: none, trace, reduced, full, asDeclared | None | whether haptic feedback may be used, and where — *with `vibrationDetection`* |
-| `kinaesthesia` | 1–99 % | None | whether the user needs visual confirmation of where their effector is |
-| `vibrationDetection` | 1–99 % | touch | whether haptic feedback may be used, and where — *with `touch`* |
+| `kinaesthesia` | needs-watching, needs-landing-check, reliable-unseen | None | whether the user needs visual confirmation of where their effector is |
+| `vibrationDetection` | strong-only, typical, subtle | touch | whether haptic feedback may be used, and where — *with `touch`* |
 
 ### What the model is for
 
@@ -310,15 +310,15 @@ with *"sight + signLanguageSet"*.
 | — | `colorHigh` | **FULL** | — | sight |
 | — | `colorLow` | **FULL** | — | sight |
 | — | `colorMedium` | **FULL** | — | sight |
-| — | `contrastSensitivity` | **PARTIAL** | 30 % | sight |
+| — | `contrastSensitivity` | **PARTIAL** | strong | sight |
 | — | `effectorStability` | **FULL** | — | None |
 | — | `focus` | **PARTIAL** | — | sight |
 | — | `focusDuration` | **PARTIAL** | 25 min | focus |
 | — | `language` | **FULL** | — | None |
 | — | `touch` | **FULL** | — | None |
-| — | `intensityHigh` | **PARTIAL** | 45 % | sight |
-| — | `intensityLow` | **PARTIAL** | 45 % | sight |
-| — | `intensityMedium` | **PARTIAL** | 45 % | sight |
+| — | `intensityHigh` | **PARTIAL** | with-support | sight |
+| — | `intensityLow` | **PARTIAL** | with-support | sight |
+| — | `intensityMedium` | **PARTIAL** | with-support | sight |
 | — | `readFontText` | **PARTIAL** | — | sight, language |
 | — | `minReadFontSizeForFont` | **PARTIAL** | size 18, font system-sans | readFontText, effectorStability |
 | — | `pointerControl` | **FULL** | — | None |
@@ -349,14 +349,14 @@ with *"sight + signLanguageSet"*.
 | — | `keyControl` | **FULL** | — | None |
 | — | `hearing` | **FULL** | — | None |
 | — | `sight` | **PARTIAL** | — | None |
-| — | `colorHigh` | **PARTIAL** | 80 % | sight |
-| — | `colorLow` | **PARTIAL** | 40 % | sight |
-| — | `colorMedium` | **PARTIAL** | 25 % | sight |
+| — | `colorHigh` | **PARTIAL** | reliably | sight |
+| — | `colorLow` | **PARTIAL** | with-support | sight |
+| — | `colorMedium` | **PARTIAL** | unreliable | sight |
 | — | `contrastSensitivity` | **FULL** | — | sight |
 | — | `effectorStability` | **FULL** | — | None |
 | — | `language` | **FULL** | — | None |
 | — | `touch` | **FULL** | — | None |
-| — | `intensityMedium` | **PARTIAL** | 70 % | sight |
+| — | `intensityMedium` | **PARTIAL** | when-emphasised | sight |
 | — | `pointerControl` | **FULL** | — | None |
 
 **Not recorded: 47 of 59 properties.**
@@ -415,7 +415,7 @@ with *"sight + signLanguageSet"*.
 | — | `keyControl` | **PARTIAL** | site hands, side both; site fingertips, side both | None |
 | — | `hearing` | **FULL** | — | None |
 | — | `sight` | **FULL** | — | None |
-| — | `effectorStability` | **PARTIAL** | 35 % | None |
+| — | `effectorStability` | **PARTIAL** | unsteady | None |
 | — | `language` | **FULL** | — | None |
 | — | `touch` | **FULL** | — | None |
 | — | `minKeyRepeatDelay` | **PARTIAL** | 900 ms | keyControl, effectorStability |
@@ -437,14 +437,14 @@ model requires each one to cite its formula.
 
 | Setting (M) | Reads | External influences | Formula |
 |---|---|---|---|
-| `minReadFontSizeForFont` | `fontSizeSeated`, `effectorStability` | `deviceStability` | MOUNTED: fontSizeSeated.size. HANDHELD: fontSizeSeated.size scaled by (1 + (100 - effectorStability)/100), clamped to 4..96pt and rounded to 1dp. At 35% stability a hand-held display needs 1.65x the mounted size. |
+| `minReadFontSizeForFont` | `fontSizeSeated`, `effectorStability` | `deviceStability` | MOUNTED: fontSizeSeated.size. HANDHELD: fontSizeSeated.size scaled by TARGET_FACTOR[effectorStability], clamped to 4..96pt and rounded to 1dp. At 'unsteady' a hand-held display needs 2x the mounted size. The factor is a LOOKUP, not a calculation: STEADINESS is ordinal, so there is no arithmetic to do on it, and the four numbers are declared where they can be argued with. |
 
 **Resolved against `deviceStability`:**
 
 | `deviceStability` | `minReadFontSizeForFont` |
 |---|---|
 | MOUNTED | size 12, font system-sans |
-| HANDHELD | size 19.8, font system-sans |
+| HANDHELD | size 24, font system-sans |
 
 One profile, two answers, no duplicated context. Access for All would need two
 whole `<context>` blocks to say this, which is the duplication the paper's §3
@@ -547,12 +547,12 @@ criticises.
 | — | `keyControl` | **PARTIAL** | site hands, side both; site fingertips, side both | None |
 | — | `hearing` | **FULL** | — | None |
 | — | `sight` | **PARTIAL** | — | None |
-| — | `effectorStability` | **PARTIAL** | 30 % | None |
+| — | `effectorStability` | **PARTIAL** | unsteady | None |
 | — | `focus` | **PARTIAL** | — | sight |
 | — | `focusDuration` | **PARTIAL** | 8 min | focus |
 | — | `language` | **FULL** | — | None |
 | — | `touch` | **NONE** | — | None |
-| — | `kinaesthesia` | **PARTIAL** | 25 % | None |
+| — | `kinaesthesia` | **PARTIAL** | needs-watching | None |
 | — | `listeningDuration` | **PARTIAL** | 15 min | hearing |
 | — | `minKeyRepeatDelay` | **PARTIAL** | 1200 ms | keyControl, effectorStability |
 | — | `readFontText` | **PARTIAL** | — | sight, language |
@@ -600,7 +600,7 @@ criticises.
 | — | `signLanguageSet` | **PARTIAL** | ASL | language |
 | — | `readSignText` | **NONE** | — | sight, signLanguageSet |
 | — | `readTactileSign` | **FULL** | — | touch, signLanguageSet |
-| — | `vibrationDetection` | **PARTIAL** | 85 % | touch |
+| — | `vibrationDetection` | **PARTIAL** | subtle | touch |
 | — | `writeSignSet` | **PARTIAL** | Visual, Tactile | signLanguageSet, effectorStability, kinaesthesia |
 | — | `writeTactileSet` | **PARTIAL** | Braille, DeafblindManual, PrintOnPalm | hapticLanguageSet, effectorStability, touch |
 
@@ -633,7 +633,7 @@ criticises.
 | — | `azimuthResolution` | **PARTIAL** | 20 deg | hearing, binauralHearing |
 | — | `sight` | **FULL** | — | None |
 | — | `concurrentStreams` | **PARTIAL** | 2 streams | hearing |
-| — | `effectorStability` | **PARTIAL** | 55 % | None |
+| — | `effectorStability` | **PARTIAL** | mostly-steady | None |
 | — | `elevationResolution` | **PARTIAL** | 30 deg | hearing |
 | — | `language` | **FULL** | — | None |
 | — | `touch` | **PARTIAL** | site fingertips, side both, level none; site hands, side both, level reduced | None |
@@ -727,7 +727,7 @@ criticises.
 | — | `activationTiming` | **PARTIAL** | needs a slow scan | keyControl |
 | — | `hearing` | **FULL** | — | None |
 | — | `sight` | **FULL** | — | None |
-| — | `effectorStability` | **PARTIAL** | 15 % | None |
+| — | `effectorStability` | **PARTIAL** | large-only | None |
 | — | `language` | **FULL** | — | None |
 | — | `touch` | **FULL** | — | None |
 | — | `inputDuration` | **PARTIAL** | 20 min | None |
@@ -972,14 +972,14 @@ NONE, or because no parent is PARTIAL and so the question does not arise.
 | `azimuthResolution` |  |  |  |  |  |  |  | PARTIAL 45 deg |  |  | PARTIAL 20 deg |  |  |  |  |  |  |  |
 | `breathControl` |  |  |  |  |  |  |  |  |  |  |  |  |  |  | PARTIAL 4 signals |  |  |  |
 | `sight` | FULL | NONE | PARTIAL | PARTIAL | FULL | FULL | FULL | FULL | PARTIAL | NONE | FULL | FULL | FULL | FULL | FULL | FULL | FULL | FULL |
-| `colorHigh` |  |  | FULL | PARTIAL 80 % |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| `colorLow` |  |  | FULL | PARTIAL 40 % |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| `colorMedium` |  |  | FULL | PARTIAL 25 % |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| `colorHigh` |  |  | FULL | PARTIAL reliably |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| `colorLow` |  |  | FULL | PARTIAL with-support |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| `colorMedium` |  |  | FULL | PARTIAL unreliable |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
 | `concurrentStreams` |  |  |  |  |  |  |  | PARTIAL 2 streams |  |  | PARTIAL 2 streams |  |  |  |  |  |  |  |
-| `contrastSensitivity` |  |  | PARTIAL 30 % | FULL |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| `contrastSensitivity` |  |  | PARTIAL strong | FULL |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
 | `gazeControl` |  |  |  |  |  |  |  |  |  |  |  |  |  | PARTIAL |  |  |  |  |
 | `dwellTolerance` |  |  |  |  |  |  |  |  |  |  |  |  |  | PARTIAL 2500 ms |  |  |  |  |
-| `effectorStability` | FULL | FULL | FULL | FULL | FULL | PARTIAL 35 % | FULL | FULL | PARTIAL 30 % | FULL | PARTIAL 55 % | FULL | PARTIAL 15 % | NONE | NONE | FULL | FULL | FULL |
+| `effectorStability` | FULL | FULL | FULL | FULL | FULL | PARTIAL unsteady | FULL | FULL | PARTIAL unsteady | FULL | PARTIAL mostly-steady | FULL | PARTIAL large-only | NONE | NONE | FULL | FULL | FULL |
 | `elevationResolution` |  |  |  |  |  |  |  | PARTIAL 40 deg |  |  | PARTIAL 30 deg |  |  |  |  |  |  |  |
 | `focus` |  |  | PARTIAL |  |  |  |  |  | PARTIAL |  |  |  |  |  |  |  |  |  |
 | `focusDuration` |  |  | PARTIAL 25 min |  |  |  |  |  | PARTIAL 8 min |  |  |  |  |  |  |  |  |  |
@@ -991,10 +991,10 @@ NONE, or because no parent is PARTIAL and so the question does not arise.
 | `inputDuration` |  |  |  |  |  |  |  |  |  |  |  |  | PARTIAL 20 min | PARTIAL 15 min | PARTIAL 45 min |  |  | PARTIAL 20 min |
 | `readAudioText` |  |  |  |  |  |  | NONE | PARTIAL |  | NONE | PARTIAL |  |  |  |  |  |  |  |
 | `intelligibleVoicePitch` |  |  |  |  |  |  |  | PARTIAL 165–300 |  |  | PARTIAL 165–300 |  |  |  |  |  |  |  |
-| `intensityHigh` |  |  | PARTIAL 45 % |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| `intensityLow` |  |  | PARTIAL 45 % |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| `intensityMedium` |  |  | PARTIAL 45 % | PARTIAL 70 % |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
-| `kinaesthesia` |  |  |  |  |  |  |  |  | PARTIAL 25 % |  |  |  |  |  | NONE |  |  |  |
+| `intensityHigh` |  |  | PARTIAL with-support |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| `intensityLow` |  |  | PARTIAL with-support |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| `intensityMedium` |  |  | PARTIAL with-support | PARTIAL when-emphasised |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+| `kinaesthesia` |  |  |  |  |  |  |  |  | PARTIAL needs-watching |  |  |  |  |  | NONE |  |  |  |
 | `knownLanguages` |  |  |  |  |  |  | PARTIAL **en-CA** — listening none, speaking basic, reading fluent, writing fluent |  |  |  |  | PARTIAL **pa** — listening native, speaking native, reading fluent, writing conversational; **en-CA** — listening fluent, speaking conversational, reading fluent, writing conversational |  | PARTIAL **en-CA** — listening native, speaking none, reading native, writing native |  |  |  |  |
 | `listeningDuration` |  |  |  |  |  |  |  | PARTIAL 20 min | PARTIAL 15 min |  | PARTIAL 25 min |  |  |  |  |  |  |  |
 | `minInterWordGap` |  |  |  |  |  |  |  | PARTIAL 220 ms |  |  | PARTIAL 260 ms |  |  |  |  |  |  |  |
@@ -1017,7 +1017,7 @@ NONE, or because no parent is PARTIAL and so the question does not arise.
 | `tracking` |  |  | PARTIAL |  |  |  |  |  | PARTIAL |  |  |  |  |  |  |  |  |  |
 | `trackingDuration` |  |  | PARTIAL 12 min |  |  |  |  |  | PARTIAL 4 min |  |  |  |  |  |  |  |  |  |
 | `usableFrequencyRange` |  |  |  |  |  |  |  | PARTIAL 20–8000 |  |  | PARTIAL 20–3000, 6000–12000 |  |  |  |  |  |  |  |
-| `vibrationDetection` |  |  |  |  |  |  |  |  |  | PARTIAL 85 % | NONE |  |  |  |  |  |  |  |
+| `vibrationDetection` |  |  |  |  |  |  |  |  |  | PARTIAL subtle | NONE |  |  |  |  |  |  |  |
 | `writeFontSet` |  |  |  |  | PARTIAL SELECT |  |  |  |  |  |  |  |  |  |  |  |  |  |
 | `writeSignSet` |  |  |  |  |  |  | PARTIAL Visual |  |  | PARTIAL Visual, Tactile |  |  |  |  |  |  |  |  |
 | `writeTactileSet` |  |  |  |  |  |  |  |  |  | PARTIAL Braille, DeafblindManual, PrintOnPalm |  |  |  |  |  |  |  |  |

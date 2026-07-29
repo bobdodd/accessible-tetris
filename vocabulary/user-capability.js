@@ -43,11 +43,95 @@
 
 import { defineCapability } from "../cradle/user/capability.js";
 
-/** The paper's percentage idiom, used throughout Table 2: "100% would be no
- *  impairment… A mid-value of 50% would suggest a mild form of colour
- *  blindness." Higher is more able. Note that total absence is NOT 0% — it is
- *  a capability of NONE, and the percentage does not arise. */
-const percent = { type: "numeric", min: 1, max: 99, unit: "%" };
+/** REPLACING THE PAPER'S PERCENTAGE IDIOM (issue #8).
+ *
+ *  MSIADU'09 Table 2 measured partial capability as a percentage: "100% would
+ *  be no impairment… A mid-value of 50% would suggest a mild form of colour
+ *  blindness." That reads as measurement and is not one. Nobody can report
+ *  their contrast sensitivity as thirty per cent; no instrument reachable in
+ *  an interview produces the figure; and the ten properties that carried it
+ *  were filled in by picking numbers that merely looked plausible.
+ *
+ *  What replaces it: ordered discrete scales, every point of which is
+ *  something a person can be asked and can answer. Each is sized to its own
+ *  subject rather than to a house style — three points where the subject has
+ *  three states, four where it has four (Bob's call 2026-07-29: "whatever is
+ *  consistent with the ontology of the scale").
+ *
+ *  This is a DEPARTURE FROM THE PUBLISHED PAPER, stated rather than smuggled.
+ *  The paper is over a decade old and this corrects it.
+ *
+ *  ORDINAL, NOT INTERVAL. The distance between neighbouring points is not
+ *  known and is not equal to any other distance, so nothing may do arithmetic
+ *  on these values. Where a number is needed downstream it comes from a
+ *  DECLARED lookup (see TARGET_FACTOR) — which puts the assumption somewhere
+ *  it can be argued with, instead of hiding it inside a formula.
+ *
+ *  `ordered: true` is what lets ordinalOf/isAtLeast rank a scale. It is
+ *  deliberately absent from lists that have no rank, such as BODY_SITES, and
+ *  comparing those throws rather than inventing an order. */
+const orderedScale = (values) => ({ type: "discrete", values, ordered: true });
+
+/** How far a colour or intensity channel can be TRUSTED to carry meaning.
+ *  Shared by all six palette channels, because they share one `decides`.
+ *
+ *  Lives inside PARTIAL. NONE already means the channel is not perceived at
+ *  all; `unreliable` is the different and far commoner case of someone who
+ *  perceives the light perfectly well and still cannot discriminate with it —
+ *  a deuteranope sees green, and still cannot separate red from green. */
+const CARRIES = orderedScale([
+  "unreliable",       // seen, but never trustworthy for telling things apart
+  "with-support",     // may reinforce a cue carried another way, never alone
+  "when-emphasised",  // carries alone if the difference is large or saturated
+  "reliably",         // carries alone at ordinary size and saturation
+]);
+
+/** How much contrast is needed before text and edges resolve. */
+const CONTRAST_NEED = orderedScale([
+  "maximum",  // black on white, nothing less
+  "strong",   // well beyond ordinary interface contrast
+  "raised",   // a little more than ordinary
+  "typical",  // ordinary contrast is fine
+]);
+
+/** The lightest vibration that reliably registers. Decides whether haptics may
+ *  be used at all, and how hard they must be driven. Every point is something
+ *  that can be handed to a person to feel, rather than asked about. */
+const VIBRATION = orderedScale([
+  "strong-only",  // only a strong sustained buzz
+  "typical",      // an ordinary phone-strength tap
+  "subtle",       // even a light tick
+]);
+
+/** Whether a person knows where their own effector is without looking. Phrased
+ *  as the question the renderer actually asks, which is this property's
+ *  `decides` almost word for word. */
+const POSITION_SENSE = orderedScale([
+  "needs-watching",       // must watch the hand or foot throughout
+  "needs-landing-check",  // can move unseen, must confirm arrival
+  "reliable-unseen",      // knows where it is without looking
+]);
+
+/** How steadily a control can be held or hit. */
+const STEADINESS = orderedScale([
+  "large-only",     // misses anything but a large target
+  "unsteady",       // misses small targets often
+  "mostly-steady",  // occasional misses
+  "steady",         // no trouble
+]);
+
+/** Steadiness -> how much bigger a target must be drawn. DECLARED, not
+ *  computed. The code this replaces multiplied a percentage, which asserted a
+ *  straight-line relationship between steadiness and target size that nobody
+ *  established and that the arithmetic hid. These are a starting position for
+ *  someone who has watched a person work with a shaking hand to correct. */
+export const TARGET_FACTOR = Object.freeze({
+  "large-only": 3.0,
+  "unsteady": 2.0,
+  "mostly-steady": 1.5,
+  "steady": 1.0,
+});
+
 const minutes = (max = 480) => ({ type: "numeric", min: 1, max, unit: "min" });
 
 const FLUENCY = ["none", "basic", "conversational", "fluent", "native"];
@@ -248,17 +332,18 @@ export const userCapability = defineCapability({
     /* --- visual: Table 2 -------------------------------------------------- */
 
     colorLow: {
-      ontology: "visual", precedence: ["sight"], measurement: percent,
+      ontology: "visual", precedence: ["sight"], measurement: CARRIES,
       decides: {
         what: "the visual palette — which hues and tones may carry meaning",
         with: ["colorMedium", "colorHigh", "intensityLow", "intensityMedium", "intensityHigh", "contrastSensitivity"],
       },
       description:
         "The effective low frequency colour perception of the user. FULL is no impairment; " +
-        "NONE is no low-frequency colour perception at all; PARTIAL carries the percentage.",
+        "NONE is no low-frequency colour perception at all; PARTIAL says how far the channel " +
+        "can be trusted to carry meaning.",
     },
     colorMedium: {
-      ontology: "visual", precedence: ["sight"], measurement: percent,
+      ontology: "visual", precedence: ["sight"], measurement: CARRIES,
       decides: {
         what: "the visual palette — which hues and tones may carry meaning",
         with: ["colorLow", "colorHigh", "intensityLow", "intensityMedium", "intensityHigh", "contrastSensitivity"],
@@ -266,7 +351,7 @@ export const userCapability = defineCapability({
       description: "The effective medium frequency colour perception of the user.",
     },
     colorHigh: {
-      ontology: "visual", precedence: ["sight"], measurement: percent,
+      ontology: "visual", precedence: ["sight"], measurement: CARRIES,
       decides: {
         what: "the visual palette — which hues and tones may carry meaning",
         with: ["colorLow", "colorMedium", "intensityLow", "intensityMedium", "intensityHigh", "contrastSensitivity"],
@@ -274,7 +359,7 @@ export const userCapability = defineCapability({
       description: "The effective high frequency colour perception of the user.",
     },
     intensityLow: {
-      ontology: "visual", precedence: ["sight"], measurement: percent,
+      ontology: "visual", precedence: ["sight"], measurement: CARRIES,
       decides: {
         what: "the visual palette — which hues and tones may carry meaning",
         with: ["colorLow", "colorMedium", "colorHigh", "intensityMedium", "intensityHigh", "contrastSensitivity"],
@@ -282,7 +367,7 @@ export const userCapability = defineCapability({
       description: "The effective low frequency intensity perception of the user.",
     },
     intensityMedium: {
-      ontology: "visual", precedence: ["sight"], measurement: percent,
+      ontology: "visual", precedence: ["sight"], measurement: CARRIES,
       decides: {
         what: "the visual palette — which hues and tones may carry meaning",
         with: ["colorLow", "colorMedium", "colorHigh", "intensityLow", "intensityHigh", "contrastSensitivity"],
@@ -290,7 +375,7 @@ export const userCapability = defineCapability({
       description: "The effective medium frequency intensity perception of the user.",
     },
     intensityHigh: {
-      ontology: "visual", precedence: ["sight"], measurement: percent,
+      ontology: "visual", precedence: ["sight"], measurement: CARRIES,
       decides: {
         what: "the visual palette — which hues and tones may carry meaning",
         with: ["colorLow", "colorMedium", "colorHigh", "intensityLow", "intensityMedium", "contrastSensitivity"],
@@ -298,7 +383,7 @@ export const userCapability = defineCapability({
       description: "The effective high frequency intensity perception of the user.",
     },
     contrastSensitivity: {
-      ontology: "visual", precedence: ["sight"], measurement: percent,
+      ontology: "visual", precedence: ["sight"], measurement: CONTRAST_NEED,
       decides: {
         what: "the visual palette — which hues and tones may carry meaning",
         with: ["colorLow", "colorMedium", "colorHigh", "intensityLow", "intensityMedium", "intensityHigh"],
@@ -479,7 +564,7 @@ export const userCapability = defineCapability({
         "fingertip tasks, and because a great many conditions take the extremities first.",
     },
     vibrationDetection: {
-      ontology: "haptic", precedence: ["touch"], measurement: percent,
+      ontology: "haptic", precedence: ["touch"], measurement: VIBRATION,
       decides: {
         what: "whether haptic feedback may be used, and where",
         with: ["touch"],
@@ -497,7 +582,7 @@ export const userCapability = defineCapability({
      * genuinely dissociate in both directions: touch can be lost with
      * proprioception intact, and proprioception lost with touch intact. */
     kinaesthesia: {
-      ontology: "haptic", precedence: [], measurement: percent,
+      ontology: "haptic", precedence: [], measurement: POSITION_SENSE,
       decides: "whether the user needs visual confirmation of where their effector is",
       description:
         "MY CHOICE. Can the user tell where their hand is without looking at it? " +
@@ -770,7 +855,7 @@ export const userCapability = defineCapability({
         "model must be able to tell those apart.",
     },
     effectorStability: {
-      ontology: "motor", precedence: [], measurement: percent,
+      ontology: "motor", precedence: [], measurement: STEADINESS,
       /* RENAMED from manualStability. The old name assumed hands, which is the
        * same hand-centric fault that had `touch` meaning fingertips and
        * `keyControl` meaning fingers. A toe typist has an effector and it is not
@@ -781,8 +866,8 @@ export const userCapability = defineCapability({
       },
       description:
         "MY CHOICE. Steadiness of whatever body part operates the control, under load — " +
-        "hand, foot, chin or head. FULL is no tremor; PARTIAL " +
-        "carries the percentage. The paper treats tremor as a capability with consequences " +
+        "hand, foot, chin or head. FULL is no tremor; PARTIAL says how steadily a control " +
+        "can be held or hit. The paper treats tremor as a capability with consequences " +
         "beyond input: 'the physical stability of the screen also plays a part, so that a " +
         "person with hand tremors may find that the readable size of text depends on " +
         "whether the screen is placed on a Table, or is held in their hand'.",
