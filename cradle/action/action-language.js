@@ -225,6 +225,51 @@ export const A = {
    * data as "always available". */
 
   influence: (name) => node("influence", { name }),
+
+  /* PREFERENCE ACCESSORS.
+   *
+   * A fourth data source alongside the store (settings), the influences
+   * (situation) and local scope. Preference is separate from capability
+   * because it answers a different question: capability describes what a
+   * person appears able to do, preference is what they would rather, and
+   * neither bounds the other.
+   *
+   * `stated` is its own accessor rather than a null test on `preferred`
+   * because "no preference was stated" is the exact condition a selection
+   * rule fires on, and that deserves to read as what it is:
+   *
+   *   A.ifThen(A.stated("readFontSize"),
+   *            A.preferred("readFontSize"),      // choosing by preference
+   *            <rule over capabilities and influences>)  // or by rule
+   *
+   * Written that way, preference-wins is structural. There is no branch in
+   * which a capability overrides a stated preference, because the capability
+   * side is only reached when nothing was stated. */
+  preferred: (name) => node("preferred", { name }),
+  stated: (name) => node("stated", { name }),
+
+  /* Position in a RANKED preference, 0 being most preferred, null where the
+   * person did not rank it. Null means "no view", NOT "last" — a rule that
+   * conflates them invents an opinion nobody expressed. Exists because the
+   * action language has no array operations, and rank comparison is what
+   * ranked preferences are actually consulted for. */
+  rankOf: (name, item) => node("rankOf", { name, item }),
+
+  /* WRITE an inferred preference.
+   *
+   * A high-level preference can imply lower-level ones: someone who puts audio
+   * ahead of vision has, in effect, said things about speech rate and earcons
+   * they never enumerated. Those inferred preferences are still USER-DRIVEN —
+   * their whole origin is a choice the person made — they are simply worked
+   * out rather than typed in. So the model has to be able to write them.
+   *
+   * Two disciplines make that safe rather than presumptuous:
+   *   - it NEVER overwrites a stated value. The person outranks the inference,
+   *     and the attempt is recorded instead of applied.
+   *   - provenance is kept, so a stated preference and an inferred one are
+   *     never confused, and inferences can be redrawn when the high-level
+   *     preference they came from changes. */
+  prefer: (name, value) => node("prefer", { name, value }),
 };
 
 /* ---------------------------------------------------------------------------
@@ -239,6 +284,10 @@ export const A = {
 const ACCESSOR_KINDS = new Set([
   "read", "measure", "capabilityOf", "readWhere", "findWhere",
   "write", "create", "delete", "exists", "navigate",
+  /* Preference access is an accessor in the OOA96 sense: data fetched from
+   * outside the process. `prefer` writes, and is listed with the other writes
+   * below so declared-write checking treats it the same way. */
+  "preferred", "stated", "rankOf", "prefer",
 ]);
 
 /** Walk a tree and report which process types it contains. Used both to
@@ -306,14 +355,21 @@ class Scope {
 export function run(action, {
   store = new MapStore(),
   influences = {},
+  preferences = null,
+  inferPreference = null,
+  ruleId = null,
   budget = 10000,
 } = {}) {
   const trace = [];
   const events = [];
-  const ctx = { store, influences, trace, events, steps: 0, budget };
+  /* inferPreference is injected rather than imported so the action language
+   * keeps knowing nothing about the user models it evaluates over. */
+  const ctx = { store, influences, preferences, inferPreference, ruleId,
+                trace, events, steps: 0, budget };
   const value = evaluate(action, new Scope(), ctx, 0);
   return Object.freeze({
     value,
+    preferences: ctx.preferences,
     events: Object.freeze(events),
     trace: Object.freeze(trace),
     store,
@@ -540,6 +596,42 @@ function evaluate(n, scope, ctx, depth) {
       }
       const v = ctx.influences[n.name];
       log("influence", { name: n.name, value: v });
+      return v;
+    }
+
+    /* Unlike `influence`, an unstated preference is NOT an error. Most
+     * preferences are unstated for most people: someone states a view about
+     * the handful of things they care about and leaves the rest to rules.
+     * Absence is the normal case, so it returns null and `stated` reports it. */
+    case "preferred": {
+      const v = ctx.preferences?.values?.[n.name] ?? null;
+      log("preferred", { name: n.name, value: v });
+      return v;
+    }
+
+    case "stated": {
+      const v = Boolean(ctx.preferences?.values && n.name in ctx.preferences.values);
+      log("stated", { name: n.name, value: v });
+      return v;
+    }
+
+    case "prefer": {
+      const value = evaluate(n.value, scope, ctx, depth + 1);
+      if (!ctx.preferences) {
+        throw new ActionError(`cannot infer preference "${n.name}": no preference set was supplied`);
+      }
+      const before = ctx.preferences.values?.[n.name];
+      ctx.preferences = ctx.inferPreference(ctx.preferences, n.name, value, ctx.ruleId ?? null);
+      const applied = ctx.preferences.values?.[n.name] !== before;
+      log("prefer", { name: n.name, value, applied });
+      return value;
+    }
+
+    case "rankOf": {
+      const list = ctx.preferences?.values?.[n.name];
+      const item = evaluate(n.item, scope, ctx, depth + 1);
+      const v = Array.isArray(list) ? (list.indexOf(item) === -1 ? null : list.indexOf(item)) : null;
+      log("rankOf", { name: n.name, item, value: v });
       return v;
     }
 

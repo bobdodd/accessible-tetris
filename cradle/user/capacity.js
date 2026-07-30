@@ -496,7 +496,13 @@ function detectDerivedCycle(settings) {
  * The paper's argument for doing this at runtime rather than in an offline
  * tool: "only the on-line model is suitable for adaptive systems".
  */
-export function resolve(capability, capacity, influences = {}) {
+/** Resolve a person's settings: fire actions, then compute derived (M) values.
+ *
+ *  `preferences` is optional and defaults to none, which is the ordinary case:
+ *  a person states a view about the few things they care about and everything
+ *  else falls to selection rules. Passing none is not "no opinions recorded
+ *  yet", it is the resting state the rules exist to serve. */
+export function resolve(capability, capacity, influences = {}, preferences = null) {
   for (const name of Object.keys(influences)) {
     const declared = capacity.influences[name];
     if (!declared) throw new CapacityError(`undeclared external influence: ${name}`);
@@ -531,7 +537,7 @@ export function resolve(capability, capacity, influences = {}) {
 
     const before = new Map([...values].map(([k, v]) => [k, JSON.stringify(v)]));
     const store = new MapStore(Object.fromEntries([...values].map(([k, v]) => [k, { ...v }])));
-    const result = run(action.body, { store, influences: effective });
+    const result = run(action.body, { store, influences: effective, preferences });
 
     /* An action must not write outside its declared Setting Access. Checked
      * before applying, so a declared write cannot mask an undeclared one. The
@@ -560,7 +566,7 @@ export function resolve(capability, capacity, influences = {}) {
   for (const id of derivedOrder(capacity.settings)) {
     const s = capacity.settings[id];
     const store = new MapStore(Object.fromEntries([...values].map(([k, v]) => [k, { ...v }])));
-    const result = run(s.derived.formula, { store, influences: effective });
+    const result = run(s.derived.formula, { store, influences: effective, preferences });
     const property = capability.properties[s.property];
     values.set(
       id,
