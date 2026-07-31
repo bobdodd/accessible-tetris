@@ -90,6 +90,15 @@ function checkMeasurementSpec(spec, where) {
       throw new PreferenceError(`${where}: numeric measurement needs min and max`);
     }
   }
+  if (spec.type === "composite") {
+    if (!Array.isArray(spec.parts) || !spec.parts.length) {
+      throw new PreferenceError(`${where}: composite measurement needs named parts`);
+    }
+    for (const part of spec.parts) {
+      if (!part?.name) throw new PreferenceError(`${where}: every composite part needs a name`);
+      checkMeasurementSpec(part, `${where}.${part.name}`);
+    }
+  }
   return Object.freeze({ ...spec });
 }
 
@@ -197,29 +206,75 @@ function checkValue(pref, value, where) {
     return Object.freeze([...value]);
   }
 
-  const m = pref.measurement;
+  return checkAgainst(pref.measurement, value, where);
+}
+
+/** Validate one value against one measurement spec. Split out because a
+ *  composite's PARTS are measurement specs too, and a tool's properties are
+ *  exactly that: named parts with value types. Recursing means a tool setting
+ *  is checked as strictly as a top-level preference. */
+function checkAgainst(m, value, where) {
   const fail = (msg) => { throw new PreferenceError(`${where}: ${msg} (measurement type ${m.type})`); };
   switch (m.type) {
     case "boolean":
       if (typeof value !== "boolean") fail("expected true or false");
       return value;
-    case "discrete":
+
+    case "discrete": {
+      /* `multiple` makes a discrete measurement a SET rather than a choice,
+       * and sets are not orders. "Use visual and audio together" is a genuinely
+       * different statement from "prefer visual, then audio", and a ranked
+       * preference cannot express it: reading along with speech wants both
+       * channels at once, not one as a fallback for the other. */
+      if (m.multiple) {
+        if (!Array.isArray(value)) fail("expected an array — this is a set");
+        if (new Set(value).size !== value.length) fail("a set cannot list the same thing twice");
+        for (const v of value) {
+          if (!m.values.includes(v)) fail(`"${v}" is not one of ${m.values.join(", ")}`);
+        }
+        return Object.freeze([...value]);
+      }
       if (!m.values.includes(value)) fail(`"${value}" is not one of ${m.values.join(", ")}`);
       return value;
+    }
+
     case "numeric":
       if (typeof value !== "number" || Number.isNaN(value)) fail("expected a number");
       /* Range is a TYPE check on the scale, not a judgement about the choice:
        * a font size preference outside 4..96pt is a mistake, whereas a font
        * size the capability model thinks is too small is a decision. */
-      if (value < m.min || value > m.max) fail(`${value} is outside ${m.min}..${m.max}`);
+      if (typeof m.min === "number" && value < m.min) fail(`${value} is outside ${m.min}..${m.max}`);
+      if (typeof m.max === "number" && value > m.max) fail(`${value} is outside ${m.min}..${m.max}`);
       return value;
+
     case "text":
       if (typeof value !== "string" || !value.length) fail("expected a non-empty string");
       return value;
-    case "composite":
+
     case "numericRange":
       if (value === null || typeof value !== "object") fail("expected an object");
-      return Object.freeze(Array.isArray(value) ? [...value] : { ...value });
+      return Object.freeze({ ...value });
+
+    case "composite": {
+      /* A TOOL is a named thing with typed properties, which is what a
+       * composite is. Every declared part is checked; an undeclared one is
+       * refused, because a setting the tool does not have is a mistake rather
+       * than an extension. Parts are OPTIONAL: naming a tool without setting
+       * all of its knobs is the normal case. */
+      if (value === null || typeof value !== "object" || Array.isArray(value)) {
+        fail("expected an object of named properties");
+      }
+      const parts = Object.fromEntries((m.parts ?? []).map((p) => [p.name, p]));
+      const out = {};
+      for (const [k, v] of Object.entries(value)) {
+        if (!parts[k]) {
+          fail(`"${k}" is not a property of this${m.parts ? ` (${Object.keys(parts).join(", ")})` : ""}`);
+        }
+        out[k] = checkAgainst(parts[k], v, `${where}.${k}`);
+      }
+      return Object.freeze(out);
+    }
+
     default:
       return fail("unsupported measurement type");
   }

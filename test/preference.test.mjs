@@ -12,6 +12,9 @@ import { definePreference, statePreferences, inferPreference, stated, hasPrefere
          provenanceOf, valueOf, rankOf, PreferenceError, PREFERENCE_KINDS }
   from "../cradle/user/preference.js";
 import { A, run, classify } from "../cradle/action/action-language.js";
+import { userPreference, DESIGN_SPACES } from "../vocabulary/user-preference.js";
+import { applyRules, rules } from "../vocabulary/preference-rules.js";
+import { userCapability } from "../vocabulary/user-capability.js";
 
 let pass = 0, fail = 0;
 const ok = (label, fn) => {
@@ -265,6 +268,129 @@ ok("an inferred value is validated exactly as a stated one", () => {
 ok("inferring without a preference set is refused, not silently dropped", () => {
   refuses(() => run(A.prefer("readFontSize", A.lit(12)), { inferPreference }),
     "no preference set was supplied");
+});
+
+console.log("\nthe vocabulary — four categories, named in the user's words:");
+
+ok("every category is populated", () => {
+  for (const c of ["designSpace", "modality", "perception", "tooling"]) {
+    const cat = userPreference.categories[c];
+    if (!cat || !cat.preferences.length) throw new Error(`${c} is empty`);
+  }
+});
+
+/* Derived from the capability model, not restated, so the two cannot drift. */
+ok("design spaces come from the capability model's own ontologies", () => {
+  const fromCapability = Object.values(userCapability.ontologies)
+    .filter((o) => o.designSpace).map((o) => o.name);
+  eq(DESIGN_SPACES, fromCapability, "same list");
+  eq(userPreference.preferences.channelOrder.domain, fromCapability, "and it is the domain");
+});
+
+ok("a tool is a named thing with typed properties", () => {
+  const k = userPreference.preferences.kurzweil;
+  eq(k.category, "tooling", "category");
+  eq(k.measurement.parts.map((p) => p.name), ["speechRate", "highlightWords", "highlightColour"], "properties");
+  eq(k.measurement.parts[0].type, "numeric", "and they have value types");
+});
+
+ok("a tool setting is validated as strictly as a top-level preference", () => {
+  refuses(() => statePreferences(userPreference, {
+    entity: { id: "u" }, values: { kurzweil: { speechRate: 9000 } },
+  }), "outside 80..400");
+  refuses(() => statePreferences(userPreference, {
+    entity: { id: "u" }, values: { kurzweil: { nonesuch: 1 } },
+  }), "is not a property of this");
+});
+
+ok("naming a tool without setting every knob is fine", () => {
+  const p = statePreferences(userPreference, {
+    entity: { id: "u" }, values: { kurzweil: { speechRate: 220 } },
+  });
+  eq(valueOf(p, "kurzweil"), { speechRate: 220 }, "partial is the ordinary case");
+});
+
+/* A set is not an order, and the difference is load-bearing. */
+ok("channelsTogether is a SET — both at once, not one then the other", () => {
+  const p = statePreferences(userPreference, {
+    entity: { id: "u" }, values: { channelsTogether: ["visual", "sonic"] },
+  });
+  eq(valueOf(p, "channelsTogether"), ["visual", "sonic"], "both");
+  refuses(() => statePreferences(userPreference, {
+    entity: { id: "u" }, values: { channelsTogether: ["visual", "visual"] },
+  }), "a set cannot list the same thing twice");
+});
+
+console.log("\nthe cascade — one choice reaching three categories:");
+
+const cascade = () => applyRules(
+  statePreferences(userPreference, {
+    entity: { id: "u" }, values: { helpWithTextPerception: true },
+  }),
+  { run, inferPreference },
+);
+
+ok("help with text perception infers across designSpace, perception and nothing else it was not asked to", () => {
+  const { preferences: p } = cascade();
+  eq(valueOf(p, "channelsTogether"), ["visual", "sonic"], "read along, both at once");
+  eq(valueOf(p, "textContrast"), "softened", "softer, not stronger");
+  eq(valueOf(p, "letterSpacing"), 1.2, "letters");
+  eq(valueOf(p, "wordSpacing"), 1.6, "words");
+  eq(valueOf(p, "lineSpacing"), 1.5, "lines");
+  if (!valueOf(p, "fontQualities").includes("mirrored-letters-differ")) {
+    throw new Error("b/d and p/q distinction not required");
+  }
+  eq(hasPreference(p, "readFontSize"), false, "it did not invent a size nobody asked about");
+});
+
+ok("everything the cascade produced says it was inferred, and by which rule", () => {
+  const { preferences: p } = cascade();
+  eq(provenanceOf(p, "helpWithTextPerception"), "stated", "the choice is theirs");
+  for (const k of ["channelsTogether", "textContrast", "letterSpacing"]) {
+    eq(provenanceOf(p, k), "inferred", `${k} provenance`);
+    eq(p.provenance[k].by, "help-with-text-perception", `${k} rule`);
+  }
+});
+
+/* The contrast case is the whole argument in one assertion. A capability
+ * profile with intact contrast sensitivity would suggest strong contrast is
+ * fine. This asks for less, and nothing objects. */
+ok("the cascade may soften contrast even where capability would not suggest it", () => {
+  const { preferences: p } = cascade();
+  eq(valueOf(p, "textContrast"), "softened", "softened");
+  eq(userPreference.preferences.textContrast.qualifies, "contrastSensitivity",
+     "and it knows which capability it sits beside, without being bound by it");
+});
+
+ok("a value the person set themselves survives the cascade", () => {
+  const stated_ = statePreferences(userPreference, {
+    entity: { id: "u" },
+    values: { helpWithTextPerception: true, textContrast: "maximum" },
+  });
+  const { preferences: p } = applyRules(stated_, { run, inferPreference });
+  eq(valueOf(p, "textContrast"), "maximum", "theirs, not the rule's");
+  eq(provenanceOf(p, "textContrast"), "stated", "still theirs");
+  eq(p.overruled.some((o) => o.preference === "textContrast" && o.wouldHaveBeen === "softened"),
+     true, "and the rule's choice is kept rather than lost");
+});
+
+ok("with the choice off, nothing is inferred at all", () => {
+  const off = statePreferences(userPreference, {
+    entity: { id: "u" }, values: { helpWithTextPerception: false },
+  });
+  const { preferences: p } = applyRules(off, { run, inferPreference });
+  eq(Object.keys(p.values), ["helpWithTextPerception"], "nothing added");
+});
+
+ok("every rule declares what it reads and writes", () => {
+  for (const r of rules) {
+    if (!r.id || !r.cite) throw new Error(`rule ${r.id} has no citation`);
+    if (!Array.isArray(r.reads) || !r.reads.length) throw new Error(`${r.id} declares no reads`);
+    if (!Array.isArray(r.writes) || !r.writes.length) throw new Error(`${r.id} declares no writes`);
+    for (const w of r.writes) {
+      if (!userPreference.preferences[w]) throw new Error(`${r.id} writes undeclared ${w}`);
+    }
+  }
 });
 
 console.log(`\n${pass} passed, ${fail} failed`);
