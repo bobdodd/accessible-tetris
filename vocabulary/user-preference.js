@@ -46,7 +46,7 @@ const INPUT_CHANNELS = [
  * would not. */
 const FONT_QUALITIES = [
   "mirrored-letters-differ",   // b and d, p and q are not reflections
-  "one-el-eye-differ",         // 1, l and I are told apart
+  "one-el-eye-differ",         // 1, l and I told apart; numbers as much as letters
   "open-apertures",            // c, e, a do not close up
   "generous-counters",         // the holes in a, e, o stay open
   "plain-shapes",              // no decorative or script forms
@@ -118,7 +118,10 @@ export const userPreference = definePreference({
       kind: "valued",
       measurement: { type: "boolean" },
       description:
-        "Asks for text to be made easier to take in. A bundle the person " +
+        "Asks for text to be made easier to take in. Serves readers whose " +
+        "difficulty is with taking text IN rather than with seeing it, " +
+        "dyslexic and dyscalculic readers most obviously, though nothing " +
+        "restricts it to them and anyone may choose it. A bundle the person " +
         "chooses, which infers letterforms, contrast and spacing below. " +
         "STATED ONLY: nothing may infer this one from a capability profile, " +
         "because a system deciding somebody needs it on the strength of what " +
