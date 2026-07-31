@@ -6,7 +6,7 @@
   "description": "Demonstrator of CISNA-style adaptation, built around an accessible Tetris. No dependencies: the cradle is the framework.",
   "license": "GPL-3.0-or-later",
   "scripts": {
-    "test": "node test/semantics.test.mjs && node test/user.test.mjs && node test/preference.test.mjs",
+    "test": "node test/semantics.test.mjs && node test/adaptation.test.mjs && node test/user.test.mjs && node test/preference.test.mjs",
     "docs:profiles": "node docs/tools/render-profiles.mjs > docs/user-profiles.md",
     "docs:profiles-docx": "python3 docs/tools/make-profiles-docx.py"
   }
